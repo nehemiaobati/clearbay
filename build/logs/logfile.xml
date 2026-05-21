@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="/Users/nehemia/Documents/DEV/green/phpunit.xml.dist" tests="10" assertions="18" errors="0" failures="0" skipped="0" time="0.345936">
+    <testsuite name="App" tests="10" assertions="18" errors="0" failures="0" skipped="0" time="0.345936">
+      <testsuite name="ExampleDatabaseTest" file="/Users/nehemia/Documents/DEV/green/tests/database/ExampleDatabaseTest.php" tests="2" assertions="3" errors="0" failures="0" skipped="0" time="0.114423">
+        <testcase name="testModelFindAll" file="/Users/nehemia/Documents/DEV/green/tests/database/ExampleDatabaseTest.php" line="17" class="ExampleDatabaseTest" classname="ExampleDatabaseTest" assertions="1" time="0.098002"/>
+        <testcase name="testSoftDeleteLeavesRow" file="/Users/nehemia/Documents/DEV/green/tests/database/ExampleDatabaseTest.php" line="28" class="ExampleDatabaseTest" classname="ExampleDatabaseTest" assertions="2" time="0.016420"/>
+      </testsuite>
+      <testsuite name="ExampleSessionTest" file="/Users/nehemia/Documents/DEV/green/tests/session/ExampleSessionTest.php" tests="1" assertions="1" errors="0" failures="0" skipped="0" time="0.007745">
+        <testcase name="testSessionSimple" file="/Users/nehemia/Documents/DEV/green/tests/session/ExampleSessionTest.php" line="10" class="ExampleSessionTest" classname="ExampleSessionTest" assertions="1" time="0.007745"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\AdminControllerTest" file="/Users/nehemia/Documents/DEV/green/tests/unit/AdminControllerTest.php" tests="5" assertions="11" errors="0" failures="0" skipped="0" time="0.206844">
+        <testcase name="testDashboardCanBeRendered" file="/Users/nehemia/Documents/DEV/green/tests/unit/AdminControllerTest.php" line="45" class="Tests\Unit\AdminControllerTest" classname="Tests.Unit.AdminControllerTest" assertions="3" time="0.070256"/>
+        <testcase name="testPilotsListCanBeRendered" file="/Users/nehemia/Documents/DEV/green/tests/unit/AdminControllerTest.php" line="58" class="Tests\Unit\AdminControllerTest" classname="Tests.Unit.AdminControllerTest" assertions="2" time="0.032645"/>
+        <testcase name="testHandoversListCanBeRendered" file="/Users/nehemia/Documents/DEV/green/tests/unit/AdminControllerTest.php" line="70" class="Tests\Unit\AdminControllerTest" classname="Tests.Unit.AdminControllerTest" assertions="2" time="0.041295"/>
+        <testcase name="testHospitalsListCanBeRendered" file="/Users/nehemia/Documents/DEV/green/tests/unit/AdminControllerTest.php" line="82" class="Tests\Unit\AdminControllerTest" classname="Tests.Unit.AdminControllerTest" assertions="2" time="0.032132"/>
+        <testcase name="testAmbulancesListCanBeRendered" file="/Users/nehemia/Documents/DEV/green/tests/unit/AdminControllerTest.php" line="94" class="Tests\Unit\AdminControllerTest" classname="Tests.Unit.AdminControllerTest" assertions="2" time="0.030515"/>
+      </testsuite>
+      <testsuite name="HealthTest" file="/Users/nehemia/Documents/DEV/green/tests/unit/HealthTest.php" tests="2" assertions="3" errors="0" failures="0" skipped="0" time="0.016924">
+        <testcase name="testIsDefinedAppPath" file="/Users/nehemia/Documents/DEV/green/tests/unit/HealthTest.php" line="12" class="HealthTest" classname="HealthTest" assertions="1" time="0.002957"/>
+        <testcase name="testBaseUrlHasBeenSet" file="/Users/nehemia/Documents/DEV/green/tests/unit/HealthTest.php" line="17" class="HealthTest" classname="HealthTest" assertions="2" time="0.013968"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>

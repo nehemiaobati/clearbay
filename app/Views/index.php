@@ -355,42 +355,10 @@
                 <th>Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="queueTableBody">
+              <!-- Dynamically populated via AJAX on page load -->
               <tr>
-                <td class="mono-label">AAR-04</td>
-                <td>AAR Healthcare</td>
-                <td>M, 58</td>
-                <td><div class="acuity-bar"><div class="acuity-dot crit"></div> Critical</div></td>
-                <td class="mono-val">Arrived</td>
-                <td><span class="wait-pill wait-red">52 min</span></td>
-                <td><button class="action-btn btn btn-outline-secondary">Clear Bay</button></td>
-              </tr>
-              <tr>
-                <td class="mono-label">KRC-12</td>
-                <td>Kenya Red Cross</td>
-                <td>F, 34</td>
-                <td><div class="acuity-bar"><div class="acuity-dot seri"></div> Serious</div></td>
-                <td class="mono-val">6 min</td>
-                <td><span class="wait-pill wait-amber">18 min</span></td>
-                <td><button class="action-btn btn btn-outline-secondary">Prepare Bay</button></td>
-              </tr>
-              <tr>
-                <td class="mono-label">NBO-07</td>
-                <td>Nairobi County</td>
-                <td>M, 71</td>
-                <td><div class="acuity-bar"><div class="acuity-dot stab"></div> Stable</div></td>
-                <td class="mono-val">14 min</td>
-                <td><span class="wait-pill wait-green">En route</span></td>
-                <td><button class="action-btn btn btn-outline-secondary">Acknowledge</button></td>
-              </tr>
-              <tr>
-                <td class="mono-label">AAR-09</td>
-                <td>AAR Healthcare</td>
-                <td>F, 26</td>
-                <td><div class="acuity-bar"><div class="acuity-dot seri"></div> Serious</div></td>
-                <td class="mono-val">22 min</td>
-                <td><span class="wait-pill wait-green">En route</span></td>
-                <td><button class="action-btn btn btn-outline-secondary">Acknowledge</button></td>
+                <td colspan="7" class="text-center text-muted py-4">Loading live ambulance queue...</td>
               </tr>
             </tbody>
           </table>
@@ -398,19 +366,19 @@
 
         <div class="dash-metrics">
           <div class="metric-box">
-            <div class="metric-val">38</div>
+            <div class="metric-val" id="metricAvgWait">38</div>
             <div class="metric-key">Avg wait today (min)</div>
           </div>
           <div class="metric-box">
-            <div class="metric-val">-22</div>
+            <div class="metric-val" id="metricBaseline">-22</div>
             <div class="metric-key">vs. pre-ClearBay baseline</div>
           </div>
           <div class="metric-box">
-            <div class="metric-val">14</div>
+            <div class="metric-val" id="metricCompleted">14</div>
             <div class="metric-key">Handovers completed today</div>
           </div>
           <div class="metric-box">
-            <div class="metric-val">4</div>
+            <div class="metric-val" id="metricInQueue">4</div>
             <div class="metric-key">Ambulances in queue</div>
           </div>
         </div>
@@ -431,50 +399,62 @@
 
       <div class="form-wrap">
         <div id="formContainer" class="card blueprint-card p-4 p-md-5 reveal">
-          <form class="form-block" id="signupForm">
+          <form class="form-block" id="signupForm" novalidate>
+            <?= csrf_field() ?>
+            <div id="formFeedback" class="alert alert-danger d-none mb-3" role="alert"></div>
+            
             <div class="form-row">
               <div class="field-wrap form-floating mb-3">
-                <input type="text" id="fullName" class="form-control field-input" placeholder="Dr. Wanjiru Kamau" required>
+                <input type="text" id="fullName" name="fullName" class="form-control field-input" placeholder="Dr. Wanjiru Kamau" required>
                 <label class="field-label" for="fullName">Full Name *</label>
+                <div class="invalid-feedback" id="error_fullName">Please enter a valid full name (minimum 3 characters).</div>
               </div>
               <div class="field-wrap form-floating mb-3">
-                <input type="email" id="emailAddress" class="form-control field-input" placeholder="you@hospital.ke" required>
+                <input type="email" id="emailAddress" name="emailAddress" class="form-control field-input" placeholder="you@hospital.ke" required>
                 <label class="field-label" for="emailAddress">Email Address *</label>
+                <div class="invalid-feedback" id="error_emailAddress">Please enter a valid email address.</div>
               </div>
             </div>
 
             <div class="field-wrap form-floating mb-3">
-              <input type="text" id="organisation" class="form-control field-input" placeholder="e.g. Kenyatta National Hospital" required>
+              <input type="text" id="organisation" name="organisation" class="form-control field-input" placeholder="e.g. Kenyatta National Hospital" required>
               <label class="field-label" for="organisation">Organisation / Hospital / EMS Service *</label>
+              <div class="invalid-feedback" id="error_organisation">Please specify your organisation (minimum 3 characters).</div>
             </div>
 
             <div class="form-row">
               <div class="field-wrap form-floating mb-3">
-                <select id="userRole" class="form-select field-select" required style="padding-top: 1.625rem; padding-bottom: 0.625rem;">
+                <select id="userRole" name="userRole" class="form-select field-select" required style="padding-top: 1.625rem; padding-bottom: 0.625rem;">
                   <option value="" disabled selected>Select your role</option>
-                  <option>Hospital Administrator</option>
-                  <option>ED Manager / Charge Nurse</option>
-                  <option>Emergency Physician</option>
-                  <option>Paramedic / EMT</option>
-                  <option>EMS Dispatcher / Operations Manager</option>
-                  <option>Investor / Funder</option>
-                  <option>Researcher / Academic</option>
-                  <option>Other</option>
+                  <option value="Hospital Administrator">Hospital Administrator</option>
+                  <option value="ED Manager / Charge Nurse">ED Manager / Charge Nurse</option>
+                  <option value="Emergency Physician">Emergency Physician</option>
+                  <option value="Paramedic / EMT">Paramedic / EMT</option>
+                  <option value="EMS Dispatcher / Operations Manager">EMS Dispatcher / Operations Manager</option>
+                  <option value="Investor / Funder">Investor / Funder</option>
+                  <option value="Researcher / Academic">Researcher / Academic</option>
+                  <option value="Other">Other</option>
                 </select>
                 <label class="field-label" for="userRole">Your Role *</label>
+                <div class="invalid-feedback" id="error_userRole">Please select a valid role.</div>
               </div>
               <div class="field-wrap form-floating mb-3">
-                <input type="tel" id="phoneNumber" class="form-control field-input" placeholder="+254 7XX XXX XXX">
+                <input type="tel" id="phoneNumber" name="phoneNumber" class="form-control field-input" placeholder="+254 7XX XXX XXX">
                 <label class="field-label" for="phoneNumber">Phone (optional)</label>
+                <div class="invalid-feedback" id="error_phoneNumber">Please enter a valid phone number.</div>
               </div>
             </div>
 
             <div class="field-wrap form-floating mb-3">
-              <input type="text" id="message" class="form-control field-input" placeholder="Tell us a bit about your interest in ClearBay">
+              <input type="text" id="message" name="message" class="form-control field-input" placeholder="Tell us a bit about your interest in ClearBay">
               <label class="field-label" for="message">Message (optional)</label>
+              <div class="invalid-feedback" id="error_message">Message content cannot exceed 2000 characters.</div>
             </div>
 
-            <button type="submit" class="submit-btn btn btn-primary">Submit Request →</button>
+            <button type="submit" id="submitBtn" class="submit-btn btn btn-primary">
+              <span id="submitSpinner" class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+              <span id="submitText">Submit Request →</span>
+            </button>
             <p class="form-note">The pilot is free. We will respond within 48 hours. Your information is held in strict confidence and is never shared with third parties.</p>
           </form>
 

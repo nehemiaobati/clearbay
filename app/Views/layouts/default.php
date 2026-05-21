@@ -6,6 +6,7 @@
  * @var string $robotsTag
  * @var string $metaImage
  */
+$metaImage = $metaImage ?? base_url('images/brand.png');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -47,18 +48,19 @@
 
   <!-- ━━━━ NAV ━━━━ -->
   <nav id="nav">
-    <a href="#" class="logo">
+    <a href="/" class="logo">
       <div class="logo-mark"></div>
       <span class="logo-name">ClearBay</span>
     </a>
     <ul class="nav-pills">
-      <li><a href="#problem">Problem</a></li>
-      <li><a href="#how">Solution</a></li>
-      <li><a href="#serve">Who We Serve</a></li>
-      <li><a href="#evidence">Research</a></li>
-      <li><a href="#signup">Contact</a></li>
+      <li><a href="/#problem">Problem</a></li>
+      <li><a href="/#how">Solution</a></li>
+      <li><a href="/#serve">Who We Serve</a></li>
+      <li><a href="/#evidence">Research</a></li>
+      <li><a href="/#signup">Contact</a></li>
+      <li><a href="<?= url_to('admin.dashboard') ?>">Admin</a></li>
     </ul>
-    <a href="#signup" class="nav-btn btn btn-primary">Join Pilot</a>
+    <a href="/#signup" class="nav-btn btn btn-primary">Join Pilot</a>
   </nav>
 
   <!-- Content Section -->
@@ -69,16 +71,16 @@
 
   <!-- ━━━━ FOOTER ━━━━ -->
   <footer>
-    <a href="#" class="logo">
+    <a href="/" class="logo">
       <div class="logo-mark"></div>
       <span class="logo-name">ClearBay</span>
     </a>
     <span class="footer-tagline">Clear the Bay. Free the Crew. Save the Next Life.</span>
     <ul class="footer-links">
-      <li><a href="#problem">Problem</a></li>
-      <li><a href="#how">Solution</a></li>
-      <li><a href="#serve">Who We Serve</a></li>
-      <li><a href="#evidence">Research</a></li>
+      <li><a href="/#problem">Problem</a></li>
+      <li><a href="/#how">Solution</a></li>
+      <li><a href="/#serve">Who We Serve</a></li>
+      <li><a href="/#evidence">Research</a></li>
       <li><a href="mailto:info@clearbayhealthke.com">info@clearbayhealthke.com</a></li>
       <li><a href="#">© 2026 ClearBay Health Ltd</a></li>
     </ul>

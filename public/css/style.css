@@ -1352,4 +1352,26 @@ footer {
   font-size: .78rem !important;
 }
 
-
+/* Form styles for dark backgrounds (Admin Panel / dark themes) */
+.form-dark .form-floating > .form-control,
+.form-dark .form-floating > .form-select {
+  border-bottom: 1.5px solid rgba(var(--cream-rgb), .2) !important;
+  color: var(--cream) !important;
+}
+.form-dark .form-floating > .form-control:focus,
+.form-dark .form-floating > .form-select:focus {
+  border-color: var(--sage-ll) !important;
+  color: var(--cream) !important;
+}
+.form-dark .form-floating > label {
+  color: rgba(var(--cream-rgb), .4) !important;
+}
+.form-dark .form-floating > .form-control:focus ~ label,
+.form-dark .form-floating > .form-control:not(:placeholder-shown) ~ label,
+.form-dark .form-floating > .form-select ~ label {
+  color: var(--sage-ll) !important;
+}
+.form-dark .form-select option {
+  background-color: var(--ink-2) !important;
+  color: var(--cream) !important;
+}
