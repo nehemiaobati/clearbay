@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var string $pageTitle
  * @var string $metaDescription
@@ -10,6 +11,7 @@ $metaImage = $metaImage ?? base_url('images/brand.png');
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,17 +35,18 @@ $metaImage = $metaImage ?? base_url('images/brand.png');
   <meta name="twitter:image:alt" content="ClearBay — Real-Time Ambulance Off-Load Management">
 
   <title><?= (string) esc($pageTitle) ?></title>
-  
+
   <!-- Bootstrap 5 CSS CDN -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
   <!-- Preconnect and Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-  
+
   <!-- Project Custom CSS Stylesheet -->
   <link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body>
 
   <!-- ━━━━ NAV ━━━━ -->
@@ -81,6 +84,7 @@ $metaImage = $metaImage ?? base_url('images/brand.png');
       <li><a href="/#how">Solution</a></li>
       <li><a href="/#serve">Who We Serve</a></li>
       <li><a href="/#evidence">Research</a></li>
+      <li><a href="<?= url_to('admin.dashboard') ?>">Admin</a></li>
       <li><a href="mailto:info@clearbayhealthke.com">info@clearbayhealthke.com</a></li>
       <li><a href="#">© 2026 ClearBay Health Ltd</a></li>
     </ul>
@@ -88,8 +92,9 @@ $metaImage = $metaImage ?? base_url('images/brand.png');
 
   <!-- Bootstrap 5 JS Bundle CDN -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  
+
   <!-- Project JS Application script -->
   <script src="/js/app.js" defer></script>
 </body>
+
 </html>
