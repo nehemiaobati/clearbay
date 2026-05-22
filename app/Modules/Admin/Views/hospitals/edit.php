@@ -11,10 +11,10 @@ $isEdit = isset($hospital) && $hospital->id;
 <?= $this->extend('layouts/default') ?>
 <?= $this->section('content') ?>
 
-<div class="container" style="margin-top: 120px; margin-bottom: 80px;">
+<div class="container admin-page">
   <!-- Breadcrumb / Back Link -->
   <div class="mb-4">
-    <a href="<?= url_to('admin.hospitals.list') ?>" class="mono-label text-decoration-none" style="color: var(--sage-ll) !important;">
+    <a href="<?= url_to('admin.hospitals.list') ?>" class="mono-label text-decoration-none admin-back">
       ← Back to Hospitals List
     </a>
   </div>
@@ -25,7 +25,7 @@ $isEdit = isset($hospital) && $hospital->id;
       <div class="s-label-line"></div>
       <span class="s-label-text"><?= $isEdit ? 'Update Facility' : 'New Facility' ?></span>
     </div>
-    <h1 class="s-title mb-2" style="font-family: var(--serif); font-weight: 700; color: var(--cream); font-size: 2.2rem; line-height: 1.2;">
+    <h1 class="s-title mb-2 admin-heading">
       <?= $isEdit ? 'Edit Hospital <span class="ital dim">Profile</span>' : 'Register New <span class="ital dim">Hospital</span>' ?>
     </h1>
   </div>
@@ -38,8 +38,8 @@ $isEdit = isset($hospital) && $hospital->id;
         <!-- Flash validation errors -->
         <?php if (session()->has('errors')) : ?>
           <div class="alert alert-danger card blueprint-card border-danger mb-4 p-3" role="alert">
-            <h5 class="alert-heading font-family-sans fw-bold mb-2 text-danger" style="font-size: 0.95rem;">Please correct the following errors:</h5>
-            <ul class="mb-0 ps-3" style="font-size: 0.85rem;">
+            <h5 class="alert-heading font-family-sans fw-bold mb-2 text-danger admin-error-heading">Please correct the following errors:</h5>
+            <ul class="mb-0 ps-3 admin-error-list">
               <?php foreach (session()->get('errors') as $error) : ?>
                 <li><?= esc($error) ?></li>
               <?php endforeach; ?>
@@ -56,7 +56,7 @@ $isEdit = isset($hospital) && $hospital->id;
                 <input type="text" id="code" name="code" class="form-control" placeholder="e.g. KNH · Level 6" required 
                        value="<?= esc(old('code', $hospital->code ?? '')) ?>">
                 <label for="code">Facility Code *</label>
-                <div class="form-note mt-1 text-muted" style="font-size: 0.72rem;">e.g. KNH · Level 6</div>
+                <div class="form-note mt-1 text-muted admin-form-note">e.g. KNH · Level 6</div>
               </div>
             </div>
             <div class="col-md-8 mb-4">
@@ -74,12 +74,12 @@ $isEdit = isset($hospital) && $hospital->id;
                 <input type="text" id="category" name="category" class="form-control" placeholder="Category" required
                        value="<?= esc(old('category', $hospital->category ?? '')) ?>">
                 <label for="category">Category / Classification *</label>
-                <div class="form-note mt-1 text-muted" style="font-size: 0.72rem;">e.g. National Referral · Public</div>
+                <div class="form-note mt-1 text-muted admin-form-note">e.g. National Referral · Public</div>
               </div>
             </div>
             <div class="col-md-6 mb-4">
               <div class="form-floating">
-                <select id="status" name="status" class="form-select" required style="padding-top: 1.625rem; padding-bottom: 0.625rem;">
+                <select id="status" name="status" class="form-select admin-form-select" required>
                   <option value="" disabled <?= !$isEdit ? 'selected' : '' ?>>Select Status Level</option>
                   <?php 
                   $statuses = ['Green', 'Amber', 'Red', 'Recruiting'];
@@ -95,10 +95,10 @@ $isEdit = isset($hospital) && $hospital->id;
           </div>
 
           <div class="d-flex align-items-center gap-3 mt-4">
-            <button type="submit" class="btn btn-primary" style="font-size: 0.78rem !important; padding: 0.75rem 2rem !important;">
+            <button type="submit" class="btn btn-primary admin-btn-submit">
               <?= $isEdit ? 'Save Changes' : 'Register Facility' ?>
             </button>
-            <a href="<?= url_to('admin.hospitals.list') ?>" class="btn btn-outline-secondary" style="font-size: 0.78rem !important; padding: 0.75rem 2rem !important;">
+            <a href="<?= url_to('admin.hospitals.list') ?>" class="btn btn-outline-secondary admin-btn-submit">
               Cancel
             </a>
           </div>

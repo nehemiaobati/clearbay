@@ -11,10 +11,10 @@
 <?= $this->extend('layouts/default') ?>
 <?= $this->section('content') ?>
 
-<div class="container" style="margin-top: 120px; margin-bottom: 80px;">
+<div class="container admin-page">
   <!-- Breadcrumb / Back Link -->
   <div class="mb-4">
-    <a href="<?= url_to('admin.dashboard') ?>" class="mono-label text-decoration-none" style="color: var(--sage-ll) !important;">
+    <a href="<?= url_to('admin.dashboard') ?>" class="mono-label text-decoration-none admin-back">
       ← Back to Dashboard
     </a>
   </div>
@@ -26,12 +26,12 @@
         <div class="s-label-line"></div>
         <span class="s-label-text">Fleet Registry</span>
       </div>
-      <h1 class="s-title mb-2" style="font-family: var(--serif); font-weight: 700; color: var(--cream); font-size: 2.2rem; line-height: 1.2;">
+      <h1 class="s-title mb-2 admin-heading">
         Manage <span class="ital dim">Ambulances</span>
       </h1>
     </div>
     <div class="mt-3 mt-md-0">
-      <a href="<?= url_to('admin.ambulances.new') ?>" class="btn btn-primary" style="font-size: 0.78rem !important; padding: 0.75rem 1.5rem !important;">
+      <a href="<?= url_to('admin.ambulances.new') ?>" class="btn btn-primary admin-btn-action">
         Register Vehicle +
       </a>
     </div>
@@ -56,20 +56,19 @@
           <tbody>
             <?php foreach ($ambulances as $ambulance) : ?>
               <tr>
-                <td style="font-family: var(--mono); color: rgba(255,255,255,0.3);"><?= esc($ambulance->id) ?></td>
-                <td style="font-family: var(--mono); font-weight: 600; color: var(--sage-ll);"><?= esc($ambulance->unit_id) ?></td>
-                <td style="font-weight: 500; color: var(--cream);"><?= esc($ambulance->provider) ?></td>
-                <td style="font-family: var(--mono); font-size: 0.75rem;">
+                <td class="admin-td-id"><?= esc($ambulance->id) ?></td>
+                <td class="admin-td-code"><?= esc($ambulance->unit_id) ?></td>
+                <td class="admin-td-name"><?= esc($ambulance->provider) ?></td>
+                <td class="admin-td-mono-sm">
                   <?= esc($ambulance->created_at ? $ambulance->created_at->format('Y-m-d H:i') : '—') ?>
                 </td>
                 <td class="text-end">
                   <div class="d-inline-flex gap-2">
-                    <a href="<?= url_to('admin.ambulances.edit', $ambulance->id) ?>" class="btn btn-outline-secondary btn-sm px-3 py-1" style="font-size: 0.72rem !important; border-color: rgba(255,255,255,0.1) !important;">
+                    <a href="<?= url_to('admin.ambulances.edit', $ambulance->id) ?>" class="btn btn-outline-secondary btn-sm px-3 py-1 admin-btn-edit">
                       Edit
                     </a>
                     <a href="<?= url_to('admin.ambulances.delete', $ambulance->id) ?>" 
-                       class="btn btn-danger btn-sm px-3 py-1" 
-                       style="font-size: 0.72rem !important;" 
+                       class="btn btn-danger btn-sm px-3 py-1 admin-btn-delete" 
                        onclick="return confirm('Are you sure you want to delete this ambulance unit? This might affect handovers associated with this vehicle.');">
                       Delete
                     </a>
@@ -90,34 +89,5 @@
     <?php endif; ?>
   </div>
 </div>
-
-<style>
-/* Style CodeIgniter 4 full pager to fit theme perfectly */
-.admin-pager ul {
-  display: flex;
-  list-style: none;
-  padding: 0;
-  gap: 0.5rem;
-  font-family: var(--mono);
-  font-size: 0.78rem;
-}
-.admin-pager li a, .admin-pager li span {
-  display: block;
-  padding: 0.5rem 0.8rem;
-  border: 1px solid rgba(247,244,238,0.1);
-  color: var(--cream);
-  text-decoration: none;
-  transition: all 0.2s;
-}
-.admin-pager li.active a, .admin-pager li.active span {
-  background-color: var(--sage-l);
-  color: var(--ink);
-  border-color: var(--sage-l);
-}
-.admin-pager li a:hover {
-  background-color: rgba(255,255,255,0.05);
-  border-color: var(--sage-l);
-}
-</style>
 
 <?= $this->endSection() ?>

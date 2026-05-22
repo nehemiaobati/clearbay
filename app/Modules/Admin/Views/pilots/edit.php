@@ -11,10 +11,10 @@ $isEdit = isset($pilot) && $pilot->id;
 <?= $this->extend('layouts/default') ?>
 <?= $this->section('content') ?>
 
-<div class="container" style="margin-top: 120px; margin-bottom: 80px;">
+<div class="container admin-page">
   <!-- Breadcrumb / Back Link -->
   <div class="mb-4">
-    <a href="<?= url_to('admin.pilots.list') ?>" class="mono-label text-decoration-none" style="color: var(--sage-ll) !important;">
+    <a href="<?= url_to('admin.pilots.list') ?>" class="mono-label text-decoration-none admin-back">
       ← Back to Pilot Registry
     </a>
   </div>
@@ -25,7 +25,7 @@ $isEdit = isset($pilot) && $pilot->id;
       <div class="s-label-line"></div>
       <span class="s-label-text"><?= $isEdit ? 'Update Entry' : 'Manual Entry' ?></span>
     </div>
-    <h1 class="s-title mb-2" style="font-family: var(--serif); font-weight: 700; color: var(--cream); font-size: 2.2rem; line-height: 1.2;">
+    <h1 class="s-title mb-2 admin-heading">
       <?= $isEdit ? 'Edit Pilot <span class="ital dim">Signup</span>' : 'Add New <span class="ital dim">Signup</span>' ?>
     </h1>
   </div>
@@ -38,8 +38,8 @@ $isEdit = isset($pilot) && $pilot->id;
         <!-- Flash validation errors -->
         <?php if (session()->has('errors')) : ?>
           <div class="alert alert-danger card blueprint-card border-danger mb-4 p-3" role="alert">
-            <h5 class="alert-heading font-family-sans fw-bold mb-2 text-danger" style="font-size: 0.95rem;">Please correct the following errors:</h5>
-            <ul class="mb-0 ps-3" style="font-size: 0.85rem;">
+            <h5 class="alert-heading font-family-sans fw-bold mb-2 text-danger admin-error-heading">Please correct the following errors:</h5>
+            <ul class="mb-0 ps-3 admin-error-list">
               <?php foreach (session()->get('errors') as $error) : ?>
                 <li><?= esc($error) ?></li>
               <?php endforeach; ?>
@@ -78,7 +78,7 @@ $isEdit = isset($pilot) && $pilot->id;
           <div class="row">
             <div class="col-md-6 mb-4">
               <div class="form-floating">
-                <select id="userRole" name="userRole" class="form-select" required style="padding-top: 1.625rem; padding-bottom: 0.625rem;">
+                <select id="userRole" name="userRole" class="form-select admin-form-select" required>
                   <option value="" disabled <?= !$isEdit ? 'selected' : '' ?>>Select Role</option>
                   <?php 
                   $roles = [
@@ -117,10 +117,10 @@ $isEdit = isset($pilot) && $pilot->id;
           </div>
 
           <div class="d-flex align-items-center gap-3 mt-4">
-            <button type="submit" class="btn btn-primary" style="font-size: 0.78rem !important; padding: 0.75rem 2rem !important;">
+            <button type="submit" class="btn btn-primary admin-btn-submit">
               <?= $isEdit ? 'Save Changes' : 'Create Application' ?>
             </button>
-            <a href="<?= url_to('admin.pilots.list') ?>" class="btn btn-outline-secondary" style="font-size: 0.78rem !important; padding: 0.75rem 2rem !important;">
+            <a href="<?= url_to('admin.pilots.list') ?>" class="btn btn-outline-secondary admin-btn-submit">
               Cancel
             </a>
           </div>
