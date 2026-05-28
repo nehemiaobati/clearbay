@@ -7,7 +7,7 @@
  * @var string $robotsTag
  * @var string $metaImage
  */
-$metaImage = $metaImage ?? base_url('images/brand.png');
+$metaImage = $metaImage ?? base_url('assets/images/brand.png');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -44,7 +44,7 @@ $metaImage = $metaImage ?? base_url('images/brand.png');
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <!-- Project Custom CSS Stylesheet -->
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 
 <body>

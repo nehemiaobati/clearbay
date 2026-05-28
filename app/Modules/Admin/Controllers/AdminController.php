@@ -13,6 +13,8 @@ use App\Modules\Queue\Entities\Hospital;
 use App\Modules\Queue\Models\HospitalModel;
 use App\Modules\Queue\Entities\Ambulance;
 use App\Modules\Queue\Models\AmbulanceModel;
+use App\Modules\Auth\Entities\User;
+use App\Modules\Auth\Models\UserModel;
 use CodeIgniter\HTTP\RedirectResponse;
 
 /**
@@ -46,6 +48,11 @@ class AdminController extends BaseController
     private AmbulanceModel $_ambulance_model;
 
     /**
+     * @var UserModel
+     */
+    private UserModel $_user_model;
+
+    /**
      * AdminController constructor.
      */
     public function __construct()
@@ -54,6 +61,7 @@ class AdminController extends BaseController
         $this->_handover_model = new HandoverModel();
         $this->_hospital_model = new HospitalModel();
         $this->_ambulance_model = new AmbulanceModel();
+        $this->_user_model = new UserModel();
         helper(['form', 'url']);
     }
 
@@ -761,5 +769,193 @@ class AdminController extends BaseController
         }
 
         return redirect()->to(url_to('admin.ambulances.list'))->with('success', 'Ambulance record deleted successfully.');
+    }
+
+    // =========================================================================
+    // USERS CRUD ACTIONS (SC-16)
+    // =========================================================================
+
+    /**
+     * Lists administrative user accounts.
+     *
+     * @return string
+     */
+    public function usersList(): string
+    {
+        $data = [
+            'pageTitle'       => 'Manage Users | ClearBay',
+            'metaDescription' => 'Review and manage ClearBay operator and staff user accounts.',
+            'canonicalUrl'    => url_to('admin.users.list'),
+            'robotsTag'       => 'noindex, nofollow',
+            'users'           => $this->_user_model
+                ->select('users.*, hospitals.name as hospital_name, ems_providers.name as ems_name')
+                ->join('hospitals', 'hospitals.id = users.hospital_id', 'left')
+                ->join('ems_providers', 'ems_providers.id = users.ems_provider_id', 'left')
+                ->orderBy('users.created_at', 'DESC')
+                ->paginate(15, 'users'),
+            'pager'           => $this->_user_model->pager,
+        ];
+
+        return view('App\Modules\Admin\Views\users\list', $data);
+    }
+
+    /**
+     * Renders form to manually register a new user account.
+     *
+     * @return string
+     */
+    public function userNew(): string
+    {
+        $data = [
+            'pageTitle'       => 'Add User Account | ClearBay',
+            'metaDescription' => 'Register a new user profile with specific authorization roles.',
+            'canonicalUrl'    => url_to('admin.users.new'),
+            'robotsTag'       => 'noindex, nofollow',
+            'hospitals'       => $this->_hospital_model->orderBy('name', 'ASC')->findAll(),
+            'ems_providers'   => $this->_pilot_model->db->table('ems_providers')->orderBy('name', 'ASC')->get()->getResultArray(),
+        ];
+
+        return view('App\Modules\Admin\Views\users\edit', $data);
+    }
+
+    /**
+     * Validates and saves a new user account with temporary password.
+     *
+     * @return RedirectResponse
+     */
+    public function userCreate(): RedirectResponse
+    {
+        $rules = [
+            'name'            => 'required|min_length[3]|max_length[255]',
+            'email'           => 'required|valid_email|max_length[255]|is_unique[users.email]',
+            'role'            => 'required|in_list[nurse,hospital_admin,paramedic,dispatcher,admin]',
+            'hospital_id'     => 'permit_empty|integer',
+            'ems_provider_id' => 'permit_empty|integer',
+            'active'          => 'required|in_list[0,1]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $user = new User();
+        $user->name            = (string) $this->request->getPost('name');
+        $user->email           = (string) $this->request->getPost('email');
+        $user->password_hash   = password_hash('12345678', PASSWORD_BCRYPT); // Temp default password
+        $user->role            = (string) $this->request->getPost('role');
+        $user->hospital_id     = $this->request->getPost('hospital_id') ? (int) $this->request->getPost('hospital_id') : null;
+        $user->ems_provider_id = $this->request->getPost('ems_provider_id') ? (int) $this->request->getPost('ems_provider_id') : null;
+        $user->active          = (int) $this->request->getPost('active');
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+        $this->_user_model->save($user);
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()->back()->withInput()->with('error', 'Database transaction failed while creating user.');
+        }
+
+        return redirect()->to(url_to('admin.users.list'))->with('success', 'User account registered successfully with temporary password "12345678"!');
+    }
+
+    /**
+     * Renders form to edit an existing user account.
+     *
+     * @param string $id
+     * @return string|RedirectResponse
+     */
+    public function userEdit(string $id)
+    {
+        /** @var User|null $user */
+        $user = $this->_user_model->find((int) $id);
+
+        if (!$user) {
+            return redirect()->to(url_to('admin.users.list'))->with('error', 'Requested user account not found.');
+        }
+
+        $data = [
+            'pageTitle'       => 'Edit User Account | ClearBay',
+            'metaDescription' => 'Modify account credentials, role levels, and active states.',
+            'canonicalUrl'    => url_to('admin.users.edit', $id),
+            'robotsTag'       => 'noindex, nofollow',
+            'user'            => $user,
+            'hospitals'       => $this->_hospital_model->orderBy('name', 'ASC')->findAll(),
+            'ems_providers'   => $this->_pilot_model->db->table('ems_providers')->orderBy('name', 'ASC')->get()->getResultArray(),
+        ];
+
+        return view('App\Modules\Admin\Views\users\edit', $data);
+    }
+
+    /**
+     * Validates and updates an existing user account.
+     *
+     * @param string $id
+     * @return RedirectResponse
+     */
+    public function userUpdate(string $id): RedirectResponse
+    {
+        /** @var User|null $user */
+        $user = $this->_user_model->find((int) $id);
+
+        if (!$user) {
+            return redirect()->to(url_to('admin.users.list'))->with('error', 'User account not found.');
+        }
+
+        $rules = [
+            'name'            => 'required|min_length[3]|max_length[255]',
+            'email'           => 'required|valid_email|max_length[255]|is_unique[users.email,id,' . $id . ']',
+            'role'            => 'required|in_list[nurse,hospital_admin,paramedic,dispatcher,admin]',
+            'hospital_id'     => 'permit_empty|integer',
+            'ems_provider_id' => 'permit_empty|integer',
+            'active'          => 'required|in_list[0,1]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $user->name            = (string) $this->request->getPost('name');
+        $user->email           = (string) $this->request->getPost('email');
+        $user->role            = (string) $this->request->getPost('role');
+        $user->hospital_id     = $this->request->getPost('hospital_id') ? (int) $this->request->getPost('hospital_id') : null;
+        $user->ems_provider_id = $this->request->getPost('ems_provider_id') ? (int) $this->request->getPost('ems_provider_id') : null;
+        $user->active          = (int) $this->request->getPost('active');
+
+        // Optional reset password if check box selected
+        if ($this->request->getPost('reset_password')) {
+            $user->password_hash = password_hash('12345678', PASSWORD_BCRYPT);
+        }
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+        $this->_user_model->save($user);
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()->back()->withInput()->with('error', 'Database transaction failed while updating user.');
+        }
+
+        return redirect()->to(url_to('admin.users.list'))->with('success', 'User account updated successfully!');
+    }
+
+    /**
+     * Deactivates or deletes a user account.
+     *
+     * @param string $id
+     * @return RedirectResponse
+     */
+    public function userDelete(string $id): RedirectResponse
+    {
+        $db = \Config\Database::connect();
+        $db->transStart();
+        $this->_user_model->delete((int) $id);
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()->to(url_to('admin.users.list'))->with('error', 'Database transaction failed while deleting user.');
+        }
+
+        return redirect()->to(url_to('admin.users.list'))->with('success', 'User account deleted successfully.');
     }
 }

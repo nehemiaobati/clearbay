@@ -16,3 +16,7 @@ Health
  [x] Is defined app path
  [x] Base url has been set
 
+Pilot Controller (Tests\Unit\PilotController)
+ [ ] Signup fails with invalid inputs
+ [ ] Signup succeeds with valid inputs
+

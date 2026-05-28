@@ -51,4 +51,14 @@ $routes->group('admin', ['namespace' => 'App\Modules\Admin\Controllers'], static
         $routes->post('update/(:num)', 'AdminController::ambulanceUpdate/$1', ['as' => 'admin.ambulances.update']);
         $routes->get('delete/(:num)', 'AdminController::ambulanceDelete/$1', ['as' => 'admin.ambulances.delete']);
     });
+
+    // Users CRUD
+    $routes->group('users', static function ($routes) {
+        $routes->get('/', 'AdminController::usersList', ['as' => 'admin.users.list']);
+        $routes->get('new', 'AdminController::userNew', ['as' => 'admin.users.new']);
+        $routes->post('create', 'AdminController::userCreate', ['as' => 'admin.users.create']);
+        $routes->get('edit/(:num)', 'AdminController::userEdit/$1', ['as' => 'admin.users.edit']);
+        $routes->post('update/(:num)', 'AdminController::userUpdate/$1', ['as' => 'admin.users.update']);
+        $routes->get('delete/(:num)', 'AdminController::userDelete/$1', ['as' => 'admin.users.delete']);
+    });
 });
