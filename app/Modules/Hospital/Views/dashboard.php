@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var string $pageTitle
  * @var string $metaDescription
@@ -104,10 +105,10 @@
             <button type="button" class="btn btn-outline-danger flex-fill py-3 status-select-btn" data-status="RED">RED<br><small class="mono-label">Full</small></button>
           </div>
           <input type="hidden" name="status" id="selectedStatus" value="">
-          
-          <div class="form-floating mb-3">
+
+          <div class="mb-3">
+            <label for="baysAvailableInput" class="form-label">Available Ambulance Bays</label>
             <input type="number" class="form-control" name="bays_available" id="baysAvailableInput" placeholder="Bays" min="0" required>
-            <label for="baysAvailableInput">Available Ambulance Bays</label>
           </div>
         </div>
         <div class="modal-footer border-secondary border-opacity-10">
@@ -135,17 +136,17 @@
             <span class="mono-label text-muted d-block mt-3 mb-1">Patient Details</span>
             <span class="d-block" id="handoverPatientDetails">...</span>
           </div>
-          
+
           <input type="hidden" name="handover_id" id="handoverIdInput" value="">
-          
-          <div class="form-floating mb-3">
+
+          <div class="mb-3">
+            <label for="bayNumberInput" class="form-label">Bay Number (Optional)</label>
             <input type="text" class="form-control" name="bay_number" id="bayNumberInput" placeholder="Bay 1">
-            <label for="bayNumberInput">Bay Number (Optional)</label>
           </div>
 
-          <div class="form-floating mb-3">
+          <div class="mb-3">
+            <label for="notesInput" class="form-label">Handover Notes (Optional, max 200 chars)</label>
             <textarea class="form-control" name="notes" id="notesInput" placeholder="Handover Notes" style="height: 100px;"></textarea>
-            <label for="notesInput">Handover Notes (Optional, max 200 chars)</label>
           </div>
         </div>
         <div class="modal-footer border-secondary border-opacity-10">
@@ -166,7 +167,7 @@
     const updateBannerUI = (status, bays) => {
       const banner = document.getElementById('statusBanner');
       banner.className = 'p-4 card blueprint-card text-center text-uppercase fw-bold fs-4 pointer-event';
-      
+
       if (status === 'GREEN') {
         banner.classList.add('bg-success', 'text-white');
         banner.innerHTML = `GREEN · Accepting — ${bays} bays available`;
@@ -206,7 +207,7 @@
       try {
         const response = await fetch('<?= url_to('hospital.queue') ?>');
         if (!response.ok) throw new Error('Network error');
-        
+
         const data = await response.json();
         if (data.status === 'success') {
           renderQueue(data.result);
@@ -224,7 +225,7 @@
       document.getElementById('metricQueueCount').textContent = result.metrics.ambulances_in_queue;
       document.getElementById('metricAvgWait').textContent = result.metrics.avg_wait_today;
       document.getElementById('metricHandoversCount').textContent = result.metrics.completed_today;
-      
+
       const baseline = result.metrics.baseline_difference;
       const baselineEl = document.getElementById('metricBaseline');
       baselineEl.textContent = baseline > 0 ? `+${baseline}` : baseline;
@@ -300,20 +301,20 @@
     statusForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(statusForm);
-      
+
       try {
         const response = await fetch('<?= url_to('hospital.status.update') ?>', {
           method: 'POST',
           body: formData
         });
         const data = await response.json();
-        
+
         if (data.status === 'success') {
           // Close modal
           const modalEl = document.getElementById('statusModal');
           const modalInstance = bootstrap.Modal.getInstance(modalEl);
           modalInstance.hide();
-          
+
           currentStatus = formData.get('status');
           currentBays = parseInt(formData.get('bays_available'), 10);
           updateBannerUI(currentStatus, currentBays);

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var string $pageTitle
  * @var string $metaDescription
@@ -8,6 +9,7 @@
  * @var int $handoverCount
  * @var int $hospitalCount
  * @var int $ambulanceCount
+ * @var int $userCount
  */
 ?>
 <?= $this->extend('layouts/default') ?>
@@ -37,7 +39,7 @@
           <div>
             <span class="mono-label d-block mb-2">Pilot Signups</span>
             <span class="d-block admin-stat-val">
-              <?= esc($pilotCount) ?>
+              <?= esc((string) $pilotCount) ?>
             </span>
           </div>
           <div class="mt-4">
@@ -56,7 +58,7 @@
           <div>
             <span class="mono-label d-block mb-2">Handovers Queue</span>
             <span class="d-block admin-stat-val">
-              <?= esc($handoverCount) ?>
+              <?= esc((string) $handoverCount) ?>
             </span>
           </div>
           <div class="mt-4">
@@ -75,7 +77,7 @@
           <div>
             <span class="mono-label d-block mb-2">Facilities</span>
             <span class="d-block admin-stat-val">
-              <?= esc($hospitalCount) ?>
+              <?= esc((string) $hospitalCount) ?>
             </span>
           </div>
           <div class="mt-4">
@@ -94,12 +96,31 @@
           <div>
             <span class="mono-label d-block mb-2">Active Fleet</span>
             <span class="d-block admin-stat-val">
-              <?= esc($ambulanceCount) ?>
+              <?= esc((string) $ambulanceCount) ?>
             </span>
           </div>
           <div class="mt-4">
             <a href="<?= url_to('admin.ambulances.list') ?>" class="btn btn-outline-secondary btn-sm w-100 admin-dash-btn">
               Manage Fleet
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users Stat -->
+    <div class="col-6 col-lg-3">
+      <div class="card blueprint-card p-4 h-100">
+        <div class="d-flex flex-column justify-content-between h-100">
+          <div>
+            <span class="mono-label d-block mb-2">User Accounts</span>
+            <span class="d-block admin-stat-val">
+              <?= esc((string) $userCount) ?>
+            </span>
+          </div>
+          <div class="mt-4">
+            <a href="<?= url_to('admin.users.list') ?>" class="btn btn-outline-secondary btn-sm w-100 admin-dash-btn">
+              Manage Users
             </a>
           </div>
         </div>

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var string $pageTitle
  * @var string $metaDescription
@@ -31,16 +32,16 @@
         </div>
       <?php endif; ?>
 
-      <!-- Email Floating Input -->
-      <div class="form-floating mb-3">
-        <input type="email" 
-               name="email" 
-               id="email" 
-               class="form-control <?= session('errors.email') ? 'is-invalid' : '' ?>" 
-               placeholder="name@clearbay.com" 
-               value="<?= (string) esc(old('email')) ?>" 
-               required>
-        <label for="email">Enter your email address</label>
+      <!-- Email Input -->
+      <div class="mb-3">
+        <label for="email" class="form-label">Enter your email address</label>
+        <input type="email"
+          name="email"
+          id="email"
+          class="form-control <?= session('errors.email') ? 'is-invalid' : '' ?>"
+          placeholder="name@clearbay.com"
+          value="<?= (string) esc(old('email')) ?>"
+          required>
         <?php if (session('errors.email')) : ?>
           <div class="invalid-feedback">
             <?= (string) esc(session('errors.email')) ?>
@@ -48,18 +49,18 @@
         <?php endif; ?>
       </div>
 
-      <!-- Password Floating Input -->
-      <div class="form-floating mb-4 position-relative">
-        <input type="password" 
-               name="password" 
-               id="password" 
-               class="form-control <?= session('errors.password') ? 'is-invalid' : '' ?>" 
-               placeholder="Password" 
-               required>
-        <label for="password">Enter your password</label>
-        <button type="button" 
-                id="togglePassword" 
-                class="btn position-absolute end-0 top-50 translate-middle-y me-2 text-muted toggle-password-btn">
+      <!-- Password Input -->
+      <div class="mb-4 position-relative">
+        <label for="password" class="form-label">Enter your password</label>
+        <input type="password"
+          name="password"
+          id="password"
+          class="form-control <?= session('errors.password') ? 'is-invalid' : '' ?>"
+          placeholder="Password"
+          required>
+        <button type="button"
+          id="togglePassword"
+          class="btn position-absolute end-0 top-50 translate-middle-y me-2 text-muted toggle-password-btn">
           Show
         </button>
         <?php if (session('errors.password')) : ?>

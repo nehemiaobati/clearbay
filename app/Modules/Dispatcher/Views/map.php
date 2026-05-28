@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var string $pageTitle
  * @var string $metaDescription
@@ -14,38 +15,15 @@
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
 
 <style>
-  /* Local custom overrides for full screen layout */
+  /* Local dispatcher overrides (global styles handle base rules) */
   .dispatcher-layout {
-    height: calc(100vh - 80px);
     margin-top: 80px;
     display: flex;
-    overflow: hidden;
-  }
-  
-  .map-container {
-    flex-grow: 1;
-    height: 100%;
-    position: relative;
   }
 
   .sidebar-container {
-    width: 380px;
-    height: 100%;
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
-    background: var(--ink);
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
     padding: 1.5rem;
     gap: 1.5rem;
-  }
-
-  /* Blinking dot for queued alerts */
-  .blink-dot {
-    animation: blinker 1.2s cubic-bezier(.5, 0, 1, 1) infinite;
-  }
-  @keyframes blinker {
-    50% { opacity: 0; }
   }
 </style>
 
@@ -106,10 +84,10 @@
     const colorSage = style.getPropertyValue('--sage').trim() || '#3D6B4F';
     const colorRed = style.getPropertyValue('--red').trim() || '#C23B22';
     const colorAmber = style.getPropertyValue('--amber').trim() || '#D4711A';
-    
+
     // 1. Mapbox Setup
-    mapboxgl.accessToken = 'pk.eyJ1IjoibmVoZW1pYWgiLCJhIjoiY2x2YnlwdnJ5MGdtNDJpcG5iNWhzNHBxNiJ9.y7k4s5f8d9q1r2t3y4u5i6';
-    
+    mapboxgl.accessToken = 'pk.eyJ1IjoibmVoZW1pYW9uZSIsImEiOiJjbXBwaDFybnMwMjE3MnNxbDZ0b2tsam8wIn0.iRzCTMim0F1j2mD4eUDggw';
+
     const map = new mapboxgl.Map({
       container: 'map',
       style: 'mapbox://styles/mapbox/dark-v11', // Premium dark theme matching platform aesthetics
@@ -142,8 +120,8 @@
         else if (a.status === 'On Scene') statusDot = 'bg-warning';
         else if (a.status === 'Off Duty') statusDot = 'bg-secondary';
 
-        const waitText = telemetry.waits[a.id] ? 
-          `<span class="badge bg-danger ms-2">${telemetry.waits[a.id].wait_time_minutes}m waiting at ${telemetry.waits[a.id].hospital_name}</span>` : 
+        const waitText = telemetry.waits[a.id] ?
+          `<span class="badge bg-danger ms-2">${telemetry.waits[a.id].wait_time_minutes}m waiting at ${telemetry.waits[a.id].hospital_name}</span>` :
           '';
 
         return `
@@ -246,7 +224,9 @@
 
           const marker = new mapboxgl.Marker(markerEl)
             .setLngLat([a.current_lng, a.current_lat])
-            .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<h6>${a.unit_id}</h6><p>${a.provider}<br>Status: ${a.status}</p>`))
+            .setPopup(new mapboxgl.Popup({
+              offset: 25
+            }).setHTML(`<h6>${a.unit_id}</h6><p>${a.provider}<br>Status: ${a.status}</p>`))
             .addTo(map);
 
           activeMarkers[a.unit_id] = marker;
@@ -269,7 +249,9 @@
 
         new mapboxgl.Marker(hospEl)
           .setLngLat([h.lng, h.lat])
-          .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<h6>${h.name}</h6><p>Bays: ${h.bays_available}<br>Status: ${h.status}</p>`))
+          .setPopup(new mapboxgl.Popup({
+            offset: 25
+          }).setHTML(`<h6>${h.name}</h6><p>Bays: ${h.bays_available}<br>Status: ${h.status}</p>`))
           .addTo(map);
       });
     };
@@ -277,7 +259,10 @@
     // Helper functions
     window.focusAmbulance = (lat, lng, unitId) => {
       if (lat && lng) {
-        map.flyTo({ center: [lng, lat], zoom: 14 });
+        map.flyTo({
+          center: [lng, lat],
+          zoom: 14
+        });
         if (activeMarkers[unitId]) {
           activeMarkers[unitId].togglePopup();
         }
@@ -286,7 +271,7 @@
 
     // 3. Telemetry Stream EventSource (Server-Sent Events Listener)
     const eventSource = new EventSource('<?= url_to('dispatcher.sse') ?>');
-    
+
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.status === 'update') {

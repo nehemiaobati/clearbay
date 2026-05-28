@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var string $pageTitle
  * @var string $metaDescription
@@ -34,7 +35,7 @@ $isEdit = isset($hospital) && $hospital->id;
   <div class="row justify-content-start">
     <div class="col-lg-8">
       <div class="card blueprint-card p-4 p-md-5">
-        
+
         <!-- Flash validation errors -->
         <?php if (session()->has('errors')) : ?>
           <div class="alert alert-danger card blueprint-card border-danger mb-4 p-3" role="alert">
@@ -52,44 +53,44 @@ $isEdit = isset($hospital) && $hospital->id;
 
           <div class="row">
             <div class="col-md-4 mb-4">
-              <div class="form-floating">
-                <input type="text" id="code" name="code" class="form-control" placeholder="e.g. KNH · Level 6" required 
-                       value="<?= esc(old('code', $hospital->code ?? '')) ?>">
-                <label for="code">Facility Code *</label>
+              <div>
+                <label for="code" class="form-label">Facility Code *</label>
+                <input type="text" id="code" name="code" class="form-control" placeholder="e.g. KNH · Level 6" required
+                  value="<?= esc(old('code', $hospital->code ?? '')) ?>">
                 <div class="form-note mt-1 text-muted admin-form-note">e.g. KNH · Level 6</div>
               </div>
             </div>
             <div class="col-md-8 mb-4">
-              <div class="form-floating">
+              <div>
+                <label for="name" class="form-label">Hospital / Facility Name *</label>
                 <input type="text" id="name" name="name" class="form-control" placeholder="Hospital Name" required
-                       value="<?= esc(old('name', $hospital->name ?? '')) ?>">
-                <label for="name">Hospital / Facility Name *</label>
+                  value="<?= esc(old('name', $hospital->name ?? '')) ?>">
               </div>
             </div>
           </div>
 
           <div class="row">
             <div class="col-md-6 mb-4">
-              <div class="form-floating">
+              <div>
+                <label for="category" class="form-label">Category / Classification *</label>
                 <input type="text" id="category" name="category" class="form-control" placeholder="Category" required
-                       value="<?= esc(old('category', $hospital->category ?? '')) ?>">
-                <label for="category">Category / Classification *</label>
+                  value="<?= esc(old('category', $hospital->category ?? '')) ?>">
                 <div class="form-note mt-1 text-muted admin-form-note">e.g. National Referral · Public</div>
               </div>
             </div>
             <div class="col-md-6 mb-4">
-              <div class="form-floating">
+              <div>
+                <label for="status" class="form-label">Off-Load Capacity Status *</label>
                 <select id="status" name="status" class="form-select admin-form-select" required>
                   <option value="" disabled <?= !$isEdit ? 'selected' : '' ?>>Select Status Level</option>
-                  <?php 
+                  <?php
                   $statuses = ['Green', 'Amber', 'Red', 'Recruiting'];
                   $currentStatus = old('status', $hospital->status ?? '');
-                  foreach ($statuses as $status) : 
+                  foreach ($statuses as $status) :
                   ?>
                     <option value="<?= esc($status) ?>" <?= $currentStatus === $status ? 'selected' : '' ?>><?= esc($status) ?></option>
                   <?php endforeach; ?>
                 </select>
-                <label for="status">Off-Load Capacity Status *</label>
               </div>
             </div>
           </div>

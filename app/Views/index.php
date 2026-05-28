@@ -152,7 +152,7 @@
 </section>
 
 <!-- ━━━━ HOW IT WORKS ━━━━ -->
-<section class="section how section--light" id="how">
+<section class="section how section--light" id="how" data-bs-theme="light">
   <div class="container my-5">
     <div class="blueprint-header reveal">
       <div class="s-label">
@@ -300,7 +300,7 @@
 </section>
 
 <!-- ━━━━ HOSPITALS ━━━━ -->
-<section class="section hospitals section--light bg-cream-2" id="hospitals">
+<section class="section hospitals section--light bg-cream-2" id="hospitals" data-bs-theme="light">
   <div class="container my-5">
     <div class="blueprint-header reveal">
       <div class="s-label">
@@ -374,7 +374,7 @@
       </div>
 
       <div class="table-responsive">
-        <table class="queue-table">
+        <table class="table queue-table align-middle">
           <thead>
             <tr>
               <th>Unit ID</th>
@@ -418,7 +418,7 @@
 </section>
 
 <!-- ━━━━ SIGNUP ━━━━ -->
-<section class="section signup section--light" id="signup">
+<section class="section signup section--light" id="signup" data-bs-theme="light">
   <div class="container my-5">
     <div class="blueprint-header reveal">
       <div class="s-label">
@@ -436,32 +436,33 @@
 
           <div class="row">
             <div class="col-md-6 mb-3">
-              <div class="form-floating">
+              <div>
+                <label for="fullName" class="form-label">Full Name *</label>
                 <input type="text" id="fullName" name="fullName" class="form-control" placeholder="Dr. Wanjiru Kamau" required>
-                <label for="fullName">Full Name *</label>
                 <div class="invalid-feedback" id="error_fullName">Please enter a valid full name (minimum 3 characters).</div>
               </div>
             </div>
             <div class="col-md-6 mb-3">
-              <div class="form-floating">
+              <div>
+                <label for="emailAddress" class="form-label">Email Address *</label>
                 <input type="email" id="emailAddress" name="emailAddress" class="form-control" placeholder="you@hospital.ke" required>
-                <label for="emailAddress">Email Address *</label>
                 <div class="invalid-feedback" id="error_emailAddress">Please enter a valid email address.</div>
               </div>
             </div>
           </div>
 
           <div class="mb-3">
-            <div class="form-floating">
+            <div>
+              <label for="organisation" class="form-label">Organisation / Hospital / EMS Service *</label>
               <input type="text" id="organisation" name="organisation" class="form-control" placeholder="e.g. Kenyatta National Hospital" required>
-              <label for="organisation">Organisation / Hospital / EMS Service *</label>
               <div class="invalid-feedback" id="error_organisation">Please specify your organisation (minimum 3 characters).</div>
             </div>
           </div>
 
           <div class="row">
             <div class="col-md-6 mb-3">
-              <div class="form-floating">
+              <div>
+                <label for="userRole" class="form-label">Your Role *</label>
                 <select id="userRole" name="userRole" class="form-select" required>
                   <option value="" disabled selected>Select your role</option>
                   <option value="Hospital Administrator">Hospital Administrator</option>
@@ -473,23 +474,22 @@
                   <option value="Researcher / Academic">Researcher / Academic</option>
                   <option value="Other">Other</option>
                 </select>
-                <label for="userRole">Your Role *</label>
                 <div class="invalid-feedback" id="error_userRole">Please select a valid role.</div>
               </div>
             </div>
             <div class="col-md-6 mb-3">
-              <div class="form-floating">
+              <div>
+                <label for="phoneNumber" class="form-label">Phone (optional)</label>
                 <input type="tel" id="phoneNumber" name="phoneNumber" class="form-control" placeholder="+254 7XX XXX XXX">
-                <label for="phoneNumber">Phone (optional)</label>
                 <div class="invalid-feedback" id="error_phoneNumber">Please enter a valid phone number.</div>
               </div>
             </div>
           </div>
 
           <div class="mb-3">
-            <div class="form-floating">
+            <div>
+              <label for="message" class="form-label">Message (optional)</label>
               <textarea id="message" name="message" class="form-control" placeholder="Tell us a bit about your interest in ClearBay" style="height: 120px;"></textarea>
-              <label for="message">Message (optional)</label>
               <div class="invalid-feedback" id="error_message">Message content cannot exceed 2000 characters.</div>
             </div>
           </div>

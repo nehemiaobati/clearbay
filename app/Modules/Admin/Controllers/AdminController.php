@@ -81,6 +81,7 @@ class AdminController extends BaseController
             'handoverCount'   => $this->_handover_model->countAllResults(),
             'hospitalCount'   => $this->_hospital_model->countAllResults(),
             'ambulanceCount'  => $this->_ambulance_model->countAllResults(),
+            'userCount'       => $this->_user_model->countAllResults(),
         ];
 
         return view('App\Modules\Admin\Views\dashboard', $data);

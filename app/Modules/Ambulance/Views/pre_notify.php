@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var string $pageTitle
  * @var string $metaDescription
@@ -31,26 +32,27 @@
       <div id="formFeedback" class="alert alert-danger d-none mb-3" role="alert"></div>
 
       <!-- Patient Age -->
-      <div class="form-floating mb-3">
+      <div class="mb-3">
+        <label for="patientAgeInput" class="form-label">Patient Age (Years) *</label>
         <input type="number" name="patient_age" id="patientAgeInput" class="form-control" placeholder="Age" min="0" max="120" required>
-        <label for="patientAgeInput">Patient Age (Years) *</label>
         <div class="invalid-feedback" id="error_patient_age">Please enter a valid age.</div>
       </div>
 
       <!-- Patient Sex -->
-      <div class="form-floating mb-3">
+      <div class="mb-3">
+        <label for="patientSexInput" class="form-label">Patient Sex *</label>
         <select name="patient_sex" id="patientSexInput" class="form-select" required>
           <option value="" disabled selected>Select patient sex</option>
           <option value="Male">Male</option>
           <option value="Female">Female</option>
           <option value="Not Specified">Not Specified</option>
         </select>
-        <label for="patientSexInput">Patient Sex *</label>
         <div class="invalid-feedback" id="error_patient_sex">Please select patient sex.</div>
       </div>
 
       <!-- Chief Complaint -->
-      <div class="form-floating mb-3">
+      <div class="mb-3">
+        <label for="chiefComplaintInput" class="form-label">Chief Complaint *</label>
         <select name="chief_complaint" id="chiefComplaintInput" class="form-select" required>
           <option value="" disabled selected>Select chief complaint</option>
           <option value="Cardiac Arrest">Cardiac Arrest</option>
@@ -63,7 +65,6 @@
           <option value="Sepsis">Sepsis</option>
           <option value="Other">Other</option>
         </select>
-        <label for="chiefComplaintInput">Chief Complaint *</label>
         <div class="invalid-feedback" id="error_chief_complaint">Please select a chief complaint.</div>
       </div>
 
@@ -80,15 +81,15 @@
       </div>
 
       <!-- Notes -->
-      <div class="form-floating mb-3">
+      <div class="mb-3">
+        <label for="notesInput" class="form-label">En-route Notes (Optional, max 150 chars)</label>
         <textarea name="notes" id="notesInput" class="form-control" placeholder="Notes" style="height: 80px;" maxlength="150"></textarea>
-        <label for="notesInput">En-route Notes (Optional, max 150 chars)</label>
       </div>
 
       <!-- ETA (Read Only) -->
-      <div class="form-floating mb-4">
+      <div class="mb-4">
+        <label for="etaInput" class="form-label">Calculated ETA (Minutes)</label>
         <input type="number" name="eta_minutes" id="etaInput" class="form-control" value="<?= $eta ?>" readonly>
-        <label for="etaInput">Calculated ETA (Minutes)</label>
       </div>
 
       <!-- Submit Button -->
@@ -125,7 +126,7 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       // Validation Check
       if (!acuityInput.value) {
         errorAcuity.classList.remove('d-none');
@@ -151,7 +152,7 @@
         if (!response.ok) throw new Error('Network error');
 
         const data = await response.json();
-        
+
         // Rotate CSRF
         const csrfInput = document.querySelector('input[name="csrf_test_name"]');
         if (csrfInput && data.csrf_token) {
@@ -164,7 +165,7 @@
           submitBtn.disabled = false;
           spinner.classList.add('d-none');
           submitText.textContent = 'Send Pre-Notification';
-          
+
           if (data.errors) {
             Object.keys(data.errors).forEach(key => {
               const input = form.querySelector(`[name="${key}"]`);

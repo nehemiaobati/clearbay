@@ -43,7 +43,7 @@
       <p class="text-center my-4 text-muted">No ambulance fleet units registered in the system.</p>
     <?php else : ?>
       <div class="table-responsive">
-        <table class="queue-table">
+        <table class="table queue-table align-middle">
           <thead>
             <tr>
               <th>ID</th>

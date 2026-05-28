@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var string $pageTitle
  * @var string $metaDescription
@@ -33,18 +34,18 @@
       <h3 class="mono-label text-muted m-0">Hospitals Sorted by Distance</h3>
       <a href="<?= url_to('auth.logout') ?>" class="btn btn-xs btn-outline-danger">Sign Out</a>
     </div>
-    
+
     <div class="row g-2">
       <?php foreach ($hospitals as $item) : ?>
-        <?php 
-          $h = $item['hospital'];
-          $status_class = 'bg-success';
-          if ($h->status === 'RED') $status_class = 'bg-danger';
-          elseif ($h->status === 'AMBER') $status_class = 'bg-warning text-dark';
+        <?php
+        $h = $item['hospital'];
+        $status_class = 'bg-success';
+        if ($h->status === 'RED') $status_class = 'bg-danger';
+        elseif ($h->status === 'AMBER') $status_class = 'bg-warning text-dark';
         ?>
         <div class="col-12 col-md-6 col-lg-4">
-          <div class="card blueprint-card p-3 d-flex flex-row justify-content-between align-items-center hover-glow touch-target-card" 
-               onclick="window.location.href='<?= url_to('ambulance.hospital.detail', $h->id) ?>'">
+          <div class="card blueprint-card p-3 d-flex flex-row justify-content-between align-items-center hover-glow touch-target-card"
+            onclick="window.location.href='<?= url_to('ambulance.hospital.detail', $h->id) ?>'">
             <div class="d-flex align-items-center gap-3">
               <span class="badge <?= $status_class ?> p-2 rounded-circle" style="width: 12px; height: 12px; display: inline-block;"></span>
               <div>
@@ -70,26 +71,25 @@
     const colorSageL = style.getPropertyValue('--sage-l').trim() || '#4E8A63';
     const colorRed = style.getPropertyValue('--red').trim() || '#C23B22';
     const colorAmber = style.getPropertyValue('--amber').trim() || '#D4711A';
-    
+
     // 1. Mapbox Initialization
     // Mapped hospital coordinates
     const hospitals = [
-      <?php foreach ($hospitals as $item) : ?>
-      {
-        id: <?= $item['hospital']->id ?>,
-        name: "<?= esc($item['hospital']->name) ?>",
-        status: "<?= esc($item['hospital']->status) ?>",
-        lat: <?= (float) $item['hospital']->lat ?>,
-        lng: <?= (float) $item['hospital']->lng ?>,
-      },
+      <?php foreach ($hospitals as $item) : ?> {
+          id: <?= $item['hospital']->id ?>,
+          name: "<?= esc($item['hospital']->name) ?>",
+          status: "<?= esc($item['hospital']->status) ?>",
+          lat: <?= (float) $item['hospital']->lat ?>,
+          lng: <?= (float) $item['hospital']->lng ?>,
+        },
       <?php endforeach; ?>
     ];
 
     const myLat = <?= $ambulance->current_lat ?? -1.2921 ?>;
     const myLng = <?= $ambulance->current_lng ?? 36.8219 ?>;
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoibmVoZW1pYWgiLCJhIjoiY2x2YnlwdnJ5MGdtNDJpcG5iNWhzNHBxNiJ9.y7k4s5f8d9q1r2t3y4u5i6';
-    
+    mapboxgl.accessToken = 'pk.eyJ1IjoibmVoZW1pYW9uZSIsImEiOiJjbXBwaDFybnMwMjE3MnNxbDZ0b2tsam8wIn0.iRzCTMim0F1j2mD4eUDggw';
+
     const map = new mapboxgl.Map({
       container: 'map',
       style: 'mapbox://styles/mapbox/dark-v11', // Premium dark theme matching ClearBay aesthetics
@@ -109,7 +109,9 @@
 
     new mapboxgl.Marker(el)
       .setLngLat([myLng, myLat])
-      .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML('<h6>Active Ambulance: ' + "<?= esc($ambulance->unit_id) ?>" + '</h6>'))
+      .setPopup(new mapboxgl.Popup({
+        offset: 25
+      }).setHTML('<h6>Active Ambulance: ' + "<?= esc($ambulance->unit_id) ?>" + '</h6>'))
       .addTo(map);
 
     // 3. Add Hospital Markers
@@ -131,7 +133,9 @@
 
       new mapboxgl.Marker(hMarker)
         .setLngLat([h.lng, h.lat])
-        .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML('<h6>' + h.name + '</h6><p>Status: ' + h.status + '</p>'))
+        .setPopup(new mapboxgl.Popup({
+          offset: 25
+        }).setHTML('<h6>' + h.name + '</h6><p>Status: ' + h.status + '</p>'))
         .addTo(map);
     });
 
