@@ -298,8 +298,8 @@
         const formData = new FormData();
         formData.append('csrf_test_name', document.querySelector('input[name="csrf_test_name"]')?.value ?? '');
 
-        const ackBaseUrl = '<?= url_to('dispatcher.alert.acknowledge', 'PLACEHOLDER') ?>';
-        const response = await fetch(ackBaseUrl.replace('PLACEHOLDER', alertId), {
+        const ackBaseUrl = '<?= url_to('dispatcher.alert.acknowledge', 999999) ?>';
+        const response = await fetch(ackBaseUrl.replace('999999', alertId), {
           method: 'POST',
           headers: {
             'X-Requested-With': 'XMLHttpRequest'

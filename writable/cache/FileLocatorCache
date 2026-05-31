@@ -129,16 +129,6 @@
         ),
       ),
     ),
-    'Language/en/Security.php' => 
-    array (
-      'php' => 
-      array (
-        0 => 
-        array (
-          0 => '/Users/nehemia/Documents/DEV/green/system/Language/en/Security.php',
-        ),
-      ),
-    ),
     'Language/en/Router.php' => 
     array (
       'php' => 
@@ -171,39 +161,18 @@
   ),
   'locateFile' => 
   array (
-    'App\\Modules\\Admin\\Views\\dashboard.php' => 
-    array (
-      'Views' => 
-      array (
-        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Admin/Views/dashboard.php',
-      ),
-    ),
-    'App\\Modules\\Admin\\Views\\pilots\\edit.php' => 
-    array (
-      'Views' => 
-      array (
-        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Admin/Views/pilots/edit.php',
-      ),
-    ),
-    'App\\Modules\\Admin\\Views\\pilots\\list.php' => 
-    array (
-      'Views' => 
-      array (
-        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Admin/Views/pilots/list.php',
-      ),
-    ),
-    'App\\Modules\\Admin\\Views\\handovers\\list.php' => 
-    array (
-      'Views' => 
-      array (
-        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Admin/Views/handovers/list.php',
-      ),
-    ),
     'App\\Modules\\Admin\\Views\\handovers\\edit.php' => 
     array (
       'Views' => 
       array (
         'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Admin/Views/handovers/edit.php',
+      ),
+    ),
+    'App\\Modules\\Admin\\Views\\dashboard.php' => 
+    array (
+      'Views' => 
+      array (
+        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Admin/Views/dashboard.php',
       ),
     ),
     'App\\Modules\\Admin\\Views\\users\\list.php' => 
@@ -213,13 +182,6 @@
         'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Admin/Views/users/list.php',
       ),
     ),
-    'App\\Modules\\Admin\\Views\\users\\edit.php' => 
-    array (
-      'Views' => 
-      array (
-        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Admin/Views/users/edit.php',
-      ),
-    ),
     'App\\Modules\\Auth\\Views\\login.php' => 
     array (
       'Views' => 
@@ -227,32 +189,11 @@
         'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Auth/Views/login.php',
       ),
     ),
-    'App\\Modules\\Ambulance\\Views\\home.php' => 
+    'App\\Modules\\Dispatcher\\Views\\map.php' => 
     array (
       'Views' => 
       array (
-        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Ambulance/Views/home.php',
-      ),
-    ),
-    'App\\Modules\\Ambulance\\Views\\detail.php' => 
-    array (
-      'Views' => 
-      array (
-        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Ambulance/Views/detail.php',
-      ),
-    ),
-    'App\\Modules\\Ambulance\\Views\\pre_notify.php' => 
-    array (
-      'Views' => 
-      array (
-        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Ambulance/Views/pre_notify.php',
-      ),
-    ),
-    'App\\Modules\\Ambulance\\Views\\active_run.php' => 
-    array (
-      'Views' => 
-      array (
-        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Ambulance/Views/active_run.php',
+        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Dispatcher/Views/map.php',
       ),
     ),
   ),
