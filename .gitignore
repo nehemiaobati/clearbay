@@ -3,6 +3,7 @@
 
 # CodeIgniter writable directory
 writable/
+writable
 
 # Node dependencies
 node_modules/
