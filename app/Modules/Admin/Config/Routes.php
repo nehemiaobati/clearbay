@@ -9,7 +9,7 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-$routes->group('admin', ['namespace' => 'App\Modules\Admin\Controllers'], static function ($routes) {
+$routes->group('admin', ['namespace' => 'App\Modules\Admin\Controllers', 'filter' => 'auth'], static function ($routes) {
     $routes->get('/', 'AdminController::dashboard', ['as' => 'admin.dashboard']);
 
     // Pilots CRUD

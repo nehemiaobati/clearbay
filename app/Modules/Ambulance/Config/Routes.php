@@ -9,7 +9,7 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-$routes->group('ambulance', ['namespace' => 'App\Modules\Ambulance\Controllers'], static function ($routes) {
+$routes->group('ambulance', ['namespace' => 'App\Modules\Ambulance\Controllers', 'filter' => 'auth'], static function ($routes) {
     $routes->get('/', 'AmbulanceController::home', ['as' => 'ambulance.home']);
     $routes->get('hospital/(:num)', 'AmbulanceController::detail/$1', ['as' => 'ambulance.hospital.detail']);
     $routes->get('pre-notify/(:num)', 'AmbulanceController::preNotifyForm/$1', ['as' => 'ambulance.pre_notify']);

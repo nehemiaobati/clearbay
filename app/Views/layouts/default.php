@@ -61,7 +61,7 @@ $metaImage = $metaImage ?? base_url('assets/images/brand.png');
       <li><a href="/#serve">Who We Serve</a></li>
       <li><a href="/#evidence">Research</a></li>
       <li><a href="/#signup">Contact</a></li>
-      <li><a href="<?= url_to('admin.dashboard') ?>">Admin</a></li>
+      <li><a href="<?= url_to('auth.login') ?>">Login</a></li>
     </ul>
     <a href="/#signup" class="nav-btn btn btn-primary">Join Pilot</a>
   </nav>
@@ -84,7 +84,7 @@ $metaImage = $metaImage ?? base_url('assets/images/brand.png');
       <li><a href="/#how">Solution</a></li>
       <li><a href="/#serve">Who We Serve</a></li>
       <li><a href="/#evidence">Research</a></li>
-      <li><a href="<?= url_to('admin.dashboard') ?>">Admin</a></li>
+      <li><a href="<?= url_to('auth.login') ?>">Login</a></li>
       <li><a href="mailto:info@clearbayhealthke.com">info@clearbayhealthke.com</a></li>
       <li><a href="#">© 2026 ClearBay Health Ltd</a></li>
     </ul>

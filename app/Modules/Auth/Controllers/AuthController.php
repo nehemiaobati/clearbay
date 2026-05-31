@@ -103,6 +103,13 @@ class AuthController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Incorrect email or password. Please try again.');
         }
 
+        // Check for saved redirect URL from AuthFilter
+        $redirect = session()->get('redirect_url');
+        if ($redirect) {
+            session()->remove('redirect_url');
+            return redirect()->to($redirect)->with('success', 'Welcome back, ' . $user->name . '!');
+        }
+
         return redirect()->to(url_to($this->_getRedirectRoute($user)))->with('success', 'Welcome back, ' . $user->name . '!');
     }
 
