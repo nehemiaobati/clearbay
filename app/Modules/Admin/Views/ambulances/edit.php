@@ -55,17 +55,23 @@ $isEdit = isset($ambulance) && $ambulance->id;
             <div class="col-md-6 mb-4">
               <div>
                 <label for="unitId" class="form-label">Ambulance Unit ID *</label>
-                <input type="text" id="unitId" name="unitId" class="form-control" placeholder="Unit ID" required
+                <input type="text" id="unitId" name="unitId" class="form-control <?= session('errors.unitId') ? 'is-invalid' : '' ?>" placeholder="Unit ID" required
                   value="<?= esc(old('unitId', $ambulance->unit_id ?? '')) ?>" style="text-transform: uppercase;">
                 <div class="form-note mt-1 text-muted admin-form-note">e.g. KRC-401, E-Plus 22, St John 05</div>
+                <?php if (session('errors.unitId')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.unitId')) ?></div>
+                <?php endif; ?>
               </div>
             </div>
             <div class="col-md-6 mb-4">
               <div>
                 <label for="provider" class="form-label">Service Provider *</label>
-                <input type="text" id="provider" name="provider" class="form-control" placeholder="Provider" required
+                <input type="text" id="provider" name="provider" class="form-control <?= session('errors.provider') ? 'is-invalid' : '' ?>" placeholder="Provider" required
                   value="<?= esc(old('provider', $ambulance->provider ?? '')) ?>">
                 <div class="form-note mt-1 text-muted admin-form-note">e.g. Kenya Red Cross, E-Plus, St John Ambulance</div>
+                <?php if (session('errors.provider')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.provider')) ?></div>
+                <?php endif; ?>
               </div>
             </div>
           </div>

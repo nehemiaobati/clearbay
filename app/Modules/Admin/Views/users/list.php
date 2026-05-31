@@ -1,11 +1,12 @@
 <?php
+
 /**
  * @var string $pageTitle
  * @var string $metaDescription
  * @var string $canonicalUrl
  * @var string $robotsTag
  * @var array $users
- * @var object $pager
+ * @var \CodeIgniter\Pager\Pager|null $pager
  */
 ?>
 <?= $this->extend('layouts/default') ?>
@@ -13,17 +14,17 @@
 
 <div class="container admin-page">
   <!-- Blueprint Header -->
-  <div class="blueprint-header reveal mb-4">
-    <div class="s-label">
-      <div class="s-label-line"></div>
-      <span class="s-label-text">Admin Panel</span>
-    </div>
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-      <h1 class="s-title m-0">User Accounts</h1>
-      <div class="d-flex gap-2">
-        <a href="<?= url_to('admin.dashboard') ?>" class="btn btn-outline-secondary">Dashboard</a>
-        <a href="<?= url_to('admin.users.new') ?>" class="btn btn-primary">Add User Account +</a>
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center blueprint-header reveal mb-4">
+    <div>
+      <div class="s-label">
+        <div class="s-label-line"></div>
+        <span class="s-label-text">Admin Panel</span>
       </div>
+      <h1 class="s-title m-0 mb-2">User Accounts</h1>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="<?= url_to('admin.dashboard') ?>" class="btn btn-outline-secondary">Dashboard</a>
+      <a href="<?= url_to('admin.users.new') ?>" class="btn btn-primary">Add User Account +</a>
     </div>
   </div>
 
@@ -69,9 +70,9 @@
                 <td class="text-end">
                   <div class="d-flex gap-2 justify-content-end">
                     <a href="<?= url_to('admin.users.edit', $u->id) ?>" class="btn btn-sm btn-outline-secondary">Edit</a>
-                    <a href="<?= url_to('admin.users.delete', $u->id) ?>" 
-                       class="btn btn-sm btn-outline-danger" 
-                       onclick="return confirm('Are you sure you want to deactivate/delete this user?');">Delete</a>
+                    <a href="<?= url_to('admin.users.delete', $u->id) ?>"
+                      class="btn btn-sm btn-outline-danger"
+                      onclick="return confirm('Are you sure you want to deactivate/delete this user?');">Delete</a>
                   </div>
                 </td>
               </tr>

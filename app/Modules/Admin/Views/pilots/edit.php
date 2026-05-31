@@ -55,15 +55,21 @@ $isEdit = isset($pilot) && $pilot->id;
             <div class="col-md-6 mb-4">
               <div>
                 <label for="fullName" class="form-label">Full Name *</label>
-                <input type="text" id="fullName" name="fullName" class="form-control" placeholder="Full Name" required
+                <input type="text" id="fullName" name="fullName" class="form-control <?= session('errors.fullName') ? 'is-invalid' : '' ?>" placeholder="Full Name" required
                   value="<?= esc(old('fullName', $pilot->full_name ?? '')) ?>">
+                <?php if (session('errors.fullName')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.fullName')) ?></div>
+                <?php endif; ?>
               </div>
             </div>
             <div class="col-md-6 mb-4">
               <div>
                 <label for="emailAddress" class="form-label">Email Address *</label>
-                <input type="email" id="emailAddress" name="emailAddress" class="form-control" placeholder="Email Address" required
+                <input type="email" id="emailAddress" name="emailAddress" class="form-control <?= session('errors.emailAddress') ? 'is-invalid' : '' ?>" placeholder="Email Address" required
                   value="<?= esc(old('emailAddress', $pilot->email_address ?? '')) ?>">
+                <?php if (session('errors.emailAddress')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.emailAddress')) ?></div>
+                <?php endif; ?>
               </div>
             </div>
           </div>
@@ -71,8 +77,11 @@ $isEdit = isset($pilot) && $pilot->id;
           <div class="mb-4">
             <div>
               <label for="organisation" class="form-label">Organisation / Hospital / EMS *</label>
-              <input type="text" id="organisation" name="organisation" class="form-control" placeholder="Organisation" required
+              <input type="text" id="organisation" name="organisation" class="form-control <?= session('errors.organisation') ? 'is-invalid' : '' ?>" placeholder="Organisation" required
                 value="<?= esc(old('organisation', $pilot->organisation ?? '')) ?>">
+              <?php if (session('errors.organisation')) : ?>
+                <div class="invalid-feedback"><?= esc(session('errors.organisation')) ?></div>
+              <?php endif; ?>
             </div>
           </div>
 
@@ -80,7 +89,7 @@ $isEdit = isset($pilot) && $pilot->id;
             <div class="col-md-6 mb-4">
               <div>
                 <label for="userRole" class="form-label">Your Role *</label>
-                <select id="userRole" name="userRole" class="form-select admin-form-select" required>
+                <select id="userRole" name="userRole" class="form-select admin-form-select <?= session('errors.userRole') ? 'is-invalid' : '' ?>" required>
                   <option value="" disabled <?= !$isEdit ? 'selected' : '' ?>>Select Role</option>
                   <?php
                   $roles = [
@@ -99,13 +108,19 @@ $isEdit = isset($pilot) && $pilot->id;
                     <option value="<?= esc($role) ?>" <?= $currentRole === $role ? 'selected' : '' ?>><?= esc($role) ?></option>
                   <?php endforeach; ?>
                 </select>
+                <?php if (session('errors.userRole')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.userRole')) ?></div>
+                <?php endif; ?>
               </div>
             </div>
             <div class="col-md-6 mb-4">
               <div>
                 <label for="phoneNumber" class="form-label">Phone Number (optional)</label>
-                <input type="tel" id="phoneNumber" name="phoneNumber" class="form-control" placeholder="Phone Number"
+                <input type="tel" id="phoneNumber" name="phoneNumber" class="form-control <?= session('errors.phoneNumber') ? 'is-invalid' : '' ?>" placeholder="Phone Number"
                   value="<?= esc(old('phoneNumber', $pilot->phone_number ?? '')) ?>">
+                <?php if (session('errors.phoneNumber')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.phoneNumber')) ?></div>
+                <?php endif; ?>
               </div>
             </div>
           </div>
@@ -113,7 +128,10 @@ $isEdit = isset($pilot) && $pilot->id;
           <div class="mb-4">
             <div>
               <label for="message" class="form-label">Message / Note (optional)</label>
-              <textarea id="message" name="message" class="form-control" placeholder="Message" style="height: 120px;"><?= esc(old('message', $pilot->message ?? '')) ?></textarea>
+              <textarea id="message" name="message" class="form-control <?= session('errors.message') ? 'is-invalid' : '' ?>" placeholder="Message" style="height: 120px;"><?= esc(old('message', $pilot->message ?? '')) ?></textarea>
+              <?php if (session('errors.message')) : ?>
+                <div class="invalid-feedback"><?= esc(session('errors.message')) ?></div>
+              <?php endif; ?>
             </div>
           </div>
 

@@ -1,0 +1,34 @@
+# Environment
+.env
+
+# CodeIgniter writable directory
+writable/
+
+# Node dependencies
+node_modules/
+
+# Build assets (compiled)
+public/assets/
+
+# Composer
+vendor/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+
+# Backup files
+*.bak
+*.swp
+
+# Coverage
+build/logs/

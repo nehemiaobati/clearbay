@@ -7,6 +7,7 @@
  * @var string $robotsTag
  * @var \App\Modules\Ambulance\Entities\Ambulance $ambulance
  * @var array $hospitals
+ * @var string $mapbox_token
  */
 ?>
 <?= $this->extend('layouts/default') ?>
@@ -88,7 +89,7 @@
     const myLat = <?= $ambulance->current_lat ?? -1.2921 ?>;
     const myLng = <?= $ambulance->current_lng ?? 36.8219 ?>;
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoibmVoZW1pYW9uZSIsImEiOiJjbXBwaDFybnMwMjE3MnNxbDZ0b2tsam8wIn0.iRzCTMim0F1j2mD4eUDggw';
+    mapboxgl.accessToken = '<?= esc($mapbox_token) ?>';
 
     const map = new mapboxgl.Map({
       container: 'map',

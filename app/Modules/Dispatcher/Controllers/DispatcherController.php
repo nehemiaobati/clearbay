@@ -42,6 +42,7 @@ class DispatcherController extends BaseController
             'metaDescription' => 'Live Mapbox fleet tracking and ambulance off-load delay alerts for Nairobi County.',
             'canonicalUrl'    => url_to('dispatcher.index'),
             'robotsTag'       => 'noindex, nofollow',
+            'mapbox_token'    => env('mapboxgl.accessToken'),
         ];
 
         return view('App\Modules\Dispatcher\Views\map', $data);
@@ -130,7 +131,7 @@ class DispatcherController extends BaseController
         $loop_count = 0;
         while ($loop_count < 10) { // Limit to 10 cycles to avoid thread exhaust, browser reconnects automatically
             $telemetry = $this->_dispatcher_service->getTelemetry();
-            
+
             echo "data: " . json_encode([
                 'status' => 'update',
                 'result' => $telemetry

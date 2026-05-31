@@ -5,6 +5,7 @@
  * @var string $metaDescription
  * @var string $canonicalUrl
  * @var string $robotsTag
+ * @var string $mapbox_token
  */
 ?>
 <?= $this->extend('layouts/default') ?>
@@ -45,7 +46,10 @@
   <div class="sidebar-container">
     <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-10">
       <span class="mono-label text-muted">EMS Dispatcher Console</span>
-      <a href="<?= url_to('auth.logout') ?>" class="btn btn-xs btn-outline-danger">Sign Out</a>
+      <div>
+        <?= csrf_field() ?>
+        <a href="<?= url_to('auth.logout') ?>" class="btn btn-xs btn-outline-danger">Sign Out</a>
+      </div>
     </div>
 
     <!-- Panel SC-14: Active Alerts Panel -->
@@ -86,7 +90,7 @@
     const colorAmber = style.getPropertyValue('--amber').trim() || '#D4711A';
 
     // 1. Mapbox Setup
-    mapboxgl.accessToken = 'pk.eyJ1IjoibmVoZW1pYW9uZSIsImEiOiJjbXBwaDFybnMwMjE3MnNxbDZ0b2tsam8wIn0.iRzCTMim0F1j2mD4eUDggw';
+    mapboxgl.accessToken = '<?= esc($mapbox_token) ?>';
 
     const map = new mapboxgl.Map({
       container: 'map',
@@ -292,12 +296,16 @@
       btn.disabled = true;
 
       try {
-        const response = await fetch('/dispatcher/alerts/' + alertId + '/acknowledge', {
+        const formData = new FormData();
+        formData.append('csrf_test_name', document.querySelector('input[name="csrf_test_name"]')?.value ?? '');
+
+        const ackBaseUrl = '<?= url_to('dispatcher.alert.acknowledge', 'PLACEHOLDER') ?>';
+        const response = await fetch(ackBaseUrl.replace('PLACEHOLDER', alertId), {
           method: 'POST',
           headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': '<?= csrf_hash() ?>'
-          }
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: formData
         });
         const data = await response.json();
         if (data.status === 'success') {

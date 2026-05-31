@@ -58,7 +58,7 @@ $isEdit = isset($handover) && $handover->id;
             <div class="col-md-6 mb-4">
               <div>
                 <label for="ambulanceId" class="form-label">Ambulance Unit *</label>
-                <select id="ambulanceId" name="ambulanceId" class="form-select admin-form-select" required>
+                <select id="ambulanceId" name="ambulanceId" class="form-select admin-form-select <?= session('errors.ambulanceId') ? 'is-invalid' : '' ?>" required>
                   <option value="" disabled <?= !$isEdit ? 'selected' : '' ?>>Select Ambulance</option>
                   <?php
                   $currentAmbulance = old('ambulanceId', $handover->ambulance_id ?? '');
@@ -69,6 +69,9 @@ $isEdit = isset($handover) && $handover->id;
                     </option>
                   <?php endforeach; ?>
                 </select>
+                <?php if (session('errors.ambulanceId')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.ambulanceId')) ?></div>
+                <?php endif; ?>
               </div>
             </div>
 
@@ -76,7 +79,7 @@ $isEdit = isset($handover) && $handover->id;
             <div class="col-md-6 mb-4">
               <div>
                 <label for="hospitalId" class="form-label">Destination Hospital *</label>
-                <select id="hospitalId" name="hospitalId" class="form-select admin-form-select" required>
+                <select id="hospitalId" name="hospitalId" class="form-select admin-form-select <?= session('errors.hospitalId') ? 'is-invalid' : '' ?>" required>
                   <option value="" disabled <?= !$isEdit ? 'selected' : '' ?>>Select Destination Hospital</option>
                   <?php
                   $currentHospital = old('hospitalId', $handover->hospital_id ?? '');
@@ -87,6 +90,9 @@ $isEdit = isset($handover) && $handover->id;
                     </option>
                   <?php endforeach; ?>
                 </select>
+                <?php if (session('errors.hospitalId')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.hospitalId')) ?></div>
+                <?php endif; ?>
               </div>
             </div>
           </div>
@@ -96,8 +102,11 @@ $isEdit = isset($handover) && $handover->id;
             <div class="col-md-4 mb-4">
               <div>
                 <label for="patientAge" class="form-label">Patient Age *</label>
-                <input type="number" id="patientAge" name="patientAge" class="form-control" placeholder="Age" min="0" required
+                <input type="number" id="patientAge" name="patientAge" class="form-control <?= session('errors.patientAge') ? 'is-invalid' : '' ?>" placeholder="Age" min="0" required
                   value="<?= esc(old('patientAge', $handover->patient_age ?? '')) ?>">
+                <?php if (session('errors.patientAge')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.patientAge')) ?></div>
+                <?php endif; ?>
               </div>
             </div>
 
@@ -105,7 +114,7 @@ $isEdit = isset($handover) && $handover->id;
             <div class="col-md-4 mb-4">
               <div>
                 <label for="patientGender" class="form-label">Patient Gender *</label>
-                <select id="patientGender" name="patientGender" class="form-select admin-form-select" required>
+                <select id="patientGender" name="patientGender" class="form-select admin-form-select <?= session('errors.patientGender') ? 'is-invalid' : '' ?>" required>
                   <option value="" disabled <?= !$isEdit ? 'selected' : '' ?>>Select Gender</option>
                   <?php
                   $genders = ['M' => 'Male', 'F' => 'Female'];
@@ -115,6 +124,9 @@ $isEdit = isset($handover) && $handover->id;
                     <option value="<?= esc($val) ?>" <?= $currentGender === $val ? 'selected' : '' ?>><?= esc($lbl) ?></option>
                   <?php endforeach; ?>
                 </select>
+                <?php if (session('errors.patientGender')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.patientGender')) ?></div>
+                <?php endif; ?>
               </div>
             </div>
 
@@ -122,7 +134,7 @@ $isEdit = isset($handover) && $handover->id;
             <div class="col-md-4 mb-4">
               <div>
                 <label for="acuity" class="form-label">Acuity Level *</label>
-                <select id="acuity" name="acuity" class="form-select admin-form-select" required>
+                <select id="acuity" name="acuity" class="form-select admin-form-select <?= session('errors.acuity') ? 'is-invalid' : '' ?>" required>
                   <option value="" disabled <?= !$isEdit ? 'selected' : '' ?>>Select Acuity</option>
                   <?php
                   $acuities = ['Critical', 'Serious', 'Stable'];
@@ -132,6 +144,9 @@ $isEdit = isset($handover) && $handover->id;
                     <option value="<?= esc($acuity) ?>" <?= $currentAcuity === $acuity ? 'selected' : '' ?>><?= esc($acuity) ?></option>
                   <?php endforeach; ?>
                 </select>
+                <?php if (session('errors.acuity')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.acuity')) ?></div>
+                <?php endif; ?>
               </div>
             </div>
           </div>
@@ -141,9 +156,12 @@ $isEdit = isset($handover) && $handover->id;
             <div class="col-md-4 mb-4">
               <div>
                 <label for="etaMinutes" class="form-label">ETA (Minutes) *</label>
-                <input type="number" id="etaMinutes" name="etaMinutes" class="form-control" placeholder="ETA Minutes" min="0" required
+                <input type="number" id="etaMinutes" name="etaMinutes" class="form-control <?= session('errors.etaMinutes') ? 'is-invalid' : '' ?>" placeholder="ETA Minutes" min="0" required
                   value="<?= esc(old('etaMinutes', $handover->eta_minutes ?? '')) ?>">
                 <div class="form-note mt-1 text-muted admin-form-note">Set to 0 if already arrived</div>
+                <?php if (session('errors.etaMinutes')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.etaMinutes')) ?></div>
+                <?php endif; ?>
               </div>
             </div>
 
@@ -151,8 +169,11 @@ $isEdit = isset($handover) && $handover->id;
             <div class="col-md-4 mb-4">
               <div>
                 <label for="waitTimeMinutes" class="form-label">Off-Load Wait Time (Mins) *</label>
-                <input type="number" id="waitTimeMinutes" name="waitTimeMinutes" class="form-control" placeholder="Wait Time" min="0" required
+                <input type="number" id="waitTimeMinutes" name="waitTimeMinutes" class="form-control <?= session('errors.waitTimeMinutes') ? 'is-invalid' : '' ?>" placeholder="Wait Time" min="0" required
                   value="<?= esc(old('waitTimeMinutes', $handover->wait_time_minutes ?? '0')) ?>">
+                <?php if (session('errors.waitTimeMinutes')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.waitTimeMinutes')) ?></div>
+                <?php endif; ?>
               </div>
             </div>
 
@@ -160,7 +181,7 @@ $isEdit = isset($handover) && $handover->id;
             <div class="col-md-4 mb-4">
               <div>
                 <label for="status" class="form-label">Dispatch / Queue Status *</label>
-                <select id="status" name="status" class="form-select admin-form-select" required>
+                <select id="status" name="status" class="form-select admin-form-select <?= session('errors.status') ? 'is-invalid' : '' ?>" required>
                   <option value="" disabled <?= !$isEdit ? 'selected' : '' ?>>Select Status</option>
                   <?php
                   $statuses = ['En route', 'Arrived', 'Acknowledged', 'Preparing', 'Cleared'];
@@ -170,6 +191,9 @@ $isEdit = isset($handover) && $handover->id;
                     <option value="<?= esc($status) ?>" <?= $currentStatus === $status ? 'selected' : '' ?>><?= esc($status) ?></option>
                   <?php endforeach; ?>
                 </select>
+                <?php if (session('errors.status')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.status')) ?></div>
+                <?php endif; ?>
               </div>
             </div>
           </div>

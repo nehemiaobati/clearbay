@@ -20,14 +20,16 @@ $isEdit = isset($user);
     <a href="<?= url_to('admin.users.list') ?>" class="mono-label text-decoration-none admin-back">← Back to Users</a>
   </div>
 
-  <div class="card blueprint-card p-4 p-md-5 reveal">
-    <div class="blueprint-header mb-4">
-      <div class="s-label">
-        <div class="s-label-line"></div>
-        <span class="s-label-text">User Registry</span>
-      </div>
-      <h1 class="s-title"><?= $isEdit ? 'Edit Account' : 'Register Account' ?></h1>
+  <!-- Blueprint Header -->
+  <div class="blueprint-header reveal mb-4">
+    <div class="s-label">
+      <div class="s-label-line"></div>
+      <span class="s-label-text">User Registry</span>
     </div>
+    <h1 class="s-title"><?= $isEdit ? 'Edit Account' : 'Register Account' ?></h1>
+  </div>
+
+  <div class="card blueprint-card p-4 p-md-5 reveal">
 
     <form action="<?= $isEdit ? url_to('admin.users.update', $user->id) : url_to('admin.users.create') ?>" method="POST" class="form-dark" novalidate>
       <?= csrf_field() ?>
