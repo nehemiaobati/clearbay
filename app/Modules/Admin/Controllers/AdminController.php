@@ -16,6 +16,7 @@ use App\Modules\Queue\Models\AmbulanceModel;
 use App\Modules\Auth\Entities\User;
 use App\Modules\Auth\Models\UserModel;
 use CodeIgniter\HTTP\RedirectResponse;
+use App\Modules\Admin\Libraries\AdminService;
 
 /**
  * Class AdminController
@@ -53,15 +54,21 @@ class AdminController extends BaseController
     private UserModel $_user_model;
 
     /**
+     * @var AdminService
+     */
+    private AdminService $adminService;
+
+    /**
      * AdminController constructor.
      */
-    public function __construct()
+    public function __construct(?AdminService $adminService = null)
     {
-        $this->_pilot_model = new PilotSignupModel();
-        $this->_handover_model = new HandoverModel();
-        $this->_hospital_model = new HospitalModel();
-        $this->_ambulance_model = new AmbulanceModel();
-        $this->_user_model = new UserModel();
+        $this->adminService = $adminService ?? new AdminService();
+        $this->_pilot_model = $this->adminService->getPilotModel();
+        $this->_handover_model = $this->adminService->getHandoverModel();
+        $this->_hospital_model = $this->adminService->getHospitalModel();
+        $this->_ambulance_model = $this->adminService->getAmbulanceModel();
+        $this->_user_model = $this->adminService->getUserModel();
         helper(['form', 'url']);
     }
 
@@ -72,16 +79,17 @@ class AdminController extends BaseController
      */
     public function dashboard(): string
     {
+        $metrics = $this->adminService->getDashboardMetrics();
         $data = [
             'pageTitle'       => 'Admin Dashboard | ClearBay',
             'metaDescription' => 'ClearBay administrative management control panel.',
             'canonicalUrl'    => url_to('admin.dashboard'),
             'robotsTag'       => 'noindex, nofollow',
-            'pilotCount'      => $this->_pilot_model->countAllResults(),
-            'handoverCount'   => $this->_handover_model->countAllResults(),
-            'hospitalCount'   => $this->_hospital_model->countAllResults(),
-            'ambulanceCount'  => $this->_ambulance_model->countAllResults(),
-            'userCount'       => $this->_user_model->countAllResults(),
+            'pilotCount'      => $metrics['pilotCount'],
+            'handoverCount'   => $metrics['handoverCount'],
+            'hospitalCount'   => $metrics['hospitalCount'],
+            'ambulanceCount'  => $metrics['ambulanceCount'],
+            'userCount'       => $metrics['userCount'],
         ];
 
         return view('App\Modules\Admin\Views\dashboard', $data);
@@ -98,13 +106,14 @@ class AdminController extends BaseController
      */
     public function pilotsList(): string
     {
+        $result = $this->adminService->getPilotsList(15);
         $data = [
             'pageTitle'       => 'Manage Pilot Signups | ClearBay',
             'metaDescription' => 'Review and manage incoming pilot onboarding request records.',
             'canonicalUrl'    => url_to('admin.pilots.list'),
             'robotsTag'       => 'noindex, nofollow',
-            'pilots'          => $this->_pilot_model->orderBy('created_at', 'DESC')->paginate(15, 'pilots'),
-            'pager'           => $this->_pilot_model->pager,
+            'pilots'          => $result['pilots'],
+            'pager'           => $result['pager'],
         ];
 
         return view('App\Modules\Admin\Views\pilots\list', $data);
@@ -271,18 +280,14 @@ class AdminController extends BaseController
      */
     public function handoversList(): string
     {
+        $result = $this->adminService->getHandoversList(15);
         $data = [
             'pageTitle'       => 'Manage Handovers | ClearBay',
             'metaDescription' => 'Review and manage ambulance queue handovers.',
             'canonicalUrl'    => url_to('admin.handovers.list'),
             'robotsTag'       => 'noindex, nofollow',
-            'handovers'       => $this->_handover_model
-                ->select('handovers.*, ambulances.unit_id as ambulance_unit, hospitals.name as hospital_name')
-                ->join('ambulances', 'ambulances.id = handovers.ambulance_id')
-                ->join('hospitals', 'hospitals.id = handovers.hospital_id')
-                ->orderBy('handovers.created_at', 'DESC')
-                ->paginate(15, 'handovers'),
-            'pager'           => $this->_handover_model->pager,
+            'handovers'       => $result['handovers'],
+            'pager'           => $result['pager'],
         ];
 
         return view('App\Modules\Admin\Views\handovers\list', $data);
@@ -461,13 +466,14 @@ class AdminController extends BaseController
      */
     public function hospitalsList(): string
     {
+        $result = $this->adminService->getHospitalsList(15);
         $data = [
             'pageTitle'       => 'Manage Hospitals | ClearBay',
             'metaDescription' => 'Review and manage partner hospital records.',
             'canonicalUrl'    => url_to('admin.hospitals.list'),
             'robotsTag'       => 'noindex, nofollow',
-            'hospitals'       => $this->_hospital_model->orderBy('name', 'ASC')->paginate(15, 'hospitals'),
-            'pager'           => $this->_hospital_model->pager,
+            'hospitals'       => $result['hospitals'],
+            'pager'           => $result['pager'],
         ];
 
         return view('App\Modules\Admin\Views\hospitals\list', $data);
@@ -626,13 +632,14 @@ class AdminController extends BaseController
      */
     public function ambulancesList(): string
     {
+        $result = $this->adminService->getAmbulancesList(15);
         $data = [
             'pageTitle'       => 'Manage Ambulances | ClearBay',
             'metaDescription' => 'Review and manage ambulance fleet units.',
             'canonicalUrl'    => url_to('admin.ambulances.list'),
             'robotsTag'       => 'noindex, nofollow',
-            'ambulances'      => $this->_ambulance_model->orderBy('unit_id', 'ASC')->paginate(15, 'ambulances'),
-            'pager'           => $this->_ambulance_model->pager,
+            'ambulances'      => $result['ambulances'],
+            'pager'           => $result['pager'],
         ];
 
         return view('App\Modules\Admin\Views\ambulances\list', $data);
@@ -783,21 +790,18 @@ class AdminController extends BaseController
      */
     public function usersList(): string
     {
+        $result = $this->adminService->getUsersList(15);
         $data = [
             'pageTitle'       => 'Manage Users | ClearBay',
             'metaDescription' => 'Review and manage ClearBay operator and staff user accounts.',
             'canonicalUrl'    => url_to('admin.users.list'),
             'robotsTag'       => 'noindex, nofollow',
-            'users'           => $this->_user_model
-                ->select('users.*, hospitals.name as hospital_name, ems_providers.name as ems_name')
-                ->join('hospitals', 'hospitals.id = users.hospital_id', 'left')
-                ->join('ems_providers', 'ems_providers.id = users.ems_provider_id', 'left')
-                ->orderBy('users.created_at', 'DESC')
-                ->paginate(15, 'users'),
-            'pager'           => $this->_user_model->pager,
+            'users'           => $result['users'],
+            'pager'           => $result['pager'],
         ];
 
         return view('App\Modules\Admin\Views\users\list', $data);
+
     }
 
     /**

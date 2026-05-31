@@ -57,7 +57,7 @@
     // Telemetry Polling (every 5 seconds)
     const pollStatus = async () => {
       try {
-        const runUrl = '<?= url_to('ambulance.active_run', 'PLACEHOLDER') ?>'.replace('PLACEHOLDER', preId);
+        const runUrl = '<?= url_to('ambulance.active_run', $pre_id) ?>';
         const apiResponse = await fetch(runUrl + '?ajax=1');
         if (!apiResponse.ok) return;
 

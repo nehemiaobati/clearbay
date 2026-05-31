@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Hospital\Models;
 
-use CodeIgniter\Model;
+use App\Modules\Queue\Models\HospitalModel as BaseHospitalModel;
 use App\Modules\Hospital\Entities\Hospital;
 
 /**
@@ -12,9 +12,8 @@ use App\Modules\Hospital\Entities\Hospital;
  *
  * Model interacting with the hospitals table.
  */
-class HospitalModel extends Model
+class HospitalModel extends BaseHospitalModel
 {
-    protected $table            = 'hospitals';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = Hospital::class;
@@ -33,7 +32,7 @@ class HospitalModel extends Model
         'active',
     ];
 
-    protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 }
+

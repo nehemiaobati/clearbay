@@ -70,11 +70,11 @@
                 </td>
                 <td class="text-end">
                   <div class="d-inline-flex gap-2">
-                    <a href="<?= url_to('admin.pilots.edit', $pilot->id) ?>" class="btn btn-outline-secondary btn-sm px-3 py-1 admin-btn-edit">
+                    <a href="<?= url_to('admin.pilots.edit', $pilot->id) ?>" class="btn btn-outline-secondary btn-sm px-3 py-2 d-inline-block admin-btn-edit">
                       Edit
                     </a>
                     <a href="<?= url_to('admin.pilots.delete', $pilot->id) ?>" 
-                       class="btn btn-danger btn-sm px-3 py-1 admin-btn-delete" 
+                       class="btn btn-danger btn-sm px-3 py-2 d-inline-block admin-btn-delete" 
                        onclick="return confirm('Are you sure you want to delete this pilot application?');">
                       Delete
                     </a>

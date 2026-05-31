@@ -22,7 +22,6 @@
       <h1 class="s-title admin-heading m-0"><?= esc($hospital->name) ?></h1>
       <div class="d-flex gap-2">
         <a href="<?= url_to('hospital.analytics') ?>" class="btn btn-sm btn-outline-secondary">View Analytics</a>
-        <a href="<?= url_to('auth.logout') ?>" class="btn btn-sm btn-outline-danger">Sign Out</a>
       </div>
     </div>
   </div>

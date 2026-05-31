@@ -48,7 +48,6 @@
       <span class="mono-label text-muted">EMS Dispatcher Console</span>
       <div>
         <?= csrf_field() ?>
-        <a href="<?= url_to('auth.logout') ?>" class="btn btn-xs btn-outline-danger">Sign Out</a>
       </div>
     </div>
 

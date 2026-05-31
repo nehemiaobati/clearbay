@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Ambulance\Models;
 
-use CodeIgniter\Model;
+use App\Modules\Queue\Models\AmbulanceModel as BaseAmbulanceModel;
 use App\Modules\Ambulance\Entities\Ambulance;
 
 /**
@@ -12,9 +12,8 @@ use App\Modules\Ambulance\Entities\Ambulance;
  *
  * Model interacting with the ambulances table.
  */
-class AmbulanceModel extends Model
+class AmbulanceModel extends BaseAmbulanceModel
 {
-    protected $table            = 'ambulances';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = Ambulance::class;
@@ -30,7 +29,7 @@ class AmbulanceModel extends Model
         'last_updated',
     ];
 
-    protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 }
+

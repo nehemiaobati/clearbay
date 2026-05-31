@@ -26,8 +26,11 @@
     'Config\\Logger' => 'Config\\Logger',
     'Config\\Database' => 'Config\\Database',
     'Routing' => 'Config\\Routing',
-    'Config\\Format' => 'Config\\Format',
+    'Config\\View' => 'Config\\View',
     'Config\\Toolbar' => 'Config\\Toolbar',
+    'Config\\Format' => 'Config\\Format',
+    'Config\\Pager' => 'Config\\Pager',
+    'Config\\Validation' => 'Config\\Validation',
   ),
   'instances' => 
   array (
@@ -360,6 +363,7 @@
         'forcehttps' => 'CodeIgniter\\Filters\\ForceHTTPS',
         'pagecache' => 'CodeIgniter\\Filters\\PageCache',
         'performance' => 'CodeIgniter\\Filters\\PerformanceMetrics',
+        'auth' => 'App\\Filters\\AuthFilter',
       ),
        'required' => 
       array (
@@ -554,27 +558,87 @@
         ),
       ),
     )),
-    'Config\\Format' => 
-    \Config\Format::__set_state(array(
-       'supportedResponseFormats' => 
+    'Config\\View' => 
+    \Config\View::__set_state(array(
+       'saveData' => true,
+       'filters' => 
       array (
-        0 => 'application/json',
-        1 => 'application/xml',
-        2 => 'text/xml',
+        'abs' => '\\abs',
+        'capitalize' => '\\CodeIgniter\\View\\Filters::capitalize',
+        'date' => '\\CodeIgniter\\View\\Filters::date',
+        'date_modify' => '\\CodeIgniter\\View\\Filters::date_modify',
+        'default' => '\\CodeIgniter\\View\\Filters::default',
+        'esc' => '\\CodeIgniter\\View\\Filters::esc',
+        'excerpt' => '\\CodeIgniter\\View\\Filters::excerpt',
+        'highlight' => '\\CodeIgniter\\View\\Filters::highlight',
+        'highlight_code' => '\\CodeIgniter\\View\\Filters::highlight_code',
+        'limit_words' => '\\CodeIgniter\\View\\Filters::limit_words',
+        'limit_chars' => '\\CodeIgniter\\View\\Filters::limit_chars',
+        'local_currency' => '\\CodeIgniter\\View\\Filters::local_currency',
+        'local_number' => '\\CodeIgniter\\View\\Filters::local_number',
+        'lower' => '\\strtolower',
+        'nl2br' => '\\CodeIgniter\\View\\Filters::nl2br',
+        'number_format' => '\\number_format',
+        'prose' => '\\CodeIgniter\\View\\Filters::prose',
+        'round' => '\\CodeIgniter\\View\\Filters::round',
+        'strip_tags' => '\\strip_tags',
+        'title' => '\\CodeIgniter\\View\\Filters::title',
+        'upper' => '\\strtoupper',
       ),
-       'formatters' => 
+       'plugins' => 
       array (
-        'application/json' => 'CodeIgniter\\Format\\JSONFormatter',
-        'application/xml' => 'CodeIgniter\\Format\\XMLFormatter',
-        'text/xml' => 'CodeIgniter\\Format\\XMLFormatter',
+        'csp_script_nonce' => '\\CodeIgniter\\View\\Plugins::cspScriptNonce',
+        'csp_style_nonce' => '\\CodeIgniter\\View\\Plugins::cspStyleNonce',
+        'current_url' => '\\CodeIgniter\\View\\Plugins::currentURL',
+        'previous_url' => '\\CodeIgniter\\View\\Plugins::previousURL',
+        'mailto' => '\\CodeIgniter\\View\\Plugins::mailto',
+        'safe_mailto' => '\\CodeIgniter\\View\\Plugins::safeMailto',
+        'lang' => '\\CodeIgniter\\View\\Plugins::lang',
+        'validation_errors' => '\\CodeIgniter\\View\\Plugins::validationErrors',
+        'route' => '\\CodeIgniter\\View\\Plugins::route',
+        'siteURL' => '\\CodeIgniter\\View\\Plugins::siteURL',
       ),
-       'formatterOptions' => 
+       'coreFilters' => 
       array (
-        'application/json' => 320,
-        'application/xml' => 0,
-        'text/xml' => 0,
+        'abs' => '\\abs',
+        'capitalize' => '\\CodeIgniter\\View\\Filters::capitalize',
+        'date' => '\\CodeIgniter\\View\\Filters::date',
+        'date_modify' => '\\CodeIgniter\\View\\Filters::date_modify',
+        'default' => '\\CodeIgniter\\View\\Filters::default',
+        'esc' => '\\CodeIgniter\\View\\Filters::esc',
+        'excerpt' => '\\CodeIgniter\\View\\Filters::excerpt',
+        'highlight' => '\\CodeIgniter\\View\\Filters::highlight',
+        'highlight_code' => '\\CodeIgniter\\View\\Filters::highlight_code',
+        'limit_words' => '\\CodeIgniter\\View\\Filters::limit_words',
+        'limit_chars' => '\\CodeIgniter\\View\\Filters::limit_chars',
+        'local_currency' => '\\CodeIgniter\\View\\Filters::local_currency',
+        'local_number' => '\\CodeIgniter\\View\\Filters::local_number',
+        'lower' => '\\strtolower',
+        'nl2br' => '\\CodeIgniter\\View\\Filters::nl2br',
+        'number_format' => '\\number_format',
+        'prose' => '\\CodeIgniter\\View\\Filters::prose',
+        'round' => '\\CodeIgniter\\View\\Filters::round',
+        'strip_tags' => '\\strip_tags',
+        'title' => '\\CodeIgniter\\View\\Filters::title',
+        'upper' => '\\strtoupper',
       ),
-       'jsonEncodeDepth' => 512,
+       'corePlugins' => 
+      array (
+        'csp_script_nonce' => '\\CodeIgniter\\View\\Plugins::cspScriptNonce',
+        'csp_style_nonce' => '\\CodeIgniter\\View\\Plugins::cspStyleNonce',
+        'current_url' => '\\CodeIgniter\\View\\Plugins::currentURL',
+        'previous_url' => '\\CodeIgniter\\View\\Plugins::previousURL',
+        'mailto' => '\\CodeIgniter\\View\\Plugins::mailto',
+        'safe_mailto' => '\\CodeIgniter\\View\\Plugins::safeMailto',
+        'lang' => '\\CodeIgniter\\View\\Plugins::lang',
+        'validation_errors' => '\\CodeIgniter\\View\\Plugins::validationErrors',
+        'route' => '\\CodeIgniter\\View\\Plugins::route',
+        'siteURL' => '\\CodeIgniter\\View\\Plugins::siteURL',
+      ),
+       'decorators' => 
+      array (
+      ),
+       'appOverridesFolder' => 'overrides',
     )),
     'Config\\Toolbar' => 
     \Config\Toolbar::__set_state(array(
@@ -611,6 +675,53 @@
         'X-Requested-With' => 'xmlhttprequest',
         'HX-Request' => 'true',
         'X-Up-Version' => NULL,
+      ),
+    )),
+    'Config\\Format' => 
+    \Config\Format::__set_state(array(
+       'supportedResponseFormats' => 
+      array (
+        0 => 'application/json',
+        1 => 'application/xml',
+        2 => 'text/xml',
+      ),
+       'formatters' => 
+      array (
+        'application/json' => 'CodeIgniter\\Format\\JSONFormatter',
+        'application/xml' => 'CodeIgniter\\Format\\XMLFormatter',
+        'text/xml' => 'CodeIgniter\\Format\\XMLFormatter',
+      ),
+       'formatterOptions' => 
+      array (
+        'application/json' => 320,
+        'application/xml' => 0,
+        'text/xml' => 0,
+      ),
+       'jsonEncodeDepth' => 512,
+    )),
+    'Config\\Pager' => 
+    \Config\Pager::__set_state(array(
+       'templates' => 
+      array (
+        'default_full' => 'pagers/bootstrap5_pagination',
+        'default_simple' => 'CodeIgniter\\Pager\\Views\\default_simple',
+        'default_head' => 'CodeIgniter\\Pager\\Views\\default_head',
+      ),
+       'perPage' => 20,
+    )),
+    'Config\\Validation' => 
+    \Config\Validation::__set_state(array(
+       'ruleSets' => 
+      array (
+        0 => 'CodeIgniter\\Validation\\StrictRules\\Rules',
+        1 => 'CodeIgniter\\Validation\\StrictRules\\FormatRules',
+        2 => 'CodeIgniter\\Validation\\StrictRules\\FileRules',
+        3 => 'CodeIgniter\\Validation\\StrictRules\\CreditCardRules',
+      ),
+       'templates' => 
+      array (
+        'list' => 'CodeIgniter\\Validation\\Views\\list',
+        'single' => 'CodeIgniter\\Validation\\Views\\single',
       ),
     )),
   ),

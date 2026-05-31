@@ -33,7 +33,6 @@
   <div class="border-top border-secondary border-opacity-20 p-3 paramedic-hospital-panel">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h3 class="mono-label text-muted m-0">Hospitals Sorted by Distance</h3>
-      <a href="<?= url_to('auth.logout') ?>" class="btn btn-xs btn-outline-danger">Sign Out</a>
     </div>
 
     <div class="row g-2">

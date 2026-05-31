@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Hospital\Models;
 
-use CodeIgniter\Model;
+use App\Modules\Queue\Models\HandoverModel as BaseHandoverModel;
 use App\Modules\Hospital\Entities\Handover;
 
 /**
@@ -12,9 +12,8 @@ use App\Modules\Hospital\Entities\Handover;
  *
  * Model interacting with the handovers table.
  */
-class HandoverModel extends Model
+class HandoverModel extends BaseHandoverModel
 {
-    protected $table            = 'handovers';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = Handover::class;
@@ -37,7 +36,7 @@ class HandoverModel extends Model
         'completed_by',
     ];
 
-    protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 }
+

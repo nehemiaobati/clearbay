@@ -50,6 +50,11 @@ $metaImage = $metaImage ?? base_url('assets/images/brand.png');
 <body>
 
   <!-- ━━━━ NAV ━━━━ -->
+  <?php
+    $session = session();
+    $isLoggedIn = $session->get('is_logged_in');
+    $userRole = $session->get('user_role');
+  ?>
   <nav id="nav">
     <a href="/" class="logo">
       <div class="logo-mark"></div>
@@ -61,10 +66,34 @@ $metaImage = $metaImage ?? base_url('assets/images/brand.png');
       <li><a href="/#serve">Who We Serve</a></li>
       <li><a href="/#evidence">Research</a></li>
       <li><a href="/#signup">Contact</a></li>
-      <li><a href="<?= url_to('auth.login') ?>">Login</a></li>
+      <?php if ($isLoggedIn): ?>
+        <?php
+          $dashboardRoute = 'auth.login';
+          switch ($userRole) {
+              case 'nurse':
+              case 'hospital_admin':
+                  $dashboardRoute = 'hospital.dashboard';
+                  break;
+              case 'paramedic':
+                  $dashboardRoute = 'ambulance.home';
+                  break;
+              case 'dispatcher':
+                  $dashboardRoute = 'dispatcher.index';
+                  break;
+              case 'admin':
+                  $dashboardRoute = 'admin.dashboard';
+                  break;
+          }
+        ?>
+        <li><a href="<?= url_to($dashboardRoute) ?>">Dashboard</a></li>
+        <li><a href="<?= url_to('auth.logout') ?>">Sign Out</a></li>
+      <?php else: ?>
+        <li><a href="<?= url_to('auth.login') ?>">Login</a></li>
+      <?php endif; ?>
     </ul>
     <a href="/#signup" class="nav-btn btn btn-primary">Join Pilot</a>
   </nav>
+
 
   <!-- Content Section -->
   <div class="container mt-3">

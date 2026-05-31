@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Ambulance\Libraries;
 
 use App\Modules\Ambulance\Models\AmbulanceModel;
-use App\Modules\Hospital\Models\HospitalModel;
+use App\Modules\Queue\Models\HospitalModel;
 use App\Modules\Hospital\Models\PreNotificationModel;
-use App\Modules\Hospital\Models\HandoverModel;
+use App\Modules\Queue\Models\HandoverModel;
 use App\Modules\Hospital\Entities\PreNotification;
 use App\Modules\Hospital\Entities\Handover;
 use App\Modules\Auth\Models\UserModel;

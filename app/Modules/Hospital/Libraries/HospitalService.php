@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Hospital\Libraries;
 
-use App\Modules\Hospital\Models\HospitalModel;
+use App\Modules\Queue\Models\HospitalModel;
 use App\Modules\Hospital\Models\HospitalStatusModel;
-use App\Modules\Hospital\Models\HandoverModel;
+use App\Modules\Queue\Models\HandoverModel;
 use App\Modules\Hospital\Entities\Hospital;
 use App\Modules\Hospital\Entities\HospitalStatus;
 use App\Modules\Hospital\Entities\Handover;
