@@ -109,6 +109,16 @@
         ),
       ),
     ),
+    'Language/en/HTTP.php' => 
+    array (
+      'php' => 
+      array (
+        0 => 
+        array (
+          0 => '/Users/nehemia/Documents/DEV/green/system/Language/en/HTTP.php',
+        ),
+      ),
+    ),
   ),
   'findQualifiedNameFromPath' => 
   array (
@@ -128,6 +138,13 @@
         'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Auth/Views/login.php',
       ),
     ),
+    'App\\Modules\\Hospital\\Views\\dashboard.php' => 
+    array (
+      'Views' => 
+      array (
+        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Hospital/Views/dashboard.php',
+      ),
+    ),
     'App\\Modules\\Ambulance\\Views\\home.php' => 
     array (
       'Views' => 
@@ -135,18 +152,11 @@
         'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Ambulance/Views/home.php',
       ),
     ),
-    'App\\Modules\\Ambulance\\Views\\detail.php' => 
+    'App\\Modules\\Dispatcher\\Views\\map.php' => 
     array (
       'Views' => 
       array (
-        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Ambulance/Views/detail.php',
-      ),
-    ),
-    'App\\Modules\\Hospital\\Views\\dashboard.php' => 
-    array (
-      'Views' => 
-      array (
-        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Hospital/Views/dashboard.php',
+        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Dispatcher/Views/map.php',
       ),
     ),
   ),

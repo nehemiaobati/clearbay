@@ -11,7 +11,7 @@
 <?= $this->extend('layouts/default') ?>
 <?= $this->section('content') ?>
 
-<div class="container-fluid p-0 d-flex flex-column flex-lg-row gap-3 mt-5 pt-4">
+<div class="container-fluid p-0 d-flex flex-column flex-lg-row gap-3 mt-5 pt-4 dispatcher-layout">
   <!-- Left Side: Map Area -->
   <div class="map-container flex-grow-1 position-relative" style="min-height: 400px;">
     <noscript>
