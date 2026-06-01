@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Hospital\Libraries;
 
-use App\Modules\Queue\Models\HospitalModel;
+use App\Modules\Hospital\Models\HospitalModel;
 use App\Modules\Hospital\Models\HospitalStatusModel;
-use App\Modules\Queue\Models\HandoverModel;
+use App\Modules\Hospital\Models\HandoverModel;
 use App\Modules\Hospital\Entities\Hospital;
 use App\Modules\Hospital\Entities\HospitalStatus;
 use App\Modules\Hospital\Entities\Handover;
@@ -21,26 +21,44 @@ class HospitalService
     /**
      * @var HospitalModel
      */
-    private HospitalModel $_hospital_model;
+    private HospitalModel $hospital_model;
 
     /**
      * @var HospitalStatusModel
      */
-    private HospitalStatusModel $_status_model;
+    private HospitalStatusModel $status_model;
 
     /**
      * @var HandoverModel
      */
-    private HandoverModel $_handover_model;
+    private HandoverModel $handover_model;
 
     /**
      * HospitalService constructor.
      */
     public function __construct()
     {
-        $this->_hospital_model = new HospitalModel();
-        $this->_status_model   = new HospitalStatusModel();
-        $this->_handover_model = new HandoverModel();
+        $this->hospital_model = new HospitalModel();
+        $this->status_model   = new HospitalStatusModel();
+        $this->handover_model = new HandoverModel();
+    }
+
+    /**
+     * Resolves the hospital mapped to the given session-bound user.
+     * Returns null if no hospital_id is present in the session or the record is missing.
+     *
+     * @return Hospital|null
+     */
+    public function getMappedHospital(): ?Hospital
+    {
+        $hospital_id = session()->get('hospital_id');
+        if ($hospital_id === null) {
+            return null;
+        }
+
+        /** @var Hospital|null $hospital */
+        $hospital = $this->hospital_model->find((int) $hospital_id);
+        return $hospital;
     }
 
     /**
@@ -52,8 +70,8 @@ class HospitalService
     public function getQueueData(int $hospital_id): array
     {
         // 1. Fetch active handovers (status != 'Cleared')
-        $queue = $this->_handover_model
-            ->select('handovers.*, ambulances.unit_id, ambulances.provider')
+        $queue = $this->handover_model
+            ->select('handovers.id, handovers.ambulance_id, handovers.hospital_id, handovers.patient_age, handovers.patient_gender, handovers.acuity, handovers.eta_minutes, handovers.wait_time_minutes, handovers.status, handovers.created_at, ambulances.unit_id, ambulances.provider')
             ->join('ambulances', 'ambulances.id = handovers.ambulance_id')
             ->where('handovers.hospital_id', $hospital_id)
             ->where('handovers.status !=', 'Cleared')
@@ -116,7 +134,7 @@ class HospitalService
         $db->transStart();
 
         // A. Update Hospitals master status
-        $this->_hospital_model->update($hospital_id, [
+        $this->hospital_model->update($hospital_id, [
             'status'         => $status,
             'bays_available' => $bays_available,
         ]);
@@ -129,7 +147,7 @@ class HospitalService
             'updated_by'     => $user_id,
             'updated_at'     => date('Y-m-d H:i:s'),
         ]);
-        $this->_status_model->save($log);
+        $this->status_model->save($log);
 
         $db->transComplete();
         return $db->transStatus() !== false;
@@ -147,7 +165,7 @@ class HospitalService
     public function completeHandover(int $handover_id, string $bay_number, string $notes, int $user_id): bool
     {
         /** @var Handover|null $handover */
-        $handover = $this->_handover_model->find($handover_id);
+        $handover = $this->handover_model->find($handover_id);
         if ($handover === null) {
             return false;
         }
@@ -158,7 +176,7 @@ class HospitalService
         // Calculate wait time since arrived_at (or created_at if arrived_at null)
         $start_time = $handover->arrived_at ?? $handover->created_at;
         $end_time   = date('Y-m-d H:i:s');
-        
+
         $diff_minutes = 0;
         if ($start_time !== null) {
             $diff_seconds = strtotime($end_time) - strtotime($start_time->toDateTimeString());
@@ -173,24 +191,24 @@ class HospitalService
         $handover->handover_complete_at = $end_time;
         $handover->wait_time_minutes    = $diff_minutes;
 
-        $this->_handover_model->save($handover);
+        $this->handover_model->save($handover);
 
         // Release the ambulance to "Available"
         $db->table('ambulances')
-           ->where('id', $handover->ambulance_id)
-           ->update([
-               'status'       => 'Available',
-               'last_updated' => $end_time
-           ]);
+            ->where('id', $handover->ambulance_id)
+            ->update([
+                'status'       => 'Available',
+                'last_updated' => $end_time
+            ]);
 
         // Complete any related pre-notifications
         if ($handover->pre_notification_id) {
             $db->table('pre_notifications')
-               ->where('id', $handover->pre_notification_id)
-               ->update([
-                   'status'      => 'Handover Complete',
-                   'received_at' => $end_time
-               ]);
+                ->where('id', $handover->pre_notification_id)
+                ->update([
+                    'status'      => 'Handover Complete',
+                    'received_at' => $end_time
+                ]);
         }
 
         $db->transComplete();

@@ -20,33 +20,35 @@ class DispatcherService
     /**
      * @var AmbulanceModel
      */
-    private AmbulanceModel $_ambulance_model;
+    private AmbulanceModel $ambulance_model;
 
     /**
      * @var HospitalModel
      */
-    private HospitalModel $_hospital_model;
+    private HospitalModel $hospital_model;
 
     /**
      * @var HandoverModel
      */
-    private HandoverModel $_handover_model;
+    private HandoverModel $handover_model;
 
     /**
      * @var AlertModel
      */
-    private AlertModel $_alert_model;
+    private AlertModel $alert_model;
 
     /**
      * DispatcherService constructor.
      */
     public function __construct()
     {
-        $this->_ambulance_model = new AmbulanceModel();
-        $this->_hospital_model  = new HospitalModel();
-        $this->_handover_model  = new HandoverModel();
-        $this->_alert_model     = new AlertModel();
+        $this->ambulance_model = new AmbulanceModel();
+        $this->hospital_model  = new HospitalModel();
+        $this->handover_model  = new HandoverModel();
+        $this->alert_model     = new AlertModel();
     }
+
+    // --- Helper Methods ---
 
     /**
      * Retrieves a hospital's name by ID from the cached local list.
@@ -78,7 +80,7 @@ class DispatcherService
         // Wait time increases automatically. If arrived_at is set, compute wait.
         // For simplicity, we can query handovers with status != 'Cleared'
         /** @var \App\Modules\Queue\Entities\Handover[] $handovers */
-        $handovers = $this->_handover_model
+        $handovers = $this->handover_model
             ->where('status !=', 'Cleared')
             ->findAll();
 
@@ -88,17 +90,17 @@ class DispatcherService
             if ($start_time === null) {
                 continue;
             }
-            
+
             $diff_seconds = time() - strtotime($start_time->toDateTimeString());
             $diff_minutes = (int) round($diff_seconds / 60);
 
             // Update wait_time_minutes in db for this handover so it's accurate
-            $this->_handover_model->update($h->id, ['wait_time_minutes' => $diff_minutes]);
+            $this->handover_model->update($h->id, ['wait_time_minutes' => $diff_minutes]);
 
             if ($diff_minutes > 30) {
                 // Check if alert already exists for this ambulance and hospital which is unacknowledged
                 /** @var Alert|null $existing */
-                $existing = $this->_alert_model
+                $existing = $this->alert_model
                     ->where('ambulance_id', $h->ambulance_id)
                     ->where('hospital_id', $h->hospital_id)
                     ->where('acknowledged_at IS NULL')
@@ -114,19 +116,19 @@ class DispatcherService
                         'alert_type'   => 'Wait Time Exceeded',
                         'triggered_at' => date('Y-m-d H:i:s')
                     ]);
-                    $this->_alert_model->save($alert);
+                    $this->alert_model->save($alert);
 
                     // Update ambulance status to highlight in red
                     $db->table('ambulances')
-                       ->where('id', $h->ambulance_id)
-                       ->update(['status' => 'Queued']);
+                        ->where('id', $h->ambulance_id)
+                        ->update(['status' => 'Queued']);
 
                     // Log audit
                     $db->table('audit_log')->insert([
                         'user_id'    => null,
                         'action'     => 'Automated alert generated: wait time > 30 min',
                         'table_name' => 'alerts',
-                        'record_id'  => $this->_alert_model->getInsertID(),
+                        'record_id'  => $this->alert_model->getInsertID(),
                         'timestamp'  => date('Y-m-d H:i:s')
                     ]);
 
@@ -155,21 +157,26 @@ class DispatcherService
     {
         $db = \Config\Database::connect();
         
-        // 1. Fetch ambulances
+        // 1. Fetch only necessary ambulance telemetry
         /** @var \App\Modules\Ambulance\Entities\Ambulance[] $ambulances */
-        $ambulances = $this->_ambulance_model->findAll();
+        $ambulances = $this->ambulance_model
+            ->select('id, ems_provider_id, unit_id, registration, current_lat, current_lng, status, last_updated')
+            ->findAll();
 
-        // 2. Fetch hospitals
+        // 2. Fetch only necessary hospital telemetry
         /** @var \App\Modules\Hospital\Entities\Hospital[] $hospitals */
-        $hospitals = $this->_hospital_model->where('active', 1)->findAll();
+        $hospitals = $this->hospital_model
+            ->select('id, code, name, category, status, bays_available, lat, lng, address, contact_phone, active')
+            ->where('active', 1)
+            ->findAll();
 
         // 3. Trigger automated 30-minute delay checks
         $this->_checkAndTriggerAlerts();
 
-        // 4. Fetch active alerts joined with ambulance unit ID and hospital name
+        // 4. Fetch specific alert attributes using an explicit select statement instead of alerts.*
         /** @var Alert[] $alerts */
-        $alerts = $this->_alert_model
-            ->select('alerts.*, ambulances.unit_id as ambulance_unit, hospitals.name as hospital_name')
+        $alerts = $this->alert_model
+            ->select('alerts.id, alerts.ambulance_id, alerts.hospital_id, alerts.alert_type, alerts.triggered_at, ambulances.unit_id as ambulance_unit, hospitals.name as hospital_name')
             ->join('ambulances', 'ambulances.id = alerts.ambulance_id')
             ->join('hospitals', 'hospitals.id = alerts.hospital_id')
             ->where('alerts.acknowledged_at IS NULL')
@@ -178,7 +185,8 @@ class DispatcherService
 
         // 5. Fetch wait times for queued ambulances
         /** @var \App\Modules\Queue\Entities\Handover[] $active_handovers */
-        $active_handovers = $this->_handover_model
+        $active_handovers = $this->handover_model
+            ->select('id, ambulance_id, hospital_id, wait_time_minutes')
             ->where('status !=', 'Cleared')
             ->findAll();
 
@@ -207,7 +215,7 @@ class DispatcherService
      */
     public function acknowledgeAlert(int $alert_id, int $user_id): bool
     {
-        return $this->_alert_model->update($alert_id, [
+        return $this->alert_model->update($alert_id, [
             'acknowledged_at' => date('Y-m-d H:i:s'),
             'acknowledged_by' => $user_id
         ]);

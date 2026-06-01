@@ -19,14 +19,14 @@ class DispatcherController extends BaseController
     /**
      * @var DispatcherService
      */
-    private DispatcherService $_dispatcher_service;
+    private DispatcherService $dispatcher_service;
 
     /**
      * DispatcherController constructor.
      */
     public function __construct()
     {
-        $this->_dispatcher_service = new DispatcherService();
+        $this->dispatcher_service = new DispatcherService();
         helper(['form', 'url']);
     }
 
@@ -42,7 +42,7 @@ class DispatcherController extends BaseController
             'meta_description' => 'Live Mapbox fleet tracking and ambulance off-load delay alerts for Nairobi County.',
             'canonical_url'    => url_to('dispatcher.index'),
             'robots_tag'       => 'noindex, nofollow',
-            'mapbox_token'    => env('mapboxgl.accessToken'),
+            'mapbox_token'     => env('mapboxgl.accessToken'),
         ];
 
         return view('App\Modules\Dispatcher\Views\map', $data);
@@ -55,7 +55,7 @@ class DispatcherController extends BaseController
      */
     public function fleetStatus(): ResponseInterface
     {
-        $telemetry = $this->_dispatcher_service->getTelemetry();
+        $telemetry = $this->dispatcher_service->getTelemetry();
 
         return $this->response->setJSON([
             'status'     => 'success',
@@ -82,7 +82,7 @@ class DispatcherController extends BaseController
         }
 
         $alert_id = (int) $id;
-        $success  = $this->_dispatcher_service->acknowledgeAlert($alert_id, (int) $user_id);
+        $success  = $this->dispatcher_service->acknowledgeAlert($alert_id, (int) $user_id);
 
         if (!$success) {
             return $this->response->setJSON([
@@ -92,7 +92,7 @@ class DispatcherController extends BaseController
             ]);
         }
 
-        $telemetry = $this->_dispatcher_service->getTelemetry();
+        $telemetry = $this->dispatcher_service->getTelemetry();
 
         return $this->response->setJSON([
             'status'     => 'success',
@@ -130,7 +130,7 @@ class DispatcherController extends BaseController
         // 4. Run loop streaming updates every 5 seconds
         $loop_count = 0;
         while ($loop_count < 10) { // Limit to 10 cycles to avoid thread exhaust, browser reconnects automatically
-            $telemetry = $this->_dispatcher_service->getTelemetry();
+            $telemetry = $this->dispatcher_service->getTelemetry();
 
             echo "data: " . json_encode([
                 'status' => 'update',

@@ -6,15 +6,10 @@ namespace App\Modules\Admin\Controllers;
 
 use App\Controllers\BaseController;
 use App\Modules\Pilot\Entities\PilotSignup;
-use App\Modules\Pilot\Models\PilotSignupModel;
 use App\Modules\Queue\Entities\Handover;
-use App\Modules\Queue\Models\HandoverModel;
 use App\Modules\Queue\Entities\Hospital;
-use App\Modules\Queue\Models\HospitalModel;
 use App\Modules\Queue\Entities\Ambulance;
-use App\Modules\Queue\Models\AmbulanceModel;
 use App\Modules\Auth\Entities\User;
-use App\Modules\Auth\Models\UserModel;
 use CodeIgniter\HTTP\RedirectResponse;
 use App\Modules\Admin\Libraries\AdminService;
 
@@ -29,46 +24,18 @@ use App\Modules\Admin\Libraries\AdminService;
 class AdminController extends BaseController
 {
     /**
-     * @var PilotSignupModel
-     */
-    private PilotSignupModel $_pilot_model;
-
-    /**
-     * @var HandoverModel
-     */
-    private HandoverModel $_handover_model;
-
-    /**
-     * @var HospitalModel
-     */
-    private HospitalModel $_hospital_model;
-
-    /**
-     * @var AmbulanceModel
-     */
-    private AmbulanceModel $_ambulance_model;
-
-    /**
-     * @var UserModel
-     */
-    private UserModel $_user_model;
-
-    /**
      * @var AdminService
      */
     private AdminService $admin_service;
 
     /**
      * AdminController constructor.
+     *
+     * @param AdminService|null $admin_service
      */
     public function __construct(?AdminService $admin_service = null)
     {
         $this->admin_service = $admin_service ?? new AdminService();
-        $this->_pilot_model = $this->admin_service->getPilotModel();
-        $this->_handover_model = $this->admin_service->getHandoverModel();
-        $this->_hospital_model = $this->admin_service->getHospitalModel();
-        $this->_ambulance_model = $this->admin_service->getAmbulanceModel();
-        $this->_user_model = $this->admin_service->getUserModel();
         helper(['form', 'url']);
     }
 
@@ -85,11 +52,11 @@ class AdminController extends BaseController
             'meta_description' => 'ClearBay administrative management control panel.',
             'canonical_url'    => url_to('admin.dashboard'),
             'robots_tag'       => 'noindex, nofollow',
-            'pilotCount'      => $metrics['pilotCount'],
-            'handoverCount'   => $metrics['handoverCount'],
-            'hospitalCount'   => $metrics['hospitalCount'],
-            'ambulanceCount'  => $metrics['ambulanceCount'],
-            'userCount'       => $metrics['userCount'],
+            'pilotCount'       => $metrics['pilotCount'],
+            'handoverCount'    => $metrics['handoverCount'],
+            'hospitalCount'    => $metrics['hospitalCount'],
+            'ambulanceCount'   => $metrics['ambulanceCount'],
+            'userCount'        => $metrics['userCount'],
         ];
 
         return view('App\Modules\Admin\Views\dashboard', $data);
@@ -112,8 +79,8 @@ class AdminController extends BaseController
             'meta_description' => 'Review and manage incoming pilot onboarding request records.',
             'canonical_url'    => url_to('admin.pilots.list'),
             'robots_tag'       => 'noindex, nofollow',
-            'pilots'          => $result['pilots'],
-            'pager'           => $result['pager'],
+            'pilots'           => $result['pilots'],
+            'pager'            => $result['pager'],
         ];
 
         return view('App\Modules\Admin\Views\pilots\list', $data);
@@ -176,13 +143,13 @@ class AdminController extends BaseController
     /**
      * Renders form to edit an existing pilot signup record.
      *
-     * @param string $id
+     * @param string $pilot_id
      * @return string|RedirectResponse
      */
-    public function pilotEdit(string $id): string|RedirectResponse
+    public function pilotEdit(string $pilot_id): string|RedirectResponse
     {
         /** @var PilotSignup|null $pilot */
-        $pilot = $this->admin_service->getPilotModel()->find((int) $id);
+        $pilot = $this->admin_service->getPilot((int) $pilot_id);
 
         if (!$pilot) {
             return redirect()->to(url_to('admin.pilots.list'))->with('error', 'Requested pilot signup record not found.');
@@ -191,9 +158,9 @@ class AdminController extends BaseController
         $data = [
             'page_title'       => 'Edit Pilot Signup | ClearBay',
             'meta_description' => 'Modify an existing pilot signup application.',
-            'canonical_url'    => url_to('admin.pilots.edit', $id),
+            'canonical_url'    => url_to('admin.pilots.edit', $pilot_id),
             'robots_tag'       => 'noindex, nofollow',
-            'pilot'           => $pilot,
+            'pilot'            => $pilot,
         ];
 
         return view('App\Modules\Admin\Views\pilots\edit', $data);
@@ -202,13 +169,13 @@ class AdminController extends BaseController
     /**
      * Validates and updates an existing pilot signup record.
      *
-     * @param string $id
+     * @param string $pilot_id
      * @return RedirectResponse
      */
-    public function pilotUpdate(string $id): RedirectResponse
+    public function pilotUpdate(string $pilot_id): RedirectResponse
     {
         /** @var PilotSignup|null $pilot */
-        $pilot = $this->admin_service->getPilotModel()->find((int) $id);
+        $pilot = $this->admin_service->getPilot((int) $pilot_id);
 
         if (!$pilot) {
             return redirect()->to(url_to('admin.pilots.list'))->with('error', 'Pilot signup record not found.');
@@ -246,12 +213,12 @@ class AdminController extends BaseController
     /**
      * Deletes a pilot signup record.
      *
-     * @param string $id
+     * @param string $pilot_id
      * @return RedirectResponse
      */
-    public function pilotDelete(string $id): RedirectResponse
+    public function pilotDelete(string $pilot_id): RedirectResponse
     {
-        $success = $this->admin_service->deletePilot((int) $id);
+        $success = $this->admin_service->deletePilot((int) $pilot_id);
 
         if (!$success) {
             return redirect()->to(url_to('admin.pilots.list'))->with('error', 'Database transaction failed while deleting signup.');
@@ -277,8 +244,8 @@ class AdminController extends BaseController
             'meta_description' => 'Review and manage ambulance queue handovers.',
             'canonical_url'    => url_to('admin.handovers.list'),
             'robots_tag'       => 'noindex, nofollow',
-            'handovers'       => $result['handovers'],
-            'pager'           => $result['pager'],
+            'handovers'        => $result['handovers'],
+            'pager'            => $result['pager'],
         ];
 
         return view('App\Modules\Admin\Views\handovers\list', $data);
@@ -296,8 +263,8 @@ class AdminController extends BaseController
             'meta_description' => 'Register a new active ambulance queue handover.',
             'canonical_url'    => url_to('admin.handovers.new'),
             'robots_tag'       => 'noindex, nofollow',
-            'hospitals'       => $this->admin_service->getHospitalModel()->orderBy('name', 'ASC')->findAll(),
-            'ambulances'      => $this->admin_service->getAmbulanceModel()->orderBy('unit_id', 'ASC')->findAll(),
+            'hospitals'        => $this->admin_service->getAllHospitals(),
+            'ambulances'       => $this->admin_service->getAllAmbulances(),
         ];
 
         return view('App\Modules\Admin\Views\handovers\edit', $data);
@@ -347,13 +314,13 @@ class AdminController extends BaseController
     /**
      * Renders form to edit an existing handover record.
      *
-     * @param string $id
+     * @param string $handover_id
      * @return string|RedirectResponse
      */
-    public function handoverEdit(string $id): string|RedirectResponse
+    public function handoverEdit(string $handover_id): string|RedirectResponse
     {
         /** @var Handover|null $handover */
-        $handover = $this->admin_service->getHandoverModel()->find((int) $id);
+        $handover = $this->admin_service->getHandover((int) $handover_id);
 
         if (!$handover) {
             return redirect()->to(url_to('admin.handovers.list'))->with('error', 'Requested handover record not found.');
@@ -362,11 +329,11 @@ class AdminController extends BaseController
         $data = [
             'page_title'       => 'Edit Handover | ClearBay',
             'meta_description' => 'Modify an existing queue handover.',
-            'canonical_url'    => url_to('admin.handovers.edit', $id),
+            'canonical_url'    => url_to('admin.handovers.edit', $handover_id),
             'robots_tag'       => 'noindex, nofollow',
-            'handover'        => $handover,
-            'hospitals'       => $this->admin_service->getHospitalModel()->orderBy('name', 'ASC')->findAll(),
-            'ambulances'      => $this->admin_service->getAmbulanceModel()->orderBy('unit_id', 'ASC')->findAll(),
+            'handover'         => $handover,
+            'hospitals'        => $this->admin_service->getAllHospitals(),
+            'ambulances'       => $this->admin_service->getAllAmbulances(),
         ];
 
         return view('App\Modules\Admin\Views\handovers\edit', $data);
@@ -375,13 +342,13 @@ class AdminController extends BaseController
     /**
      * Validates and updates an existing handover record.
      *
-     * @param string $id
+     * @param string $handover_id
      * @return RedirectResponse
      */
-    public function handoverUpdate(string $id): RedirectResponse
+    public function handoverUpdate(string $handover_id): RedirectResponse
     {
         /** @var Handover|null $handover */
-        $handover = $this->admin_service->getHandoverModel()->find((int) $id);
+        $handover = $this->admin_service->getHandover((int) $handover_id);
 
         if (!$handover) {
             return redirect()->to(url_to('admin.handovers.list'))->with('error', 'Handover record not found.');
@@ -423,12 +390,12 @@ class AdminController extends BaseController
     /**
      * Deletes a handover record.
      *
-     * @param string $id
+     * @param string $handover_id
      * @return RedirectResponse
      */
-    public function handoverDelete(string $id): RedirectResponse
+    public function handoverDelete(string $handover_id): RedirectResponse
     {
-        $success = $this->admin_service->deleteHandover((int) $id);
+        $success = $this->admin_service->deleteHandover((int) $handover_id);
 
         if (!$success) {
             return redirect()->to(url_to('admin.handovers.list'))->with('error', 'Database transaction failed while deleting handover.');
@@ -454,8 +421,8 @@ class AdminController extends BaseController
             'meta_description' => 'Review and manage partner hospital records.',
             'canonical_url'    => url_to('admin.hospitals.list'),
             'robots_tag'       => 'noindex, nofollow',
-            'hospitals'       => $result['hospitals'],
-            'pager'           => $result['pager'],
+            'hospitals'        => $result['hospitals'],
+            'pager'            => $result['pager'],
         ];
 
         return view('App\Modules\Admin\Views\hospitals\list', $data);
@@ -514,13 +481,13 @@ class AdminController extends BaseController
     /**
      * Renders form to edit an existing hospital record.
      *
-     * @param string $id
+     * @param string $hospital_id
      * @return string|RedirectResponse
      */
-    public function hospitalEdit(string $id): string|RedirectResponse
+    public function hospitalEdit(string $hospital_id): string|RedirectResponse
     {
         /** @var Hospital|null $hospital */
-        $hospital = $this->admin_service->getHospitalModel()->find((int) $id);
+        $hospital = $this->admin_service->getHospital((int) $hospital_id);
 
         if (!$hospital) {
             return redirect()->to(url_to('admin.hospitals.list'))->with('error', 'Requested hospital record not found.');
@@ -529,9 +496,9 @@ class AdminController extends BaseController
         $data = [
             'page_title'       => 'Edit Hospital | ClearBay',
             'meta_description' => 'Modify hospital facility configuration and capacity status.',
-            'canonical_url'    => url_to('admin.hospitals.edit', $id),
+            'canonical_url'    => url_to('admin.hospitals.edit', $hospital_id),
             'robots_tag'       => 'noindex, nofollow',
-            'hospital'        => $hospital,
+            'hospital'         => $hospital,
         ];
 
         return view('App\Modules\Admin\Views\hospitals\edit', $data);
@@ -540,20 +507,20 @@ class AdminController extends BaseController
     /**
      * Validates and updates an existing hospital record.
      *
-     * @param string $id
+     * @param string $hospital_id
      * @return RedirectResponse
      */
-    public function hospitalUpdate(string $id): RedirectResponse
+    public function hospitalUpdate(string $hospital_id): RedirectResponse
     {
         /** @var Hospital|null $hospital */
-        $hospital = $this->admin_service->getHospitalModel()->find((int) $id);
+        $hospital = $this->admin_service->getHospital((int) $hospital_id);
 
         if (!$hospital) {
             return redirect()->to(url_to('admin.hospitals.list'))->with('error', 'Hospital record not found.');
         }
 
         $rules = [
-            'code'     => 'required|min_length[2]|max_length[10]|is_unique[hospitals.code,id,' . $id . ']',
+            'code'     => 'required|min_length[2]|max_length[10]|is_unique[hospitals.code,id,' . $hospital_id . ']',
             'name'     => 'required|min_length[3]|max_length[255]',
             'category' => 'required|min_length[3]|max_length[255]',
             'status'   => 'required|in_list[Green,Amber,Red,Recruiting]',
@@ -580,12 +547,12 @@ class AdminController extends BaseController
     /**
      * Deletes a hospital record.
      *
-     * @param string $id
+     * @param string $hospital_id
      * @return RedirectResponse
      */
-    public function hospitalDelete(string $id): RedirectResponse
+    public function hospitalDelete(string $hospital_id): RedirectResponse
     {
-        $success = $this->admin_service->deleteHospital((int) $id);
+        $success = $this->admin_service->deleteHospital((int) $hospital_id);
 
         if (!$success) {
             return redirect()->to(url_to('admin.hospitals.list'))->with('error', 'Database transaction failed while deleting hospital.');
@@ -611,8 +578,8 @@ class AdminController extends BaseController
             'meta_description' => 'Review and manage ambulance fleet units.',
             'canonical_url'    => url_to('admin.ambulances.list'),
             'robots_tag'       => 'noindex, nofollow',
-            'ambulances'      => $result['ambulances'],
-            'pager'           => $result['pager'],
+            'ambulances'       => $result['ambulances'],
+            'pager'            => $result['pager'],
         ];
 
         return view('App\Modules\Admin\Views\ambulances\list', $data);
@@ -667,13 +634,13 @@ class AdminController extends BaseController
     /**
      * Renders form to edit an existing ambulance record.
      *
-     * @param string $id
+     * @param string $ambulance_id
      * @return string|RedirectResponse
      */
-    public function ambulanceEdit(string $id): string|RedirectResponse
+    public function ambulanceEdit(string $ambulance_id): string|RedirectResponse
     {
         /** @var Ambulance|null $ambulance */
-        $ambulance = $this->admin_service->getAmbulanceModel()->find((int) $id);
+        $ambulance = $this->admin_service->getAmbulance((int) $ambulance_id);
 
         if (!$ambulance) {
             return redirect()->to(url_to('admin.ambulances.list'))->with('error', 'Requested ambulance record not found.');
@@ -682,9 +649,9 @@ class AdminController extends BaseController
         $data = [
             'page_title'       => 'Edit Ambulance | ClearBay',
             'meta_description' => 'Modify vehicle fleet configuration details.',
-            'canonical_url'    => url_to('admin.ambulances.edit', $id),
+            'canonical_url'    => url_to('admin.ambulances.edit', $ambulance_id),
             'robots_tag'       => 'noindex, nofollow',
-            'ambulance'       => $ambulance,
+            'ambulance'        => $ambulance,
         ];
 
         return view('App\Modules\Admin\Views\ambulances\edit', $data);
@@ -693,20 +660,20 @@ class AdminController extends BaseController
     /**
      * Validates and updates an existing ambulance record.
      *
-     * @param string $id
+     * @param string $ambulance_id
      * @return RedirectResponse
      */
-    public function ambulanceUpdate(string $id): RedirectResponse
+    public function ambulanceUpdate(string $ambulance_id): RedirectResponse
     {
         /** @var Ambulance|null $ambulance */
-        $ambulance = $this->admin_service->getAmbulanceModel()->find((int) $id);
+        $ambulance = $this->admin_service->getAmbulance((int) $ambulance_id);
 
         if (!$ambulance) {
             return redirect()->to(url_to('admin.ambulances.list'))->with('error', 'Ambulance record not found.');
         }
 
         $rules = [
-            'unitId'   => 'required|min_length[3]|max_length[50]|is_unique[ambulances.unit_id,id,' . $id . ']',
+            'unitId'   => 'required|min_length[3]|max_length[50]|is_unique[ambulances.unit_id,id,' . $ambulance_id . ']',
             'provider' => 'required|min_length[2]|max_length[255]',
         ];
 
@@ -729,12 +696,12 @@ class AdminController extends BaseController
     /**
      * Deletes an ambulance record.
      *
-     * @param string $id
+     * @param string $ambulance_id
      * @return RedirectResponse
      */
-    public function ambulanceDelete(string $id): RedirectResponse
+    public function ambulanceDelete(string $ambulance_id): RedirectResponse
     {
-        $success = $this->admin_service->deleteAmbulance((int) $id);
+        $success = $this->admin_service->deleteAmbulance((int) $ambulance_id);
 
         if (!$success) {
             return redirect()->to(url_to('admin.ambulances.list'))->with('error', 'Database transaction failed while deleting ambulance.');
@@ -760,8 +727,8 @@ class AdminController extends BaseController
             'meta_description' => 'Review and manage ClearBay operator and staff user accounts.',
             'canonical_url'    => url_to('admin.users.list'),
             'robots_tag'       => 'noindex, nofollow',
-            'users'           => $result['users'],
-            'pager'           => $result['pager'],
+            'users'            => $result['users'],
+            'pager'            => $result['pager'],
         ];
 
         return view('App\Modules\Admin\Views\users\list', $data);
@@ -779,8 +746,8 @@ class AdminController extends BaseController
             'meta_description' => 'Register a new user profile with specific authorization roles.',
             'canonical_url'    => url_to('admin.users.new'),
             'robots_tag'       => 'noindex, nofollow',
-            'hospitals'       => $this->admin_service->getHospitalModel()->orderBy('name', 'ASC')->findAll(),
-            'ems_providers'   => $this->admin_service->getPilotModel()->db->table('ems_providers')->orderBy('name', 'ASC')->get()->getResultArray(),
+            'hospitals'        => $this->admin_service->getAllHospitals(),
+            'ems_providers'    => $this->admin_service->getAllEmsProviders(),
         ];
 
         return view('App\Modules\Admin\Views\users\edit', $data);
@@ -827,13 +794,13 @@ class AdminController extends BaseController
     /**
      * Renders form to edit an existing user account.
      *
-     * @param string $id
+     * @param string $user_id
      * @return string|RedirectResponse
      */
-    public function userEdit(string $id): string|RedirectResponse
+    public function userEdit(string $user_id): string|RedirectResponse
     {
         /** @var User|null $user */
-        $user = $this->admin_service->getUserModel()->find((int) $id);
+        $user = $this->admin_service->getUser((int) $user_id);
 
         if (!$user) {
             return redirect()->to(url_to('admin.users.list'))->with('error', 'Requested user account not found.');
@@ -842,11 +809,11 @@ class AdminController extends BaseController
         $data = [
             'page_title'       => 'Edit User Account | ClearBay',
             'meta_description' => 'Modify account credentials, role levels, and active states.',
-            'canonical_url'    => url_to('admin.users.edit', $id),
+            'canonical_url'    => url_to('admin.users.edit', $user_id),
             'robots_tag'       => 'noindex, nofollow',
-            'user'            => $user,
-            'hospitals'       => $this->admin_service->getHospitalModel()->orderBy('name', 'ASC')->findAll(),
-            'ems_providers'   => $this->admin_service->getPilotModel()->db->table('ems_providers')->orderBy('name', 'ASC')->get()->getResultArray(),
+            'user'             => $user,
+            'hospitals'        => $this->admin_service->getAllHospitals(),
+            'ems_providers'    => $this->admin_service->getAllEmsProviders(),
         ];
 
         return view('App\Modules\Admin\Views\users\edit', $data);
@@ -855,13 +822,13 @@ class AdminController extends BaseController
     /**
      * Validates and updates an existing user account.
      *
-     * @param string $id
+     * @param string $user_id
      * @return RedirectResponse
      */
-    public function userUpdate(string $id): RedirectResponse
+    public function userUpdate(string $user_id): RedirectResponse
     {
         /** @var User|null $user */
-        $user = $this->admin_service->getUserModel()->find((int) $id);
+        $user = $this->admin_service->getUser((int) $user_id);
 
         if (!$user) {
             return redirect()->to(url_to('admin.users.list'))->with('error', 'User account not found.');
@@ -869,7 +836,7 @@ class AdminController extends BaseController
 
         $rules = [
             'name'            => 'required|min_length[3]|max_length[255]',
-            'email'           => 'required|valid_email|max_length[255]|is_unique[users.email,id,' . $id . ']',
+            'email'           => 'required|valid_email|max_length[255]|is_unique[users.email,id,' . $user_id . ']',
             'role'            => 'required|in_list[nurse,hospital_admin,paramedic,dispatcher,admin]',
             'hospital_id'     => 'permit_empty|integer',
             'ems_provider_id' => 'permit_empty|integer',
@@ -904,12 +871,12 @@ class AdminController extends BaseController
     /**
      * Deactivates or deletes a user account.
      *
-     * @param string $id
+     * @param string $user_id
      * @return RedirectResponse
      */
-    public function userDelete(string $id): RedirectResponse
+    public function userDelete(string $user_id): RedirectResponse
     {
-        $success = $this->admin_service->deleteUser((int) $id);
+        $success = $this->admin_service->deleteUser((int) $user_id);
 
         if (!$success) {
             return redirect()->to(url_to('admin.users.list'))->with('error', 'Database transaction failed while deleting user.');

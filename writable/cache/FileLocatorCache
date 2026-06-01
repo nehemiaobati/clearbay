@@ -119,6 +119,16 @@
         ),
       ),
     ),
+    'Language/en/Errors.php' => 
+    array (
+      'php' => 
+      array (
+        0 => 
+        array (
+          0 => '/Users/nehemia/Documents/DEV/green/system/Language/en/Errors.php',
+        ),
+      ),
+    ),
   ),
   'findQualifiedNameFromPath' => 
   array (
@@ -145,6 +155,20 @@
         'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Admin/Views/dashboard.php',
       ),
     ),
+    'App\\Modules\\Admin\\Views\\users\\list.php' => 
+    array (
+      'Views' => 
+      array (
+        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Admin/Views/users/list.php',
+      ),
+    ),
+    'App\\Modules\\Admin\\Views\\users\\edit.php' => 
+    array (
+      'Views' => 
+      array (
+        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Admin/Views/users/edit.php',
+      ),
+    ),
     'App\\Modules\\Admin\\Views\\pilots\\edit.php' => 
     array (
       'Views' => 
@@ -159,18 +183,25 @@
         'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Admin/Views/pilots/list.php',
       ),
     ),
-    'App\\Modules\\Admin\\Views\\users\\list.php' => 
-    array (
-      'Views' => 
-      array (
-        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Admin/Views/users/list.php',
-      ),
-    ),
     'App\\Modules\\Hospital\\Views\\dashboard.php' => 
     array (
       'Views' => 
       array (
         'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Hospital/Views/dashboard.php',
+      ),
+    ),
+    'App\\Modules\\Hospital\\Views\\analytics.php' => 
+    array (
+      'Views' => 
+      array (
+        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Hospital/Views/analytics.php',
+      ),
+    ),
+    'App\\Modules\\Dispatcher\\Views\\map.php' => 
+    array (
+      'Views' => 
+      array (
+        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Dispatcher/Views/map.php',
       ),
     ),
   ),

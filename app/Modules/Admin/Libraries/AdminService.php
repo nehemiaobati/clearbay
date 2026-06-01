@@ -5,10 +5,15 @@ declare(strict_types=1);
 namespace App\Modules\Admin\Libraries;
 
 use App\Modules\Pilot\Models\PilotSignupModel;
+use App\Modules\Pilot\Entities\PilotSignup;
 use App\Modules\Queue\Models\HandoverModel;
+use App\Modules\Queue\Entities\Handover;
 use App\Modules\Queue\Models\HospitalModel;
+use App\Modules\Queue\Entities\Hospital;
 use App\Modules\Queue\Models\AmbulanceModel;
+use App\Modules\Queue\Entities\Ambulance;
 use App\Modules\Auth\Models\UserModel;
+use App\Modules\Auth\Entities\User;
 
 /**
  * Class AdminService
@@ -52,33 +57,110 @@ class AdminService
         $this->user_model = new UserModel();
     }
 
-    public function getPilotModel(): PilotSignupModel
+    /**
+     * Resolves a single pilot signup record by primary key.
+     *
+     * @param int $pilot_id
+     * @return PilotSignup|null
+     */
+    public function getPilot(int $pilot_id): ?PilotSignup
     {
-        return $this->pilot_model;
+        /** @var PilotSignup|null $pilot */
+        $pilot = $this->pilot_model->find($pilot_id);
+        return $pilot;
     }
 
-    public function getHandoverModel(): HandoverModel
+    /**
+     * Resolves a single handover record by primary key.
+     *
+     * @param int $handover_id
+     * @return Handover|null
+     */
+    public function getHandover(int $handover_id): ?Handover
     {
-        return $this->handover_model;
+        /** @var Handover|null $handover */
+        $handover = $this->handover_model->find($handover_id);
+        return $handover;
     }
 
-    public function getHospitalModel(): HospitalModel
+    /**
+     * Resolves a single hospital record by primary key.
+     *
+     * @param int $hospital_id
+     * @return Hospital|null
+     */
+    public function getHospital(int $hospital_id): ?Hospital
     {
-        return $this->hospital_model;
+        /** @var Hospital|null $hospital */
+        $hospital = $this->hospital_model->find($hospital_id);
+        return $hospital;
     }
 
-    public function getAmbulanceModel(): AmbulanceModel
+    /**
+     * Resolves a single ambulance record by primary key.
+     *
+     * @param int $ambulance_id
+     * @return Ambulance|null
+     */
+    public function getAmbulance(int $ambulance_id): ?Ambulance
     {
-        return $this->ambulance_model;
+        /** @var Ambulance|null $ambulance */
+        $ambulance = $this->ambulance_model->find($ambulance_id);
+        return $ambulance;
     }
 
-    public function getUserModel(): UserModel
+    /**
+     * Resolves a single user record by primary key.
+     *
+     * @param int $user_id
+     * @return User|null
+     */
+    public function getUser(int $user_id): ?User
     {
-        return $this->user_model;
+        /** @var User|null $user */
+        $user = $this->user_model->find($user_id);
+        return $user;
+    }
+
+    /**
+     * Retrieves all hospitals ordered by name (for form dropdowns).
+     *
+     * @return array
+     */
+    public function getAllHospitals(): array
+    {
+        return $this->hospital_model->orderBy('name', 'ASC')->findAll();
+    }
+
+    /**
+     * Retrieves all ambulances ordered by unit_id (for form dropdowns).
+     *
+     * @return array
+     */
+    public function getAllAmbulances(): array
+    {
+        return $this->ambulance_model->orderBy('unit_id', 'ASC')->findAll();
+    }
+
+    /**
+     * Retrieves all EMS providers ordered by name (for form dropdowns).
+     *
+     * @return array
+     */
+    public function getAllEmsProviders(): array
+    {
+        $db = \Config\Database::connect();
+        return $db->table('ems_providers')
+            ->select('id, name')
+            ->orderBy('name', 'ASC')
+            ->get()
+            ->getResultArray();
     }
 
     /**
      * Returns count results for pilots, handovers, hospitals, ambulances, and users.
+     *
+     * @return array
      */
     public function getDashboardMetrics(): array
     {
@@ -93,6 +175,9 @@ class AdminService
 
     /**
      * Returns paginated pilots list and the pager instance.
+     *
+     * @param int $perPage
+     * @return array
      */
     public function getPilotsList(int $perPage): array
     {
@@ -104,12 +189,15 @@ class AdminService
 
     /**
      * Returns paginated handovers list and the pager instance.
+     *
+     * @param int $perPage
+     * @return array
      */
     public function getHandoversList(int $perPage): array
     {
         return [
             'handovers' => $this->handover_model
-                ->select('handovers.*, ambulances.unit_id as ambulance_unit, hospitals.name as hospital_name')
+                ->select('handovers.id, handovers.ambulance_id, handovers.hospital_id, handovers.patient_age, handovers.patient_gender, handovers.acuity, handovers.eta_minutes, handovers.wait_time_minutes, handovers.status, handovers.created_at, ambulances.unit_id as ambulance_unit, hospitals.name as hospital_name')
                 ->join('ambulances', 'ambulances.id = handovers.ambulance_id')
                 ->join('hospitals', 'hospitals.id = handovers.hospital_id')
                 ->orderBy('handovers.created_at', 'DESC')
@@ -120,6 +208,9 @@ class AdminService
 
     /**
      * Returns paginated hospitals list and the pager instance.
+     *
+     * @param int $perPage
+     * @return array
      */
     public function getHospitalsList(int $perPage): array
     {
@@ -131,6 +222,9 @@ class AdminService
 
     /**
      * Returns paginated ambulances list and the pager instance.
+     *
+     * @param int $perPage
+     * @return array
      */
     public function getAmbulancesList(int $perPage): array
     {
@@ -142,12 +236,15 @@ class AdminService
 
     /**
      * Returns paginated users list and the pager instance.
+     *
+     * @param int $perPage
+     * @return array
      */
     public function getUsersList(int $perPage): array
     {
         return [
             'users' => $this->user_model
-                ->select('users.*, hospitals.name as hospital_name, ems_providers.name as ems_name')
+                ->select('users.id, users.name, users.email, users.role, users.hospital_id, users.ems_provider_id, users.active, users.created_at, hospitals.name as hospital_name, ems_providers.name as ems_name')
                 ->join('hospitals', 'hospitals.id = users.hospital_id', 'left')
                 ->join('ems_providers', 'ems_providers.id = users.ems_provider_id', 'left')
                 ->orderBy('users.created_at', 'DESC')
@@ -158,8 +255,11 @@ class AdminService
 
     /**
      * Saves a pilot record wrapped in a database transaction.
+     *
+     * @param PilotSignup $pilot
+     * @return bool
      */
-    public function savePilot(\App\Modules\Pilot\Entities\PilotSignup $pilot): bool
+    public function savePilot(PilotSignup $pilot): bool
     {
         $db = \Config\Database::connect();
         $db->transStart();
@@ -170,6 +270,9 @@ class AdminService
 
     /**
      * Deletes a pilot record wrapped in a database transaction.
+     *
+     * @param int $id
+     * @return bool
      */
     public function deletePilot(int $id): bool
     {
@@ -182,8 +285,11 @@ class AdminService
 
     /**
      * Saves a handover record wrapped in a database transaction.
+     *
+     * @param Handover $handover
+     * @return bool
      */
-    public function saveHandover(\App\Modules\Queue\Entities\Handover $handover): bool
+    public function saveHandover(Handover $handover): bool
     {
         $db = \Config\Database::connect();
         $db->transStart();
@@ -194,6 +300,9 @@ class AdminService
 
     /**
      * Deletes a handover record wrapped in a database transaction.
+     *
+     * @param int $id
+     * @return bool
      */
     public function deleteHandover(int $id): bool
     {
@@ -206,8 +315,11 @@ class AdminService
 
     /**
      * Saves a hospital record wrapped in a database transaction.
+     *
+     * @param Hospital $hospital
+     * @return bool
      */
-    public function saveHospital(\App\Modules\Queue\Entities\Hospital $hospital): bool
+    public function saveHospital(Hospital $hospital): bool
     {
         $db = \Config\Database::connect();
         $db->transStart();
@@ -218,6 +330,9 @@ class AdminService
 
     /**
      * Deletes a hospital record wrapped in a database transaction.
+     *
+     * @param int $id
+     * @return bool
      */
     public function deleteHospital(int $id): bool
     {
@@ -230,8 +345,11 @@ class AdminService
 
     /**
      * Saves an ambulance record wrapped in a database transaction.
+     *
+     * @param Ambulance $ambulance
+     * @return bool
      */
-    public function saveAmbulance(\App\Modules\Queue\Entities\Ambulance $ambulance): bool
+    public function saveAmbulance(Ambulance $ambulance): bool
     {
         $db = \Config\Database::connect();
         $db->transStart();
@@ -242,6 +360,9 @@ class AdminService
 
     /**
      * Deletes an ambulance record wrapped in a database transaction.
+     *
+     * @param int $id
+     * @return bool
      */
     public function deleteAmbulance(int $id): bool
     {
@@ -254,8 +375,11 @@ class AdminService
 
     /**
      * Saves a user record wrapped in a database transaction.
+     *
+     * @param User $user
+     * @return bool
      */
-    public function saveUser(\App\Modules\Auth\Entities\User $user): bool
+    public function saveUser(User $user): bool
     {
         $db = \Config\Database::connect();
         $db->transStart();
@@ -266,6 +390,9 @@ class AdminService
 
     /**
      * Deletes a user record wrapped in a database transaction.
+     *
+     * @param int $id
+     * @return bool
      */
     public function deleteUser(int $id): bool
     {
@@ -276,4 +403,3 @@ class AdminService
         return $db->transStatus() !== false;
     }
 }
-

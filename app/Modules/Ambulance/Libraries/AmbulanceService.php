@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Modules\Ambulance\Libraries;
 
 use App\Modules\Ambulance\Models\AmbulanceModel;
-use App\Modules\Queue\Models\HospitalModel;
+use App\Modules\Ambulance\Entities\Ambulance;
+use App\Modules\Hospital\Models\HospitalModel;
 use App\Modules\Hospital\Models\PreNotificationModel;
-use App\Modules\Queue\Models\HandoverModel;
+use App\Modules\Hospital\Models\HandoverModel;
 use App\Modules\Hospital\Entities\PreNotification;
 use App\Modules\Hospital\Entities\Handover;
 use App\Modules\Auth\Models\UserModel;
+use App\Modules\Auth\Entities\User;
 
 /**
  * Class AmbulanceService
@@ -22,38 +24,57 @@ class AmbulanceService
     /**
      * @var AmbulanceModel
      */
-    private AmbulanceModel $_ambulance_model;
+    private AmbulanceModel $ambulance_model;
 
     /**
      * @var HospitalModel
      */
-    private HospitalModel $_hospital_model;
+    private HospitalModel $hospital_model;
 
     /**
      * @var PreNotificationModel
      */
-    private PreNotificationModel $_pre_model;
+    private PreNotificationModel $pre_model;
 
     /**
      * @var HandoverModel
      */
-    private HandoverModel $_handover_model;
+    private HandoverModel $handover_model;
 
     /**
      * @var UserModel
      */
-    private UserModel $_user_model;
+    private UserModel $user_model;
 
     /**
      * AmbulanceService constructor.
      */
     public function __construct()
     {
-        $this->_ambulance_model = new AmbulanceModel();
-        $this->_hospital_model  = new HospitalModel();
-        $this->_pre_model       = new PreNotificationModel();
-        $this->_handover_model  = new HandoverModel();
-        $this->_user_model       = new UserModel();
+        $this->ambulance_model = new AmbulanceModel();
+        $this->hospital_model  = new HospitalModel();
+        $this->pre_model       = new PreNotificationModel();
+        $this->handover_model  = new HandoverModel();
+        $this->user_model      = new UserModel();
+    }
+
+    /**
+     * Resolves active ambulance entity based on paramedic user identification.
+     *
+     * @param int $user_id
+     * @return Ambulance|null
+     */
+    public function getActiveAmbulance(int $user_id): ?Ambulance
+    {
+        /** @var User|null $user */
+        $user = $this->user_model->find($user_id);
+        if ($user === null || $user->ems_provider_id === null) {
+            return null;
+        }
+
+        /** @var Ambulance|null $ambulance */
+        $ambulance = $this->ambulance_model->where('ems_provider_id', $user->ems_provider_id)->first();
+        return $ambulance;
     }
 
     /**
@@ -66,7 +87,7 @@ class AmbulanceService
      */
     public function updateLocation(int $ambulance_id, float $lat, float $lng): bool
     {
-        return $this->_ambulance_model->update($ambulance_id, [
+        return $this->ambulance_model->update($ambulance_id, [
             'current_lat'  => $lat,
             'current_lng'  => $lng,
             'last_updated' => date('Y-m-d H:i:s'),
@@ -80,7 +101,7 @@ class AmbulanceService
      */
     public function getHospitals(): array
     {
-        return $this->_hospital_model->where('active', 1)->orderBy('name', 'ASC')->findAll();
+        return $this->hospital_model->where('active', 1)->orderBy('name', 'ASC')->findAll();
     }
 
     /**
@@ -92,12 +113,12 @@ class AmbulanceService
     public function getHospitalDetails(int $hospital_id): array
     {
         /** @var \App\Modules\Hospital\Entities\Hospital|null $hospital */
-        $hospital = $this->_hospital_model->find($hospital_id);
+        $hospital = $this->hospital_model->find($hospital_id);
         if ($hospital === null) {
             return [];
         }
 
-        $queue_count = $this->_handover_model
+        $queue_count = $this->handover_model
             ->where('hospital_id', $hospital_id)
             ->where('status !=', 'Cleared')
             ->countAllResults();
@@ -148,15 +169,15 @@ class AmbulanceService
         int $eta_minutes
     ): ?int {
         // Fetch paramedic user
-        /** @var \App\Modules\Auth\Entities\User|null $user */
-        $user = $this->_user_model->find($paramedic_id);
+        /** @var User|null $user */
+        $user = $this->user_model->find($paramedic_id);
         if ($user === null || $user->ems_provider_id === null) {
             return null;
         }
 
         // Fetch corresponding ambulance
-        /** @var \App\Modules\Ambulance\Entities\Ambulance|null $ambulance */
-        $ambulance = $this->_ambulance_model->where('ems_provider_id', $user->ems_provider_id)->first();
+        /** @var Ambulance|null $ambulance */
+        $ambulance = $this->ambulance_model->where('ems_provider_id', $user->ems_provider_id)->first();
         if ($ambulance === null) {
             return null;
         }
@@ -180,8 +201,8 @@ class AmbulanceService
             'status'          => 'Pending',
             'sent_at'         => $sent_at,
         ]);
-        $this->_pre_model->save($pre);
-        $pre_id = (int) $this->_pre_model->getInsertID();
+        $this->pre_model->save($pre);
+        $pre_id = (int) $this->pre_model->getInsertID();
 
         // B. Insert corresponding Handover row to populate ED queue dashboard
         $handover = new Handover([
@@ -196,10 +217,10 @@ class AmbulanceService
             'status'              => 'En route',
             'arrived_at'          => null,
         ]);
-        $this->_handover_model->save($handover);
+        $this->handover_model->save($handover);
 
         // C. Update ambulance status
-        $this->_ambulance_model->update($ambulance->id, [
+        $this->ambulance_model->update($ambulance->id, [
             'status'       => 'Transporting',
             'last_updated' => $sent_at,
         ]);
@@ -222,17 +243,17 @@ class AmbulanceService
     public function getActiveRunStatus(int $pre_id): array
     {
         /** @var PreNotification|null $pre */
-        $pre = $this->_pre_model->find($pre_id);
+        $pre = $this->pre_model->find($pre_id);
         if ($pre === null) {
             return [];
         }
 
         /** @var \App\Modules\Hospital\Entities\Hospital|null $hospital */
-        $hospital = $this->_hospital_model->find($pre->hospital_id);
+        $hospital = $this->hospital_model->find($pre->hospital_id);
 
         /** @var Handover|null $handover */
-        $handover = $this->_handover_model->where('pre_notification_id', $pre_id)->first();
-        
+        $handover = $this->handover_model->where('pre_notification_id', $pre_id)->first();
+
         $status = 'En route';
         if ($handover !== null) {
             $status = $handover->status;

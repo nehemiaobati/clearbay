@@ -6,8 +6,7 @@ namespace App\Modules\Ambulance\Controllers;
 
 use App\Controllers\BaseController;
 use App\Modules\Ambulance\Libraries\AmbulanceService;
-use App\Modules\Ambulance\Models\AmbulanceModel;
-use App\Modules\Auth\Models\UserModel;
+use App\Modules\Ambulance\Entities\Ambulance;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\HTTP\RedirectResponse;
 
@@ -21,54 +20,32 @@ class AmbulanceController extends BaseController
     /**
      * @var AmbulanceService
      */
-    private AmbulanceService $_ambulance_service;
-
-    /**
-     * @var AmbulanceModel
-     */
-    private AmbulanceModel $_ambulance_model;
-
-    /**
-     * @var UserModel
-     */
-    private UserModel $_user_model;
+    private AmbulanceService $ambulance_service;
 
     /**
      * AmbulanceController constructor.
      */
     public function __construct()
     {
-        $this->_ambulance_service = new AmbulanceService();
-        $this->_ambulance_model   = new AmbulanceModel();
-        $this->_user_model        = new UserModel();
+        $this->ambulance_service = new AmbulanceService();
         helper(['form', 'url']);
     }
 
-    /**
-     * --- Helper Methods ---
-     */
+    // --- Helper Methods ---
 
     /**
      * Helper to retrieve active ambulance mapping for currently authenticated paramedic.
      *
-     * @return \App\Modules\Ambulance\Entities\Ambulance|null
+     * @return Ambulance|null
      */
-    private function _getActiveAmbulance(): ?\App\Modules\Ambulance\Entities\Ambulance
+    private function _getActiveAmbulance(): ?Ambulance
     {
         $user_id = session()->get('user_id');
         if ($user_id === null) {
             return null;
         }
 
-        /** @var \App\Modules\Auth\Entities\User|null $user */
-        $user = $this->_user_model->find((int) $user_id);
-        if ($user === null || $user->ems_provider_id === null) {
-            return null;
-        }
-
-        /** @var \App\Modules\Ambulance\Entities\Ambulance|null $ambulance */
-        $ambulance = $this->_ambulance_model->where('ems_provider_id', $user->ems_provider_id)->first();
-        return $ambulance;
+        return $this->ambulance_service->getActiveAmbulance((int) $user_id);
     }
 
     /**
@@ -84,12 +61,12 @@ class AmbulanceController extends BaseController
     {
         $earth_radius = 6371; // Kilometers
 
-        $dLat = deg2rad($lat2 - $lat1);
-        $dLon = deg2rad($lon2 - $lon1);
+        $d_lat = deg2rad($lat2 - $lat1);
+        $d_lon = deg2rad($lon2 - $lon1);
 
-        $a = sin($dLat / 2) * sin($dLat / 2) +
+        $a = sin($d_lat / 2) * sin($d_lat / 2) +
             cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
-            sin($dLon / 2) * sin($dLon / 2);
+            sin($d_lon / 2) * sin($d_lon / 2);
 
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
@@ -109,7 +86,7 @@ class AmbulanceController extends BaseController
         }
 
         // Fetch hospitals
-        $hospitals = $this->_ambulance_service->getHospitals();
+        $hospitals = $this->ambulance_service->getHospitals();
 
         // Sort by distance (Haversine)
         $hosp_list = [];
@@ -138,9 +115,9 @@ class AmbulanceController extends BaseController
             'meta_description' => 'Live Nairobi emergency department capacity mapping for paramedics.',
             'canonical_url'    => url_to('ambulance.home'),
             'robots_tag'       => 'noindex, nofollow',
-            'ambulance'       => $ambulance,
-            'hospitals'       => $hosp_list,
-            'mapbox_token'    => env('mapboxgl.accessToken'),
+            'ambulance'        => $ambulance,
+            'hospitals'        => $hosp_list,
+            'mapbox_token'     => env('mapboxgl.accessToken'),
         ];
 
         return view('App\Modules\Ambulance\Views\home', $data);
@@ -155,7 +132,7 @@ class AmbulanceController extends BaseController
     public function detail(string $id): string|RedirectResponse
     {
         $hospital_id = (int) $id;
-        $details = $this->_ambulance_service->getHospitalDetails($hospital_id);
+        $details = $this->ambulance_service->getHospitalDetails($hospital_id);
 
         if (empty($details)) {
             return redirect()->to(url_to('ambulance.home'))->with('error', 'Hospital not found.');
@@ -166,7 +143,7 @@ class AmbulanceController extends BaseController
             'meta_description' => 'Available bays, queue length, and off-load wait times.',
             'canonical_url'    => url_to('ambulance.hospital.detail', $hospital_id),
             'robots_tag'       => 'noindex, nofollow',
-            'details'         => $details,
+            'details'          => $details,
         ];
 
         return view('App\Modules\Ambulance\Views\detail', $data);
@@ -181,7 +158,7 @@ class AmbulanceController extends BaseController
     public function preNotifyForm(string $id): string|RedirectResponse
     {
         $hospital_id = (int) $id;
-        $details = $this->_ambulance_service->getHospitalDetails($hospital_id);
+        $details = $this->ambulance_service->getHospitalDetails($hospital_id);
 
         if (empty($details)) {
             return redirect()->to(url_to('ambulance.home'))->with('error', 'Hospital not found.');
@@ -202,8 +179,8 @@ class AmbulanceController extends BaseController
             'meta_description' => 'Send pre-arrival patient characteristics to emergency department.',
             'canonical_url'    => url_to('ambulance.pre_notify', $hospital_id),
             'robots_tag'       => 'noindex, nofollow',
-            'hospital'        => $details['hospital'],
-            'eta'             => $eta,
+            'hospital'         => $details['hospital'],
+            'eta'              => $eta,
         ];
 
         return view('App\Modules\Ambulance\Views\pre_notify', $data);
@@ -252,7 +229,7 @@ class AmbulanceController extends BaseController
         $notes           = (string) ($this->request->getPost('notes') ?? '');
         $eta_minutes     = (int) $this->request->getPost('eta_minutes');
 
-        $pre_id = $this->_ambulance_service->sendPreNotification(
+        $pre_id = $this->ambulance_service->sendPreNotification(
             (int) $paramedic_id,
             $hospital_id,
             $patient_age,
@@ -288,13 +265,14 @@ class AmbulanceController extends BaseController
     public function activeRun(string $id): ResponseInterface|string
     {
         $pre_id = (int) $id;
-        $status = $this->_ambulance_service->getActiveRunStatus($pre_id);
+        $status = $this->ambulance_service->getActiveRunStatus($pre_id);
 
         if (empty($status)) {
             if ($this->request->getGet('ajax') === '1' || $this->request->isAJAX()) {
                 return $this->response->setJSON([
-                    'status'  => 'error',
-                    'message' => 'Active run record not found.'
+                    'status'     => 'error',
+                    'message'    => 'Active run record not found.',
+                    'csrf_token' => csrf_hash()
                 ]);
             }
             return redirect()->to(url_to('ambulance.home'))->with('error', 'Active run record not found.');
@@ -302,8 +280,9 @@ class AmbulanceController extends BaseController
 
         if ($this->request->getGet('ajax') === '1' || $this->request->isAJAX()) {
             return $this->response->setJSON([
-                'status' => 'success',
-                'result' => $status,
+                'status'     => 'success',
+                'result'     => $status,
+                'csrf_token' => csrf_hash()
             ]);
         }
 
@@ -312,15 +291,15 @@ class AmbulanceController extends BaseController
             'meta_description' => 'En route telemetry tracking and clinician bay readiness countdown.',
             'canonical_url'    => url_to('ambulance.active_run', $pre_id),
             'robots_tag'       => 'noindex, nofollow',
-            'pre_id'          => $pre_id,
-            'status'          => $status,
+            'pre_id'           => $pre_id,
+            'status'           => $status,
         ];
 
         return view('App\Modules\Ambulance\Views\active_run', $data);
     }
 
     /**
-     * REST Endpoint updating paramedic's current coordinates every 30s.
+     * REST Endpoint updating paramedic's current coordinates every 30s with CSRF rotation.
      *
      * @return ResponseInterface
      */
@@ -333,34 +312,38 @@ class AmbulanceController extends BaseController
 
         if (!$this->validate($rules)) {
             return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Invalid coordinate data.'
+                'status'     => 'error',
+                'message'    => 'Invalid coordinate data.',
+                'csrf_token' => csrf_hash()
             ]);
         }
 
         $ambulance = $this->_getActiveAmbulance();
         if ($ambulance === null) {
             return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Vehicle mapping missing.'
+                'status'     => 'error',
+                'message'    => 'Vehicle mapping missing.',
+                'csrf_token' => csrf_hash()
             ]);
         }
 
         $lat = (float) $this->request->getPost('lat');
         $lng = (float) $this->request->getPost('lng');
 
-        $success = $this->_ambulance_service->updateLocation((int) $ambulance->id, $lat, $lng);
+        $success = $this->ambulance_service->updateLocation((int) $ambulance->id, $lat, $lng);
 
         if (!$success) {
             return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Failed to save location updates.'
+                'status'     => 'error',
+                'message'    => 'Failed to save location updates.',
+                'csrf_token' => csrf_hash()
             ]);
         }
 
         return $this->response->setJSON([
-            'status'  => 'success',
-            'message' => 'Ambulance location coordinates synchronized.'
+            'status'     => 'success',
+            'message'    => 'Ambulance location coordinates synchronized.',
+            'csrf_token' => csrf_hash()
         ]);
     }
 }

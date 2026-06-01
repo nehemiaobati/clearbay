@@ -31,13 +31,13 @@ class HandoverModel extends Model
     ];
 
     /**
-     * Retrieves the list of active handovers in the queue.
+     * Retrieves the list of active handovers in the queue with explicit selections.
      *
      * @return array
      */
     public function getActiveQueue(): array
     {
-        return $this->select('handovers.*, ambulances.unit_id, ambulances.provider, hospitals.name as hospital_name, hospitals.code as hospital_code')
+        return $this->select('handovers.id, handovers.ambulance_id, handovers.hospital_id, handovers.patient_age, handovers.patient_gender, handovers.acuity, handovers.eta_minutes, handovers.wait_time_minutes, handovers.status, handovers.created_at, ambulances.unit_id, ambulances.provider, hospitals.name as hospital_name, hospitals.code as hospital_code')
             ->join('ambulances', 'ambulances.id = handovers.ambulance_id')
             ->join('hospitals', 'hospitals.id = handovers.hospital_id')
             ->where('handovers.status !=', 'Cleared')
