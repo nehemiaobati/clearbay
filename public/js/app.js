@@ -280,8 +280,12 @@
   }
 
   // 9. Initial Load and Live Dashboard Polling (10s intervals)
-  fetchQueueData();
-  setInterval(fetchQueueData, 10000);
+  // Only execute and poll public queue if we are on the public landing/preview page
+  const previewSection = document.getElementById('preview');
+  if (previewSection && queueTableBody) {
+    fetchQueueData();
+    setInterval(fetchQueueData, 10000);
+  }
 
   // 10. Pilot Onboarding Request Form Submission Handler
   const signupForm = document.getElementById('signupForm');

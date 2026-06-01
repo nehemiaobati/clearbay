@@ -227,28 +227,44 @@
     };
 
     const renderQueue = (result) => {
-      document.getElementById('metricQueueCount').textContent = result.metrics.ambulances_in_queue;
-      document.getElementById('metricAvgWait').textContent = result.metrics.avg_wait_today;
-      document.getElementById('metricHandoversCount').textContent = result.metrics.completed_today;
+      const updateElText = (id, val) => {
+        const el = document.getElementById(id);
+        if (el && el.textContent !== String(val)) {
+          el.textContent = val;
+        }
+      };
+
+      updateElText('metricQueueCount', result.metrics.ambulances_in_queue);
+      updateElText('metricAvgWait', result.metrics.avg_wait_today);
+      updateElText('metricHandoversCount', result.metrics.completed_today);
 
       const baseline = result.metrics.baseline_difference;
       const baselineEl = document.getElementById('metricBaseline');
-      baselineEl.textContent = baseline > 0 ? `+${baseline}` : baseline;
-      if (baseline < 0) {
-        baselineEl.className = 'd-block admin-stat-val text-success';
-      } else if (baseline > 0) {
-        baselineEl.className = 'd-block admin-stat-val text-danger';
-      } else {
-        baselineEl.className = 'd-block admin-stat-val text-muted';
+      if (baselineEl) {
+        const formattedBaseline = baseline > 0 ? `+${baseline}` : String(baseline);
+        if (baselineEl.textContent !== formattedBaseline) {
+          baselineEl.textContent = formattedBaseline;
+        }
+        const expectedClass = baseline < 0 
+          ? 'd-block admin-stat-val text-success' 
+          : (baseline > 0 ? 'd-block admin-stat-val text-danger' : 'd-block admin-stat-val text-muted');
+        if (baselineEl.className !== expectedClass) {
+          baselineEl.className = expectedClass;
+        }
       }
 
       const tbody = document.getElementById('queueTableBody');
+      if (!tbody) return;
+
       if (result.queue.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">No active ambulances in queue. All clear.</td></tr>`;
+        const emptyHtml = `<tr><td colspan="8" class="text-center text-muted py-4">No active ambulances in queue. All clear.</td></tr>`;
+        if (tbody.innerHTML !== emptyHtml) {
+          tbody.innerHTML = emptyHtml;
+        }
         return;
       }
 
-      tbody.innerHTML = result.queue.map(h => {
+      const newHtml = result.queue.map(h => {
         const wait = parseInt(h.wait_time_minutes, 10);
         let waitClass = 'bg-success text-white';
         if (wait >= 30) waitClass = 'bg-danger text-white';
@@ -258,13 +274,14 @@
 
         const patientStr = `${h.patient_gender}, ${h.patient_age}`;
         const etaStr = h.status === 'En route' ? `${h.eta_minutes} min` : 'Arrived';
+        const complaintStr = h.chief_complaint || 'Walk-in / Direct';
 
         return `
           <tr class="${rowHighlight}">
             <td class="mono-label">${h.unit_id}</td>
             <td>${h.provider}</td>
             <td>${patientStr}</td>
-            <td>${h.chief_complaint}</td>
+            <td>${complaintStr}</td>
             <td><span class="badge ${h.acuity === 'Critical' ? 'bg-danger' : (h.acuity === 'Serious' ? 'bg-warning text-dark' : 'bg-success')}">${h.acuity}</span></td>
             <td class="fw-bold">${etaStr}</td>
             <td><span class="badge ${waitClass}">${wait} min</span></td>
@@ -274,7 +291,7 @@
                 `<button class="btn btn-sm btn-primary clear-bay-btn" style="min-height: 36px;"
                          data-id="${h.id}"
                          data-unit="${h.unit_id}"
-                         data-details="${patientStr} (${h.chief_complaint})"
+                         data-details="${patientStr} (${complaintStr})"
                          data-bs-toggle="modal"
                          data-bs-target="#handoverModal">Clear Bay</button>`
               }
@@ -282,6 +299,10 @@
           </tr>
         `;
       }).join('');
+
+      if (tbody.innerHTML !== newHtml) {
+        tbody.innerHTML = newHtml;
+      }
     };
 
     fetchQueue();

@@ -26,10 +26,9 @@
     'Config\\Logger' => 'Config\\Logger',
     'Config\\Database' => 'Config\\Database',
     'Routing' => 'Config\\Routing',
-    'Config\\Format' => 'Config\\Format',
-    'Config\\Toolbar' => 'Config\\Toolbar',
-    'Config\\Pager' => 'Config\\Pager',
     'Config\\View' => 'Config\\View',
+    'Config\\Toolbar' => 'Config\\Toolbar',
+    'Config\\Format' => 'Config\\Format',
     'Config\\Validation' => 'Config\\Validation',
   ),
   'instances' => 
@@ -558,75 +557,6 @@
         ),
       ),
     )),
-    'Config\\Format' => 
-    \Config\Format::__set_state(array(
-       'supportedResponseFormats' => 
-      array (
-        0 => 'application/json',
-        1 => 'application/xml',
-        2 => 'text/xml',
-      ),
-       'formatters' => 
-      array (
-        'application/json' => 'CodeIgniter\\Format\\JSONFormatter',
-        'application/xml' => 'CodeIgniter\\Format\\XMLFormatter',
-        'text/xml' => 'CodeIgniter\\Format\\XMLFormatter',
-      ),
-       'formatterOptions' => 
-      array (
-        'application/json' => 320,
-        'application/xml' => 0,
-        'text/xml' => 0,
-      ),
-       'jsonEncodeDepth' => 512,
-    )),
-    'Config\\Toolbar' => 
-    \Config\Toolbar::__set_state(array(
-       'collectors' => 
-      array (
-        0 => 'CodeIgniter\\Debug\\Toolbar\\Collectors\\Timers',
-        1 => 'CodeIgniter\\Debug\\Toolbar\\Collectors\\Database',
-        2 => 'CodeIgniter\\Debug\\Toolbar\\Collectors\\Logs',
-        3 => 'CodeIgniter\\Debug\\Toolbar\\Collectors\\Views',
-        4 => 'CodeIgniter\\Debug\\Toolbar\\Collectors\\Files',
-        5 => 'CodeIgniter\\Debug\\Toolbar\\Collectors\\Routes',
-        6 => 'CodeIgniter\\Debug\\Toolbar\\Collectors\\Events',
-      ),
-       'collectVarData' => true,
-       'maxHistory' => 20,
-       'viewsPath' => '/Users/nehemia/Documents/DEV/green/system/Debug/Toolbar/Views/',
-       'maxQueries' => 100,
-       'watchedDirectories' => 
-      array (
-        0 => 'app',
-      ),
-       'watchedExtensions' => 
-      array (
-        0 => 'php',
-        1 => 'css',
-        2 => 'js',
-        3 => 'html',
-        4 => 'svg',
-        5 => 'json',
-        6 => 'env',
-      ),
-       'disableOnHeaders' => 
-      array (
-        'X-Requested-With' => 'xmlhttprequest',
-        'HX-Request' => 'true',
-        'X-Up-Version' => NULL,
-      ),
-    )),
-    'Config\\Pager' => 
-    \Config\Pager::__set_state(array(
-       'templates' => 
-      array (
-        'default_full' => 'pagers/bootstrap5_pagination',
-        'default_simple' => 'CodeIgniter\\Pager\\Views\\default_simple',
-        'default_head' => 'CodeIgniter\\Pager\\Views\\default_head',
-      ),
-       'perPage' => 20,
-    )),
     'Config\\View' => 
     \Config\View::__set_state(array(
        'saveData' => true,
@@ -708,6 +638,65 @@
       array (
       ),
        'appOverridesFolder' => 'overrides',
+    )),
+    'Config\\Toolbar' => 
+    \Config\Toolbar::__set_state(array(
+       'collectors' => 
+      array (
+        0 => 'CodeIgniter\\Debug\\Toolbar\\Collectors\\Timers',
+        1 => 'CodeIgniter\\Debug\\Toolbar\\Collectors\\Database',
+        2 => 'CodeIgniter\\Debug\\Toolbar\\Collectors\\Logs',
+        3 => 'CodeIgniter\\Debug\\Toolbar\\Collectors\\Views',
+        4 => 'CodeIgniter\\Debug\\Toolbar\\Collectors\\Files',
+        5 => 'CodeIgniter\\Debug\\Toolbar\\Collectors\\Routes',
+        6 => 'CodeIgniter\\Debug\\Toolbar\\Collectors\\Events',
+      ),
+       'collectVarData' => true,
+       'maxHistory' => 20,
+       'viewsPath' => '/Users/nehemia/Documents/DEV/green/system/Debug/Toolbar/Views/',
+       'maxQueries' => 100,
+       'watchedDirectories' => 
+      array (
+        0 => 'app',
+      ),
+       'watchedExtensions' => 
+      array (
+        0 => 'php',
+        1 => 'css',
+        2 => 'js',
+        3 => 'html',
+        4 => 'svg',
+        5 => 'json',
+        6 => 'env',
+      ),
+       'disableOnHeaders' => 
+      array (
+        'X-Requested-With' => 'xmlhttprequest',
+        'HX-Request' => 'true',
+        'X-Up-Version' => NULL,
+      ),
+    )),
+    'Config\\Format' => 
+    \Config\Format::__set_state(array(
+       'supportedResponseFormats' => 
+      array (
+        0 => 'application/json',
+        1 => 'application/xml',
+        2 => 'text/xml',
+      ),
+       'formatters' => 
+      array (
+        'application/json' => 'CodeIgniter\\Format\\JSONFormatter',
+        'application/xml' => 'CodeIgniter\\Format\\XMLFormatter',
+        'text/xml' => 'CodeIgniter\\Format\\XMLFormatter',
+      ),
+       'formatterOptions' => 
+      array (
+        'application/json' => 320,
+        'application/xml' => 0,
+        'text/xml' => 0,
+      ),
+       'jsonEncodeDepth' => 512,
     )),
     'Config\\Validation' => 
     \Config\Validation::__set_state(array(

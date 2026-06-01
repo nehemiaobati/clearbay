@@ -71,8 +71,9 @@ class HospitalService
     {
         // 1. Fetch active handovers (status != 'Cleared')
         $queue = $this->handover_model
-            ->select('handovers.id, handovers.ambulance_id, handovers.hospital_id, handovers.patient_age, handovers.patient_gender, handovers.acuity, handovers.eta_minutes, handovers.wait_time_minutes, handovers.status, handovers.created_at, ambulances.unit_id, ambulances.provider')
+            ->select('handovers.id, handovers.ambulance_id, handovers.hospital_id, handovers.patient_age, handovers.patient_gender, handovers.acuity, handovers.eta_minutes, handovers.wait_time_minutes, handovers.status, handovers.created_at, ambulances.unit_id, ambulances.provider, pre_notifications.chief_complaint')
             ->join('ambulances', 'ambulances.id = handovers.ambulance_id')
+            ->join('pre_notifications', 'pre_notifications.id = handovers.pre_notification_id', 'left')
             ->where('handovers.hospital_id', $hospital_id)
             ->where('handovers.status !=', 'Cleared')
             ->orderBy('handovers.created_at', 'ASC')
