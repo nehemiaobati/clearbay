@@ -18,6 +18,20 @@ use CodeIgniter\HTTP\ResponseInterface;
  */
 class PilotController extends BaseController
 {
+    /**
+     * @var \App\Modules\Pilot\Libraries\PilotService
+     */
+    private \App\Modules\Pilot\Libraries\PilotService $_pilot_service;
+
+    /**
+     * PilotController constructor.
+     */
+    public function __construct()
+    {
+        $this->_pilot_service = new \App\Modules\Pilot\Libraries\PilotService();
+        helper(['form', 'url']);
+    }
+
     // ==========================================
     // // --- Helper Methods ---
     // ==========================================
@@ -189,15 +203,9 @@ class PilotController extends BaseController
         $signup->phone_number  = $phone_number;
         $signup->message       = $message;
 
-        $db = \Config\Database::connect();
-        $db->transStart();
+        $success = $this->_pilot_service->registerSignup($signup);
 
-        $model = new PilotSignupModel();
-        $model->save($signup);
-
-        $db->transComplete();
-
-        if ($db->transStatus() === false) {
+        if (!$success) {
             log_message('error', '[PilotController] Database transaction failed while saving pilot signup.');
             return $this->response->setJSON([
                 'status'     => 'error',

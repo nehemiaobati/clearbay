@@ -9,10 +9,10 @@ class Home extends BaseController
         helper('url');
 
         $data = [
-            'pageTitle'       => 'ClearBay — Real-Time Ambulance Off-Load Management | Nairobi, Kenya',
-            'metaDescription' => 'Kenya\'s first real-time ambulance off-load management platform — giving hospital emergency departments and ambulance services live visibility to hand over patients faster.',
-            'canonicalUrl'    => base_url(),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'ClearBay — Real-Time Ambulance Off-Load Management | Nairobi, Kenya',
+            'meta_description' => 'Kenya\'s first real-time ambulance off-load management platform — giving hospital emergency departments and ambulance services live visibility to hand over patients faster.',
+            'canonical_url'    => base_url(),
+            'robots_tag'       => 'noindex, nofollow',
             'metaImage'       => base_url('images/brand.png'),
         ];
 

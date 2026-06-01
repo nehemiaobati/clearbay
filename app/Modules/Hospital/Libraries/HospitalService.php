@@ -60,23 +60,22 @@ class HospitalService
             ->orderBy('handovers.created_at', 'ASC')
             ->findAll();
 
-        // 2. Fetch completed handovers today
+        // 2. Fetch completed handovers today count and average wait
         $today_start = date('Y-m-d 00:00:00');
         $today_end   = date('Y-m-d 23:59:59');
 
-        $completed_today = $this->_handover_model
+        $db = \Config\Database::connect();
+        $stats = $db->table('handovers')
+            ->select('COUNT(id) as completed_count, SUM(wait_time_minutes) as total_wait')
             ->where('hospital_id', $hospital_id)
             ->where('status', 'Cleared')
             ->where('updated_at >=', $today_start)
             ->where('updated_at <=', $today_end)
-            ->findAll();
+            ->get()
+            ->getRow();
 
-        // Calculate average wait time today (in minutes)
-        $total_wait = 0;
-        $completed_count = count($completed_today);
-        foreach ($completed_today as $h) {
-            $total_wait += (int) $h->wait_time_minutes;
-        }
+        $completed_count = (int) ($stats->completed_count ?? 0);
+        $total_wait = (int) ($stats->total_wait ?? 0);
         $avg_wait_today = $completed_count > 0 ? (int) round($total_wait / $completed_count) : 0;
 
         // Baseline comparison (baseline average = 60 minutes)

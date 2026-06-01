@@ -1,11 +1,11 @@
 <?php
 
 /**
- * @var string $pageTitle
- * @var string $metaDescription
- * @var string $canonicalUrl
- * @var string $robotsTag
- * @var string $metaImage
+ * @var string $page_title
+ * @var string $meta_description
+ * @var string $canonical_url
+ * @var string $robots_tag
+ * @var string $meta_image
  */
 ?>
 <?= $this->extend('layouts/default') ?>

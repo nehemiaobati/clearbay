@@ -49,73 +49,6 @@ class DispatcherService
     }
 
     /**
-     * Compiles complete command center telemetry payload and triggers alerts checks.
-     *
-     * @return array
-     */
-    public function getTelemetry(): array
-    {
-        $db = \Config\Database::connect();
-        
-        // 1. Fetch ambulances
-        $ambulances = $this->_ambulance_model->findAll();
-
-        // 2. Fetch hospitals
-        $hospitals = $this->_hospital_model->where('active', 1)->findAll();
-
-        // 3. Trigger automated 30-minute delay checks
-        $this->_checkAndTriggerAlerts();
-
-        // 4. Fetch active alerts joined with ambulance unit ID and hospital name
-        $alerts = $this->_alert_model
-            ->select('alerts.*, ambulances.unit_id as ambulance_unit, hospitals.name as hospital_name')
-            ->join('ambulances', 'ambulances.id = alerts.ambulance_id')
-            ->join('hospitals', 'hospitals.id = alerts.hospital_id')
-            ->where('alerts.acknowledged_at IS NULL')
-            ->orderBy('alerts.triggered_at', 'DESC')
-            ->findAll();
-
-        // 5. Fetch wait times for queued ambulances
-        $active_handovers = $this->_handover_model
-            ->where('status !=', 'Cleared')
-            ->findAll();
-
-        $waits = [];
-        foreach ($active_handovers as $h) {
-            $waits[$h->ambulance_id] = [
-                'hospital_name'     => $this->_getHospitalName((int) $h->hospital_id, $hospitals),
-                'wait_time_minutes' => $h->wait_time_minutes
-            ];
-        }
-
-        return [
-            'ambulances' => $ambulances,
-            'hospitals'  => $hospitals,
-            'alerts'     => $alerts,
-            'waits'      => $waits
-        ];
-    }
-
-    /**
-     * Acknowledges an active alert.
-     *
-     * @param int $alert_id
-     * @param int $user_id
-     * @return bool
-     */
-    public function acknowledgeAlert(int $alert_id, int $user_id): bool
-    {
-        return $this->_alert_model->update($alert_id, [
-            'acknowledged_at' => date('Y-m-d H:i:s'),
-            'acknowledged_by' => $user_id
-        ]);
-    }
-
-    /**
-     * --- Helper Methods ---
-     */
-
-    /**
      * Retrieves a hospital's name by ID from the cached local list.
      *
      * @param int $hospital_id
@@ -144,6 +77,7 @@ class DispatcherService
         // Find handovers that are en-route/arrived and have been waiting > 30 minutes
         // Wait time increases automatically. If arrived_at is set, compute wait.
         // For simplicity, we can query handovers with status != 'Cleared'
+        /** @var \App\Modules\Queue\Entities\Handover[] $handovers */
         $handovers = $this->_handover_model
             ->where('status !=', 'Cleared')
             ->findAll();
@@ -163,6 +97,7 @@ class DispatcherService
 
             if ($diff_minutes > 30) {
                 // Check if alert already exists for this ambulance and hospital which is unacknowledged
+                /** @var Alert|null $existing */
                 $existing = $this->_alert_model
                     ->where('ambulance_id', $h->ambulance_id)
                     ->where('hospital_id', $h->hospital_id)
@@ -209,5 +144,72 @@ class DispatcherService
                 }
             }
         }
+    }
+
+    /**
+     * Compiles complete command center telemetry payload and triggers alerts checks.
+     *
+     * @return array
+     */
+    public function getTelemetry(): array
+    {
+        $db = \Config\Database::connect();
+        
+        // 1. Fetch ambulances
+        /** @var \App\Modules\Ambulance\Entities\Ambulance[] $ambulances */
+        $ambulances = $this->_ambulance_model->findAll();
+
+        // 2. Fetch hospitals
+        /** @var \App\Modules\Hospital\Entities\Hospital[] $hospitals */
+        $hospitals = $this->_hospital_model->where('active', 1)->findAll();
+
+        // 3. Trigger automated 30-minute delay checks
+        $this->_checkAndTriggerAlerts();
+
+        // 4. Fetch active alerts joined with ambulance unit ID and hospital name
+        /** @var Alert[] $alerts */
+        $alerts = $this->_alert_model
+            ->select('alerts.*, ambulances.unit_id as ambulance_unit, hospitals.name as hospital_name')
+            ->join('ambulances', 'ambulances.id = alerts.ambulance_id')
+            ->join('hospitals', 'hospitals.id = alerts.hospital_id')
+            ->where('alerts.acknowledged_at IS NULL')
+            ->orderBy('alerts.triggered_at', 'DESC')
+            ->findAll();
+
+        // 5. Fetch wait times for queued ambulances
+        /** @var \App\Modules\Queue\Entities\Handover[] $active_handovers */
+        $active_handovers = $this->_handover_model
+            ->where('status !=', 'Cleared')
+            ->findAll();
+
+        $waits = [];
+        foreach ($active_handovers as $h) {
+            $waits[$h->ambulance_id] = [
+                'hospital_name'     => $this->_getHospitalName((int) $h->hospital_id, $hospitals),
+                'wait_time_minutes' => $h->wait_time_minutes
+            ];
+        }
+
+        return [
+            'ambulances' => $ambulances,
+            'hospitals'  => $hospitals,
+            'alerts'     => $alerts,
+            'waits'      => $waits
+        ];
+    }
+
+    /**
+     * Acknowledges an active alert.
+     *
+     * @param int $alert_id
+     * @param int $user_id
+     * @return bool
+     */
+    public function acknowledgeAlert(int $alert_id, int $user_id): bool
+    {
+        return $this->_alert_model->update($alert_id, [
+            'acknowledged_at' => date('Y-m-d H:i:s'),
+            'acknowledged_by' => $user_id
+        ]);
     }
 }

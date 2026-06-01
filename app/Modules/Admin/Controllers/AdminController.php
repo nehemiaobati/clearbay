@@ -56,19 +56,19 @@ class AdminController extends BaseController
     /**
      * @var AdminService
      */
-    private AdminService $adminService;
+    private AdminService $admin_service;
 
     /**
      * AdminController constructor.
      */
-    public function __construct(?AdminService $adminService = null)
+    public function __construct(?AdminService $admin_service = null)
     {
-        $this->adminService = $adminService ?? new AdminService();
-        $this->_pilot_model = $this->adminService->getPilotModel();
-        $this->_handover_model = $this->adminService->getHandoverModel();
-        $this->_hospital_model = $this->adminService->getHospitalModel();
-        $this->_ambulance_model = $this->adminService->getAmbulanceModel();
-        $this->_user_model = $this->adminService->getUserModel();
+        $this->admin_service = $admin_service ?? new AdminService();
+        $this->_pilot_model = $this->admin_service->getPilotModel();
+        $this->_handover_model = $this->admin_service->getHandoverModel();
+        $this->_hospital_model = $this->admin_service->getHospitalModel();
+        $this->_ambulance_model = $this->admin_service->getAmbulanceModel();
+        $this->_user_model = $this->admin_service->getUserModel();
         helper(['form', 'url']);
     }
 
@@ -79,12 +79,12 @@ class AdminController extends BaseController
      */
     public function dashboard(): string
     {
-        $metrics = $this->adminService->getDashboardMetrics();
+        $metrics = $this->admin_service->getDashboardMetrics();
         $data = [
-            'pageTitle'       => 'Admin Dashboard | ClearBay',
-            'metaDescription' => 'ClearBay administrative management control panel.',
-            'canonicalUrl'    => url_to('admin.dashboard'),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Admin Dashboard | ClearBay',
+            'meta_description' => 'ClearBay administrative management control panel.',
+            'canonical_url'    => url_to('admin.dashboard'),
+            'robots_tag'       => 'noindex, nofollow',
             'pilotCount'      => $metrics['pilotCount'],
             'handoverCount'   => $metrics['handoverCount'],
             'hospitalCount'   => $metrics['hospitalCount'],
@@ -106,12 +106,12 @@ class AdminController extends BaseController
      */
     public function pilotsList(): string
     {
-        $result = $this->adminService->getPilotsList(15);
+        $result = $this->admin_service->getPilotsList(15);
         $data = [
-            'pageTitle'       => 'Manage Pilot Signups | ClearBay',
-            'metaDescription' => 'Review and manage incoming pilot onboarding request records.',
-            'canonicalUrl'    => url_to('admin.pilots.list'),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Manage Pilot Signups | ClearBay',
+            'meta_description' => 'Review and manage incoming pilot onboarding request records.',
+            'canonical_url'    => url_to('admin.pilots.list'),
+            'robots_tag'       => 'noindex, nofollow',
             'pilots'          => $result['pilots'],
             'pager'           => $result['pager'],
         ];
@@ -127,10 +127,10 @@ class AdminController extends BaseController
     public function pilotNew(): string
     {
         $data = [
-            'pageTitle'       => 'Add Pilot Signup | ClearBay',
-            'metaDescription' => 'Manually register a new pilot program application.',
-            'canonicalUrl'    => url_to('admin.pilots.new'),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Add Pilot Signup | ClearBay',
+            'meta_description' => 'Manually register a new pilot program application.',
+            'canonical_url'    => url_to('admin.pilots.new'),
+            'robots_tag'       => 'noindex, nofollow',
         ];
 
         return view('App\Modules\Admin\Views\pilots\edit', $data);
@@ -164,12 +164,9 @@ class AdminController extends BaseController
         $pilot->phone_number  = $this->request->getPost('phoneNumber') ? (string) $this->request->getPost('phoneNumber') : null;
         $pilot->message       = $this->request->getPost('message') ? (string) $this->request->getPost('message') : null;
 
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->_pilot_model->save($pilot);
-        $db->transComplete();
+        $success = $this->admin_service->savePilot($pilot);
 
-        if ($db->transStatus() === false) {
+        if (!$success) {
             return redirect()->back()->withInput()->with('error', 'Database transaction failed while creating signup.');
         }
 
@@ -182,20 +179,20 @@ class AdminController extends BaseController
      * @param string $id
      * @return string|RedirectResponse
      */
-    public function pilotEdit(string $id)
+    public function pilotEdit(string $id): string|RedirectResponse
     {
         /** @var PilotSignup|null $pilot */
-        $pilot = $this->_pilot_model->find((int) $id);
+        $pilot = $this->admin_service->getPilotModel()->find((int) $id);
 
         if (!$pilot) {
             return redirect()->to(url_to('admin.pilots.list'))->with('error', 'Requested pilot signup record not found.');
         }
 
         $data = [
-            'pageTitle'       => 'Edit Pilot Signup | ClearBay',
-            'metaDescription' => 'Modify an existing pilot signup application.',
-            'canonicalUrl'    => url_to('admin.pilots.edit', $id),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Edit Pilot Signup | ClearBay',
+            'meta_description' => 'Modify an existing pilot signup application.',
+            'canonical_url'    => url_to('admin.pilots.edit', $id),
+            'robots_tag'       => 'noindex, nofollow',
             'pilot'           => $pilot,
         ];
 
@@ -211,7 +208,7 @@ class AdminController extends BaseController
     public function pilotUpdate(string $id): RedirectResponse
     {
         /** @var PilotSignup|null $pilot */
-        $pilot = $this->_pilot_model->find((int) $id);
+        $pilot = $this->admin_service->getPilotModel()->find((int) $id);
 
         if (!$pilot) {
             return redirect()->to(url_to('admin.pilots.list'))->with('error', 'Pilot signup record not found.');
@@ -237,12 +234,9 @@ class AdminController extends BaseController
         $pilot->phone_number  = $this->request->getPost('phoneNumber') ? (string) $this->request->getPost('phoneNumber') : null;
         $pilot->message       = $this->request->getPost('message') ? (string) $this->request->getPost('message') : null;
 
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->_pilot_model->save($pilot);
-        $db->transComplete();
+        $success = $this->admin_service->savePilot($pilot);
 
-        if ($db->transStatus() === false) {
+        if (!$success) {
             return redirect()->back()->withInput()->with('error', 'Database transaction failed while updating signup.');
         }
 
@@ -257,12 +251,9 @@ class AdminController extends BaseController
      */
     public function pilotDelete(string $id): RedirectResponse
     {
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->_pilot_model->delete((int) $id);
-        $db->transComplete();
+        $success = $this->admin_service->deletePilot((int) $id);
 
-        if ($db->transStatus() === false) {
+        if (!$success) {
             return redirect()->to(url_to('admin.pilots.list'))->with('error', 'Database transaction failed while deleting signup.');
         }
 
@@ -280,12 +271,12 @@ class AdminController extends BaseController
      */
     public function handoversList(): string
     {
-        $result = $this->adminService->getHandoversList(15);
+        $result = $this->admin_service->getHandoversList(15);
         $data = [
-            'pageTitle'       => 'Manage Handovers | ClearBay',
-            'metaDescription' => 'Review and manage ambulance queue handovers.',
-            'canonicalUrl'    => url_to('admin.handovers.list'),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Manage Handovers | ClearBay',
+            'meta_description' => 'Review and manage ambulance queue handovers.',
+            'canonical_url'    => url_to('admin.handovers.list'),
+            'robots_tag'       => 'noindex, nofollow',
             'handovers'       => $result['handovers'],
             'pager'           => $result['pager'],
         ];
@@ -301,12 +292,12 @@ class AdminController extends BaseController
     public function handoverNew(): string
     {
         $data = [
-            'pageTitle'       => 'Add Handover | ClearBay',
-            'metaDescription' => 'Register a new active ambulance queue handover.',
-            'canonicalUrl'    => url_to('admin.handovers.new'),
-            'robotsTag'       => 'noindex, nofollow',
-            'hospitals'       => $this->_hospital_model->orderBy('name', 'ASC')->findAll(),
-            'ambulances'      => $this->_ambulance_model->orderBy('unit_id', 'ASC')->findAll(),
+            'page_title'       => 'Add Handover | ClearBay',
+            'meta_description' => 'Register a new active ambulance queue handover.',
+            'canonical_url'    => url_to('admin.handovers.new'),
+            'robots_tag'       => 'noindex, nofollow',
+            'hospitals'       => $this->admin_service->getHospitalModel()->orderBy('name', 'ASC')->findAll(),
+            'ambulances'      => $this->admin_service->getAmbulanceModel()->orderBy('unit_id', 'ASC')->findAll(),
         ];
 
         return view('App\Modules\Admin\Views\handovers\edit', $data);
@@ -344,12 +335,9 @@ class AdminController extends BaseController
         $handover->wait_time_minutes  = (int) $this->request->getPost('waitTimeMinutes');
         $handover->status             = (string) $this->request->getPost('status');
 
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->_handover_model->save($handover);
-        $db->transComplete();
+        $success = $this->admin_service->saveHandover($handover);
 
-        if ($db->transStatus() === false) {
+        if (!$success) {
             return redirect()->back()->withInput()->with('error', 'Database transaction failed while creating handover.');
         }
 
@@ -362,23 +350,23 @@ class AdminController extends BaseController
      * @param string $id
      * @return string|RedirectResponse
      */
-    public function handoverEdit(string $id)
+    public function handoverEdit(string $id): string|RedirectResponse
     {
         /** @var Handover|null $handover */
-        $handover = $this->_handover_model->find((int) $id);
+        $handover = $this->admin_service->getHandoverModel()->find((int) $id);
 
         if (!$handover) {
             return redirect()->to(url_to('admin.handovers.list'))->with('error', 'Requested handover record not found.');
         }
 
         $data = [
-            'pageTitle'       => 'Edit Handover | ClearBay',
-            'metaDescription' => 'Modify an existing queue handover.',
-            'canonicalUrl'    => url_to('admin.handovers.edit', $id),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Edit Handover | ClearBay',
+            'meta_description' => 'Modify an existing queue handover.',
+            'canonical_url'    => url_to('admin.handovers.edit', $id),
+            'robots_tag'       => 'noindex, nofollow',
             'handover'        => $handover,
-            'hospitals'       => $this->_hospital_model->orderBy('name', 'ASC')->findAll(),
-            'ambulances'      => $this->_ambulance_model->orderBy('unit_id', 'ASC')->findAll(),
+            'hospitals'       => $this->admin_service->getHospitalModel()->orderBy('name', 'ASC')->findAll(),
+            'ambulances'      => $this->admin_service->getAmbulanceModel()->orderBy('unit_id', 'ASC')->findAll(),
         ];
 
         return view('App\Modules\Admin\Views\handovers\edit', $data);
@@ -393,7 +381,7 @@ class AdminController extends BaseController
     public function handoverUpdate(string $id): RedirectResponse
     {
         /** @var Handover|null $handover */
-        $handover = $this->_handover_model->find((int) $id);
+        $handover = $this->admin_service->getHandoverModel()->find((int) $id);
 
         if (!$handover) {
             return redirect()->to(url_to('admin.handovers.list'))->with('error', 'Handover record not found.');
@@ -423,12 +411,9 @@ class AdminController extends BaseController
         $handover->wait_time_minutes  = (int) $this->request->getPost('waitTimeMinutes');
         $handover->status             = (string) $this->request->getPost('status');
 
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->_handover_model->save($handover);
-        $db->transComplete();
+        $success = $this->admin_service->saveHandover($handover);
 
-        if ($db->transStatus() === false) {
+        if (!$success) {
             return redirect()->back()->withInput()->with('error', 'Database transaction failed while updating handover.');
         }
 
@@ -443,12 +428,9 @@ class AdminController extends BaseController
      */
     public function handoverDelete(string $id): RedirectResponse
     {
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->_handover_model->delete((int) $id);
-        $db->transComplete();
+        $success = $this->admin_service->deleteHandover((int) $id);
 
-        if ($db->transStatus() === false) {
+        if (!$success) {
             return redirect()->to(url_to('admin.handovers.list'))->with('error', 'Database transaction failed while deleting handover.');
         }
 
@@ -466,12 +448,12 @@ class AdminController extends BaseController
      */
     public function hospitalsList(): string
     {
-        $result = $this->adminService->getHospitalsList(15);
+        $result = $this->admin_service->getHospitalsList(15);
         $data = [
-            'pageTitle'       => 'Manage Hospitals | ClearBay',
-            'metaDescription' => 'Review and manage partner hospital records.',
-            'canonicalUrl'    => url_to('admin.hospitals.list'),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Manage Hospitals | ClearBay',
+            'meta_description' => 'Review and manage partner hospital records.',
+            'canonical_url'    => url_to('admin.hospitals.list'),
+            'robots_tag'       => 'noindex, nofollow',
             'hospitals'       => $result['hospitals'],
             'pager'           => $result['pager'],
         ];
@@ -487,10 +469,10 @@ class AdminController extends BaseController
     public function hospitalNew(): string
     {
         $data = [
-            'pageTitle'       => 'Add Hospital | ClearBay',
-            'metaDescription' => 'Add a new hospital facility profile.',
-            'canonicalUrl'    => url_to('admin.hospitals.new'),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Add Hospital | ClearBay',
+            'meta_description' => 'Add a new hospital facility profile.',
+            'canonical_url'    => url_to('admin.hospitals.new'),
+            'robots_tag'       => 'noindex, nofollow',
         ];
 
         return view('App\Modules\Admin\Views\hospitals\edit', $data);
@@ -520,12 +502,9 @@ class AdminController extends BaseController
         $hospital->category = (string) $this->request->getPost('category');
         $hospital->status   = (string) $this->request->getPost('status');
 
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->_hospital_model->save($hospital);
-        $db->transComplete();
+        $success = $this->admin_service->saveHospital($hospital);
 
-        if ($db->transStatus() === false) {
+        if (!$success) {
             return redirect()->back()->withInput()->with('error', 'Database transaction failed while creating hospital.');
         }
 
@@ -538,20 +517,20 @@ class AdminController extends BaseController
      * @param string $id
      * @return string|RedirectResponse
      */
-    public function hospitalEdit(string $id)
+    public function hospitalEdit(string $id): string|RedirectResponse
     {
         /** @var Hospital|null $hospital */
-        $hospital = $this->_hospital_model->find((int) $id);
+        $hospital = $this->admin_service->getHospitalModel()->find((int) $id);
 
         if (!$hospital) {
             return redirect()->to(url_to('admin.hospitals.list'))->with('error', 'Requested hospital record not found.');
         }
 
         $data = [
-            'pageTitle'       => 'Edit Hospital | ClearBay',
-            'metaDescription' => 'Modify hospital facility configuration and capacity status.',
-            'canonicalUrl'    => url_to('admin.hospitals.edit', $id),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Edit Hospital | ClearBay',
+            'meta_description' => 'Modify hospital facility configuration and capacity status.',
+            'canonical_url'    => url_to('admin.hospitals.edit', $id),
+            'robots_tag'       => 'noindex, nofollow',
             'hospital'        => $hospital,
         ];
 
@@ -567,7 +546,7 @@ class AdminController extends BaseController
     public function hospitalUpdate(string $id): RedirectResponse
     {
         /** @var Hospital|null $hospital */
-        $hospital = $this->_hospital_model->find((int) $id);
+        $hospital = $this->admin_service->getHospitalModel()->find((int) $id);
 
         if (!$hospital) {
             return redirect()->to(url_to('admin.hospitals.list'))->with('error', 'Hospital record not found.');
@@ -589,12 +568,9 @@ class AdminController extends BaseController
         $hospital->category = (string) $this->request->getPost('category');
         $hospital->status   = (string) $this->request->getPost('status');
 
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->_hospital_model->save($hospital);
-        $db->transComplete();
+        $success = $this->admin_service->saveHospital($hospital);
 
-        if ($db->transStatus() === false) {
+        if (!$success) {
             return redirect()->back()->withInput()->with('error', 'Database transaction failed while updating hospital.');
         }
 
@@ -609,12 +585,9 @@ class AdminController extends BaseController
      */
     public function hospitalDelete(string $id): RedirectResponse
     {
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->_hospital_model->delete((int) $id);
-        $db->transComplete();
+        $success = $this->admin_service->deleteHospital((int) $id);
 
-        if ($db->transStatus() === false) {
+        if (!$success) {
             return redirect()->to(url_to('admin.hospitals.list'))->with('error', 'Database transaction failed while deleting hospital.');
         }
 
@@ -632,12 +605,12 @@ class AdminController extends BaseController
      */
     public function ambulancesList(): string
     {
-        $result = $this->adminService->getAmbulancesList(15);
+        $result = $this->admin_service->getAmbulancesList(15);
         $data = [
-            'pageTitle'       => 'Manage Ambulances | ClearBay',
-            'metaDescription' => 'Review and manage ambulance fleet units.',
-            'canonicalUrl'    => url_to('admin.ambulances.list'),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Manage Ambulances | ClearBay',
+            'meta_description' => 'Review and manage ambulance fleet units.',
+            'canonical_url'    => url_to('admin.ambulances.list'),
+            'robots_tag'       => 'noindex, nofollow',
             'ambulances'      => $result['ambulances'],
             'pager'           => $result['pager'],
         ];
@@ -653,10 +626,10 @@ class AdminController extends BaseController
     public function ambulanceNew(): string
     {
         $data = [
-            'pageTitle'       => 'Add Ambulance | ClearBay',
-            'metaDescription' => 'Register a new emergency vehicle fleet unit.',
-            'canonicalUrl'    => url_to('admin.ambulances.new'),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Add Ambulance | ClearBay',
+            'meta_description' => 'Register a new emergency vehicle fleet unit.',
+            'canonical_url'    => url_to('admin.ambulances.new'),
+            'robots_tag'       => 'noindex, nofollow',
         ];
 
         return view('App\Modules\Admin\Views\ambulances\edit', $data);
@@ -682,12 +655,9 @@ class AdminController extends BaseController
         $ambulance->unit_id  = strtoupper((string) $this->request->getPost('unitId'));
         $ambulance->provider = (string) $this->request->getPost('provider');
 
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->_ambulance_model->save($ambulance);
-        $db->transComplete();
+        $success = $this->admin_service->saveAmbulance($ambulance);
 
-        if ($db->transStatus() === false) {
+        if (!$success) {
             return redirect()->back()->withInput()->with('error', 'Database transaction failed while creating ambulance.');
         }
 
@@ -700,20 +670,20 @@ class AdminController extends BaseController
      * @param string $id
      * @return string|RedirectResponse
      */
-    public function ambulanceEdit(string $id)
+    public function ambulanceEdit(string $id): string|RedirectResponse
     {
         /** @var Ambulance|null $ambulance */
-        $ambulance = $this->_ambulance_model->find((int) $id);
+        $ambulance = $this->admin_service->getAmbulanceModel()->find((int) $id);
 
         if (!$ambulance) {
             return redirect()->to(url_to('admin.ambulances.list'))->with('error', 'Requested ambulance record not found.');
         }
 
         $data = [
-            'pageTitle'       => 'Edit Ambulance | ClearBay',
-            'metaDescription' => 'Modify vehicle fleet configuration details.',
-            'canonicalUrl'    => url_to('admin.ambulances.edit', $id),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Edit Ambulance | ClearBay',
+            'meta_description' => 'Modify vehicle fleet configuration details.',
+            'canonical_url'    => url_to('admin.ambulances.edit', $id),
+            'robots_tag'       => 'noindex, nofollow',
             'ambulance'       => $ambulance,
         ];
 
@@ -729,7 +699,7 @@ class AdminController extends BaseController
     public function ambulanceUpdate(string $id): RedirectResponse
     {
         /** @var Ambulance|null $ambulance */
-        $ambulance = $this->_ambulance_model->find((int) $id);
+        $ambulance = $this->admin_service->getAmbulanceModel()->find((int) $id);
 
         if (!$ambulance) {
             return redirect()->to(url_to('admin.ambulances.list'))->with('error', 'Ambulance record not found.');
@@ -747,12 +717,9 @@ class AdminController extends BaseController
         $ambulance->unit_id  = strtoupper((string) $this->request->getPost('unitId'));
         $ambulance->provider = (string) $this->request->getPost('provider');
 
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->_ambulance_model->save($ambulance);
-        $db->transComplete();
+        $success = $this->admin_service->saveAmbulance($ambulance);
 
-        if ($db->transStatus() === false) {
+        if (!$success) {
             return redirect()->back()->withInput()->with('error', 'Database transaction failed while updating ambulance.');
         }
 
@@ -767,12 +734,9 @@ class AdminController extends BaseController
      */
     public function ambulanceDelete(string $id): RedirectResponse
     {
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->_ambulance_model->delete((int) $id);
-        $db->transComplete();
+        $success = $this->admin_service->deleteAmbulance((int) $id);
 
-        if ($db->transStatus() === false) {
+        if (!$success) {
             return redirect()->to(url_to('admin.ambulances.list'))->with('error', 'Database transaction failed while deleting ambulance.');
         }
 
@@ -790,18 +754,17 @@ class AdminController extends BaseController
      */
     public function usersList(): string
     {
-        $result = $this->adminService->getUsersList(15);
+        $result = $this->admin_service->getUsersList(15);
         $data = [
-            'pageTitle'       => 'Manage Users | ClearBay',
-            'metaDescription' => 'Review and manage ClearBay operator and staff user accounts.',
-            'canonicalUrl'    => url_to('admin.users.list'),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Manage Users | ClearBay',
+            'meta_description' => 'Review and manage ClearBay operator and staff user accounts.',
+            'canonical_url'    => url_to('admin.users.list'),
+            'robots_tag'       => 'noindex, nofollow',
             'users'           => $result['users'],
             'pager'           => $result['pager'],
         ];
 
         return view('App\Modules\Admin\Views\users\list', $data);
-
     }
 
     /**
@@ -812,12 +775,12 @@ class AdminController extends BaseController
     public function userNew(): string
     {
         $data = [
-            'pageTitle'       => 'Add User Account | ClearBay',
-            'metaDescription' => 'Register a new user profile with specific authorization roles.',
-            'canonicalUrl'    => url_to('admin.users.new'),
-            'robotsTag'       => 'noindex, nofollow',
-            'hospitals'       => $this->_hospital_model->orderBy('name', 'ASC')->findAll(),
-            'ems_providers'   => $this->_pilot_model->db->table('ems_providers')->orderBy('name', 'ASC')->get()->getResultArray(),
+            'page_title'       => 'Add User Account | ClearBay',
+            'meta_description' => 'Register a new user profile with specific authorization roles.',
+            'canonical_url'    => url_to('admin.users.new'),
+            'robots_tag'       => 'noindex, nofollow',
+            'hospitals'       => $this->admin_service->getHospitalModel()->orderBy('name', 'ASC')->findAll(),
+            'ems_providers'   => $this->admin_service->getPilotModel()->db->table('ems_providers')->orderBy('name', 'ASC')->get()->getResultArray(),
         ];
 
         return view('App\Modules\Admin\Views\users\edit', $data);
@@ -852,12 +815,9 @@ class AdminController extends BaseController
         $user->ems_provider_id = $this->request->getPost('ems_provider_id') ? (int) $this->request->getPost('ems_provider_id') : null;
         $user->active          = (int) $this->request->getPost('active');
 
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->_user_model->save($user);
-        $db->transComplete();
+        $success = $this->admin_service->saveUser($user);
 
-        if ($db->transStatus() === false) {
+        if (!$success) {
             return redirect()->back()->withInput()->with('error', 'Database transaction failed while creating user.');
         }
 
@@ -870,23 +830,23 @@ class AdminController extends BaseController
      * @param string $id
      * @return string|RedirectResponse
      */
-    public function userEdit(string $id)
+    public function userEdit(string $id): string|RedirectResponse
     {
         /** @var User|null $user */
-        $user = $this->_user_model->find((int) $id);
+        $user = $this->admin_service->getUserModel()->find((int) $id);
 
         if (!$user) {
             return redirect()->to(url_to('admin.users.list'))->with('error', 'Requested user account not found.');
         }
 
         $data = [
-            'pageTitle'       => 'Edit User Account | ClearBay',
-            'metaDescription' => 'Modify account credentials, role levels, and active states.',
-            'canonicalUrl'    => url_to('admin.users.edit', $id),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Edit User Account | ClearBay',
+            'meta_description' => 'Modify account credentials, role levels, and active states.',
+            'canonical_url'    => url_to('admin.users.edit', $id),
+            'robots_tag'       => 'noindex, nofollow',
             'user'            => $user,
-            'hospitals'       => $this->_hospital_model->orderBy('name', 'ASC')->findAll(),
-            'ems_providers'   => $this->_pilot_model->db->table('ems_providers')->orderBy('name', 'ASC')->get()->getResultArray(),
+            'hospitals'       => $this->admin_service->getHospitalModel()->orderBy('name', 'ASC')->findAll(),
+            'ems_providers'   => $this->admin_service->getPilotModel()->db->table('ems_providers')->orderBy('name', 'ASC')->get()->getResultArray(),
         ];
 
         return view('App\Modules\Admin\Views\users\edit', $data);
@@ -901,7 +861,7 @@ class AdminController extends BaseController
     public function userUpdate(string $id): RedirectResponse
     {
         /** @var User|null $user */
-        $user = $this->_user_model->find((int) $id);
+        $user = $this->admin_service->getUserModel()->find((int) $id);
 
         if (!$user) {
             return redirect()->to(url_to('admin.users.list'))->with('error', 'User account not found.');
@@ -932,12 +892,9 @@ class AdminController extends BaseController
             $user->password_hash = password_hash('12345678', PASSWORD_BCRYPT);
         }
 
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->_user_model->save($user);
-        $db->transComplete();
+        $success = $this->admin_service->saveUser($user);
 
-        if ($db->transStatus() === false) {
+        if (!$success) {
             return redirect()->back()->withInput()->with('error', 'Database transaction failed while updating user.');
         }
 
@@ -952,12 +909,9 @@ class AdminController extends BaseController
      */
     public function userDelete(string $id): RedirectResponse
     {
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->_user_model->delete((int) $id);
-        $db->transComplete();
+        $success = $this->admin_service->deleteUser((int) $id);
 
-        if ($db->transStatus() === false) {
+        if (!$success) {
             return redirect()->to(url_to('admin.users.list'))->with('error', 'Database transaction failed while deleting user.');
         }
 

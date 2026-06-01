@@ -70,7 +70,7 @@ class MakeModule extends BaseCommand
      */
     private function _createControllerFile(string $path, string $name): void
     {
-        $content = "<?php\n\ndeclare(strict_types=1);\n\nnamespace App\Modules\\" . $name . "\\Controllers;\n\nuse App\Controllers\BaseController;\n\n/**\n * Class " . $name . "Controller\n */\nclass " . $name . "Controller extends BaseController\n{\n    /**\n     * Index action.\n     *\n     * @return string\n     */\n    public function index(): string\n    {\n        return view('App\\Modules\\" . $name . "\\Views\\index', ['pageTitle' => '" . $name . " Module']);\n    }\n}\n";
+        $content = "<?php\n\ndeclare(strict_types=1);\n\nnamespace App\Modules\\" . $name . "\\Controllers;\n\nuse App\Controllers\BaseController;\n\n/**\n * Class " . $name . "Controller\n */\nclass " . $name . "Controller extends BaseController\n{\n    /**\n     * Index action.\n     *\n     * @return string\n     */\n    public function index(): string\n    {\n        return view('App\\Modules\\" . $name . "\\Views\\index', ['page_title' => '" . $name . " Module']);\n    }\n}\n";
         file_put_contents($path . '/Controllers/' . $name . 'Controller.php', $content);
     }
 

@@ -29,8 +29,8 @@
     'Config\\Format' => 'Config\\Format',
     'Config\\Toolbar' => 'Config\\Toolbar',
     'Config\\View' => 'Config\\View',
-    'Config\\Pager' => 'Config\\Pager',
     'Config\\Validation' => 'Config\\Validation',
+    'Config\\Pager' => 'Config\\Pager',
   ),
   'instances' => 
   array (
@@ -699,16 +699,6 @@
       ),
        'appOverridesFolder' => 'overrides',
     )),
-    'Config\\Pager' => 
-    \Config\Pager::__set_state(array(
-       'templates' => 
-      array (
-        'default_full' => 'pagers/bootstrap5_pagination',
-        'default_simple' => 'CodeIgniter\\Pager\\Views\\default_simple',
-        'default_head' => 'CodeIgniter\\Pager\\Views\\default_head',
-      ),
-       'perPage' => 20,
-    )),
     'Config\\Validation' => 
     \Config\Validation::__set_state(array(
        'ruleSets' => 
@@ -723,6 +713,16 @@
         'list' => 'CodeIgniter\\Validation\\Views\\list',
         'single' => 'CodeIgniter\\Validation\\Views\\single',
       ),
+    )),
+    'Config\\Pager' => 
+    \Config\Pager::__set_state(array(
+       'templates' => 
+      array (
+        'default_full' => 'pagers/bootstrap5_pagination',
+        'default_simple' => 'CodeIgniter\\Pager\\Views\\default_simple',
+        'default_head' => 'CodeIgniter\\Pager\\Views\\default_head',
+      ),
+       'perPage' => 20,
     )),
   ),
 );

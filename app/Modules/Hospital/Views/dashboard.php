@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @var string $pageTitle
- * @var string $metaDescription
- * @var string $canonicalUrl
- * @var string $robotsTag
+ * @var string $page_title
+ * @var string $meta_description
+ * @var string $canonical_url
+ * @var string $robots_tag
  * @var \App\Modules\Hospital\Entities\Hospital $hospital
  */
 ?>
@@ -97,6 +97,7 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form id="statusForm" class="form-dark" novalidate>
+        <?= csrf_field() ?>
         <div class="modal-body">
           <div class="d-flex justify-content-between gap-2 mb-4">
             <button type="button" class="btn btn-outline-success flex-fill py-3 status-select-btn" data-status="GREEN">GREEN<br><small class="mono-label">Accepting</small></button>
@@ -128,6 +129,7 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form id="handoverForm" class="form-dark" novalidate>
+        <?= csrf_field() ?>
         <div class="modal-body">
           <div class="mb-4 p-3 bg-secondary bg-opacity-10 rounded">
             <span class="mono-label text-muted d-block mb-1">Ambulance Unit</span>

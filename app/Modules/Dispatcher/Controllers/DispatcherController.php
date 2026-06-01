@@ -35,13 +35,13 @@ class DispatcherController extends BaseController
      *
      * @return ResponseInterface|string
      */
-    public function index()
+    public function index(): string
     {
         $data = [
-            'pageTitle'       => 'Dispatcher Command Centre | ClearBay',
-            'metaDescription' => 'Live Mapbox fleet tracking and ambulance off-load delay alerts for Nairobi County.',
-            'canonicalUrl'    => url_to('dispatcher.index'),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Dispatcher Command Centre | ClearBay',
+            'meta_description' => 'Live Mapbox fleet tracking and ambulance off-load delay alerts for Nairobi County.',
+            'canonical_url'    => url_to('dispatcher.index'),
+            'robots_tag'       => 'noindex, nofollow',
             'mapbox_token'    => env('mapboxgl.accessToken'),
         ];
 

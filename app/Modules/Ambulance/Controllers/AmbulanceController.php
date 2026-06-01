@@ -9,6 +9,7 @@ use App\Modules\Ambulance\Libraries\AmbulanceService;
 use App\Modules\Ambulance\Models\AmbulanceModel;
 use App\Modules\Auth\Models\UserModel;
 use CodeIgniter\HTTP\ResponseInterface;
+use CodeIgniter\HTTP\RedirectResponse;
 
 /**
  * Class AmbulanceController
@@ -100,7 +101,7 @@ class AmbulanceController extends BaseController
      *
      * @return ResponseInterface|string
      */
-    public function home()
+    public function home(): string|RedirectResponse
     {
         $ambulance = $this->_getActiveAmbulance();
         if ($ambulance === null) {
@@ -133,10 +134,10 @@ class AmbulanceController extends BaseController
         });
 
         $data = [
-            'pageTitle'       => 'Ambulance Navigator | ClearBay',
-            'metaDescription' => 'Live Nairobi emergency department capacity mapping for paramedics.',
-            'canonicalUrl'    => url_to('ambulance.home'),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Ambulance Navigator | ClearBay',
+            'meta_description' => 'Live Nairobi emergency department capacity mapping for paramedics.',
+            'canonical_url'    => url_to('ambulance.home'),
+            'robots_tag'       => 'noindex, nofollow',
             'ambulance'       => $ambulance,
             'hospitals'       => $hosp_list,
             'mapbox_token'    => env('mapboxgl.accessToken'),
@@ -151,7 +152,7 @@ class AmbulanceController extends BaseController
      * @param string $id
      * @return ResponseInterface|string
      */
-    public function detail(string $id)
+    public function detail(string $id): string|RedirectResponse
     {
         $hospital_id = (int) $id;
         $details = $this->_ambulance_service->getHospitalDetails($hospital_id);
@@ -161,10 +162,10 @@ class AmbulanceController extends BaseController
         }
 
         $data = [
-            'pageTitle'       => $details['hospital']->name . ' Capacity | ClearBay',
-            'metaDescription' => 'Available bays, queue length, and off-load wait times.',
-            'canonicalUrl'    => url_to('ambulance.hospital.detail', $hospital_id),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => $details['hospital']->name . ' Capacity | ClearBay',
+            'meta_description' => 'Available bays, queue length, and off-load wait times.',
+            'canonical_url'    => url_to('ambulance.hospital.detail', $hospital_id),
+            'robots_tag'       => 'noindex, nofollow',
             'details'         => $details,
         ];
 
@@ -177,7 +178,7 @@ class AmbulanceController extends BaseController
      * @param string $id
      * @return ResponseInterface|string
      */
-    public function preNotifyForm(string $id)
+    public function preNotifyForm(string $id): string|RedirectResponse
     {
         $hospital_id = (int) $id;
         $details = $this->_ambulance_service->getHospitalDetails($hospital_id);
@@ -197,10 +198,10 @@ class AmbulanceController extends BaseController
         $eta   = (int) round($dist * 2.5 + 2);
 
         $data = [
-            'pageTitle'       => 'Pre-Notify ED | ClearBay',
-            'metaDescription' => 'Send pre-arrival patient characteristics to emergency department.',
-            'canonicalUrl'    => url_to('ambulance.pre_notify', $hospital_id),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Pre-Notify ED | ClearBay',
+            'meta_description' => 'Send pre-arrival patient characteristics to emergency department.',
+            'canonical_url'    => url_to('ambulance.pre_notify', $hospital_id),
+            'robots_tag'       => 'noindex, nofollow',
             'hospital'        => $details['hospital'],
             'eta'             => $eta,
         ];
@@ -284,7 +285,7 @@ class AmbulanceController extends BaseController
      * @param string $id
      * @return ResponseInterface|string
      */
-    public function activeRun(string $id)
+    public function activeRun(string $id): ResponseInterface|string
     {
         $pre_id = (int) $id;
         $status = $this->_ambulance_service->getActiveRunStatus($pre_id);
@@ -307,10 +308,10 @@ class AmbulanceController extends BaseController
         }
 
         $data = [
-            'pageTitle'       => 'Active Run en Route | ClearBay',
-            'metaDescription' => 'En route telemetry tracking and clinician bay readiness countdown.',
-            'canonicalUrl'    => url_to('ambulance.active_run', $pre_id),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Active Run en Route | ClearBay',
+            'meta_description' => 'En route telemetry tracking and clinician bay readiness countdown.',
+            'canonical_url'    => url_to('ambulance.active_run', $pre_id),
+            'robots_tag'       => 'noindex, nofollow',
             'pre_id'          => $pre_id,
             'status'          => $status,
         ];

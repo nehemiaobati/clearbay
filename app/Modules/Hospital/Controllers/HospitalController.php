@@ -9,6 +9,7 @@ use App\Modules\Hospital\Libraries\HospitalService;
 use App\Modules\Hospital\Models\HospitalModel;
 use App\Modules\Hospital\Entities\Hospital;
 use CodeIgniter\HTTP\ResponseInterface;
+use CodeIgniter\HTTP\RedirectResponse;
 
 /**
  * Class HospitalController
@@ -60,7 +61,7 @@ class HospitalController extends BaseController
      *
      * @return ResponseInterface|string
      */
-    public function dashboard()
+    public function dashboard(): string|RedirectResponse
     {
         $hospital = $this->_getMappedHospital();
         if ($hospital === null) {
@@ -68,10 +69,10 @@ class HospitalController extends BaseController
         }
 
         $data = [
-            'pageTitle'       => $hospital->name . ' Emergency Department | ClearBay',
-            'metaDescription' => 'Live ambulance tracking and off-load management dashboard for ' . $hospital->name,
-            'canonicalUrl'    => url_to('hospital.dashboard'),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => $hospital->name . ' Emergency Department | ClearBay',
+            'meta_description' => 'Live ambulance tracking and off-load management dashboard for ' . $hospital->name,
+            'canonical_url'    => url_to('hospital.dashboard'),
+            'robots_tag'       => 'noindex, nofollow',
             'hospital'        => $hospital,
         ];
 
@@ -211,7 +212,7 @@ class HospitalController extends BaseController
      *
      * @return ResponseInterface|string
      */
-    public function analytics()
+    public function analytics(): string|RedirectResponse
     {
         $hospital = $this->_getMappedHospital();
         if ($hospital === null) {
@@ -224,10 +225,10 @@ class HospitalController extends BaseController
         $analytics = $this->_hospital_service->getAnalytics((int) $hospital->id, $days);
 
         $data = [
-            'pageTitle'       => 'ED Analytics | ' . $hospital->name,
-            'metaDescription' => 'Emergency Department ambulance handover statistics and performance.',
-            'canonicalUrl'    => url_to('hospital.analytics'),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'ED Analytics | ' . $hospital->name,
+            'meta_description' => 'Emergency Department ambulance handover statistics and performance.',
+            'canonical_url'    => url_to('hospital.analytics'),
+            'robots_tag'       => 'noindex, nofollow',
             'hospital'        => $hospital,
             'analytics'       => $analytics,
             'range'           => $range,

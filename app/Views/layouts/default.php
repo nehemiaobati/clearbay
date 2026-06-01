@@ -1,13 +1,13 @@
 <?php
 
 /**
- * @var string $pageTitle
- * @var string $metaDescription
- * @var string $canonicalUrl
- * @var string $robotsTag
- * @var string $metaImage
+ * @var string $page_title
+ * @var string $meta_description
+ * @var string $canonical_url
+ * @var string $robots_tag
+ * @var string $meta_image
  */
-$metaImage = $metaImage ?? base_url('assets/images/brand.png');
+$meta_image = $meta_image ?? base_url('assets/images/brand.png');
 ?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
@@ -15,26 +15,26 @@ $metaImage = $metaImage ?? base_url('assets/images/brand.png');
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="<?= (string) esc($robotsTag) ?>">
-  <meta name="description" content="<?= (string) esc($metaDescription) ?>">
-  <link rel="canonical" href="<?= (string) esc($canonicalUrl) ?>">
+  <meta name="robots" content="<?= (string) esc($robots_tag) ?>">
+  <meta name="description" content="<?= (string) esc($meta_description) ?>">
+  <link rel="canonical" href="<?= (string) esc($canonical_url) ?>">
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="<?= (string) esc($canonicalUrl) ?>">
-  <meta property="og:title" content="<?= (string) esc($pageTitle) ?>">
-  <meta property="og:description" content="<?= (string) esc($metaDescription) ?>">
-  <meta property="og:image" content="<?= (string) esc($metaImage) ?>">
+  <meta property="og:url" content="<?= (string) esc($canonical_url) ?>">
+  <meta property="og:title" content="<?= (string) esc($page_title) ?>">
+  <meta property="og:description" content="<?= (string) esc($meta_description) ?>">
+  <meta property="og:image" content="<?= (string) esc($meta_image) ?>">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@ClearBayHealth">
-  <meta name="twitter:title" content="<?= (string) esc($pageTitle) ?>">
-  <meta name="twitter:description" content="<?= (string) esc($metaDescription) ?>">
-  <meta name="twitter:image" content="<?= (string) esc($metaImage) ?>">
+  <meta name="twitter:title" content="<?= (string) esc($page_title) ?>">
+  <meta name="twitter:description" content="<?= (string) esc($meta_description) ?>">
+  <meta name="twitter:image" content="<?= (string) esc($meta_image) ?>">
   <meta name="twitter:image:alt" content="ClearBay — Real-Time Ambulance Off-Load Management">
 
-  <title><?= (string) esc($pageTitle) ?></title>
+  <title><?= (string) esc($page_title) ?></title>
 
   <!-- Bootstrap 5 CSS CDN -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">

@@ -55,24 +55,27 @@ class QueueService
             ->countAllResults();
 
         // 3. Calculate average wait time today (active + completed today)
-        $total_wait_minutes = 0;
-        $total_records = 0;
+        // Let's use database aggregation using query builder select(SUM(wait_time_minutes)) and count
+        $db = \Config\Database::connect();
+        
+        // Active queue records
+        $active_stats = $db->table('handovers')
+            ->select('SUM(wait_time_minutes) as total_wait, COUNT(id) as cnt')
+            ->where('status !=', 'Cleared')
+            ->get()
+            ->getRow();
 
-        foreach ($active_queue as $handover) {
-            $total_wait_minutes += (int) $handover->wait_time_minutes;
-            $total_records++;
-        }
-
-        $completed_today_records = $this->_handover_model
+        // Completed today records
+        $completed_stats = $db->table('handovers')
+            ->select('SUM(wait_time_minutes) as total_wait, COUNT(id) as cnt')
             ->where('status', 'Cleared')
             ->where('updated_at >=', $today_start)
             ->where('updated_at <=', $today_end)
-            ->findAll();
+            ->get()
+            ->getRow();
 
-        foreach ($completed_today_records as $handover) {
-            $total_wait_minutes += (int) $handover->wait_time_minutes;
-            $total_records++;
-        }
+        $total_wait_minutes = (int) ($active_stats->total_wait ?? 0) + (int) ($completed_stats->total_wait ?? 0);
+        $total_records = (int) ($active_stats->cnt ?? 0) + (int) ($completed_stats->cnt ?? 0);
 
         $avg_wait_today = $total_records > 0 ? (int) round($total_wait_minutes / $total_records) : 0;
 

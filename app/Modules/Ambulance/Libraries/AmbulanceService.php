@@ -104,17 +104,17 @@ class AmbulanceService
 
         // Calculate average wait time today (in minutes) for estimation
         $today_start = date('Y-m-d 00:00:00');
-        $completed_today = $this->_handover_model
+        $db = \Config\Database::connect();
+        $stats = $db->table('handovers')
+            ->select('COUNT(id) as completed_count, SUM(wait_time_minutes) as total_wait')
             ->where('hospital_id', $hospital_id)
             ->where('status', 'Cleared')
             ->where('updated_at >=', $today_start)
-            ->findAll();
+            ->get()
+            ->getRow();
 
-        $total_wait = 0;
-        $completed_count = count($completed_today);
-        foreach ($completed_today as $h) {
-            $total_wait += (int) $h->wait_time_minutes;
-        }
+        $completed_count = (int) ($stats->completed_count ?? 0);
+        $total_wait = (int) ($stats->total_wait ?? 0);
         $avg_wait_today = $completed_count > 0 ? (int) round($total_wait / $completed_count) : 8; // default to 8 min
 
         return [

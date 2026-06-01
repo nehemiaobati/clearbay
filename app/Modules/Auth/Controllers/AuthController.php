@@ -59,7 +59,7 @@ class AuthController extends BaseController
      *
      * @return ResponseInterface|string
      */
-    public function loginView()
+    public function loginView(): string|RedirectResponse
     {
         if ($this->_auth_service->isLoggedIn()) {
             $user = $this->_auth_service->getCurrentUser();
@@ -69,10 +69,10 @@ class AuthController extends BaseController
         }
 
         $data = [
-            'pageTitle'       => 'Sign In | ClearBay',
-            'metaDescription' => 'Sign in to the ClearBay emergency off-load coordination dashboard.',
-            'canonicalUrl'    => url_to('auth.login'),
-            'robotsTag'       => 'noindex, nofollow',
+            'page_title'       => 'Sign In | ClearBay',
+            'meta_description' => 'Sign in to the ClearBay emergency off-load coordination dashboard.',
+            'canonical_url'    => url_to('auth.login'),
+            'robots_tag'       => 'noindex, nofollow',
         ];
 
         return view('App\Modules\Auth\Views\login', $data);
