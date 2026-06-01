@@ -11,39 +11,27 @@
 <?= $this->extend('layouts/default') ?>
 <?= $this->section('content') ?>
 
-<!-- Include Mapbox GL JS via CDN -->
-<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
-<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
-
-<style>
-  /* Local dispatcher overrides (global styles handle base rules) */
-  .dispatcher-layout {
-    margin-top: 80px;
-    display: flex;
-  }
-
-  .sidebar-container {
-    padding: 1.5rem;
-    gap: 1.5rem;
-  }
-</style>
-
-<div class="container-fluid p-0 dispatcher-layout">
+<div class="container-fluid p-0 d-flex flex-column flex-lg-row gap-3 mt-5 pt-4">
   <!-- Left Side: Map Area -->
-  <div class="map-container">
+  <div class="map-container flex-grow-1 position-relative" style="min-height: 400px;">
+    <noscript>
+      <div class="alert alert-warning m-3" role="alert">
+        Dispatcher map requires JavaScript. Please enable it to view live fleet positions.
+      </div>
+    </noscript>
     <div id="map" class="w-100 h-100"></div>
 
     <!-- Floating Map Control Search Bar -->
     <div class="position-absolute top-0 end-0 m-3" style="z-index: 10; width: 280px;">
       <div class="input-group">
-        <input type="text" id="unitSearchInput" class="form-control bg-dark border-secondary border-opacity-25 text-cream" placeholder="Search Unit ID (e.g. AAR-04)">
-        <button class="btn btn-outline-secondary" type="button" id="searchBtn">Find</button>
+        <input type="text" id="unitSearchInput" class="form-control bg-dark border-secondary border-opacity-25 text-cream" placeholder="Search Unit ID (e.g. AAR-04)" aria-label="Search ambulance unit by ID">
+        <button class="btn btn-outline-secondary" type="button" id="searchBtn" style="min-height: 48px;">Find</button>
       </div>
     </div>
   </div>
 
   <!-- Right Side: Sidebar Panels -->
-  <div class="sidebar-container">
+  <aside class="p-4 d-flex flex-column gap-4 border-start border-secondary border-opacity-10" style="min-width: 320px;">
     <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-10">
       <span class="mono-label text-muted">EMS Dispatcher Console</span>
       <div>
@@ -52,36 +40,43 @@
     </div>
 
     <!-- Panel SC-14: Active Alerts Panel -->
-    <div class="card blueprint-card p-3">
-      <h3 class="mono-label text-danger mb-3 d-flex align-items-center gap-2">
-        <span class="spinner-grow spinner-grow-sm text-danger blink-dot" role="status"></span>
-        Active Off-Load Alerts (&gt;30m)
+    <section class="card blueprint-card p-3" aria-labelledby="alertsHeading">
+      <h3 id="alertsHeading" class="mono-label text-danger mb-3 d-flex align-items-center gap-2">
+        <span class="spinner-grow spinner-grow-sm text-danger blink-dot" role="status" aria-hidden="true"></span>
+        Active Off-Load Alerts (>30m)
       </h3>
       <div id="alertsPanelList" class="d-flex flex-column gap-2" style="max-height: 200px; overflow-y: auto;">
         <span class="text-muted small text-center py-3">No active timeout alerts.</span>
       </div>
-    </div>
+    </section>
 
     <!-- Panel SC-13: Fleet Status Panel -->
-    <div class="card blueprint-card p-3 flex-grow-1" style="min-height: 250px;">
-      <h3 class="mono-label text-primary mb-3">Ambulance Fleet Status</h3>
+    <section class="card blueprint-card p-3 flex-grow-1" style="min-height: 250px;" aria-labelledby="fleetHeading">
+      <h3 id="fleetHeading" class="mono-label text-primary mb-3">Ambulance Fleet Status</h3>
       <div id="fleetPanelList" class="d-flex flex-column gap-2" style="overflow-y: auto;">
         <span class="text-muted small text-center py-3">Loading active fleet...</span>
       </div>
-    </div>
+    </section>
 
     <!-- Panel SC-15: Hospital Capacity Panel -->
-    <div class="card blueprint-card p-3">
-      <h3 class="mono-label text-success mb-3">Facility Capacities</h3>
+    <section class="card blueprint-card p-3" aria-labelledby="capacityHeading">
+      <h3 id="capacityHeading" class="mono-label text-success mb-3">Facility Capacities</h3>
       <div id="capacityPanelList" class="d-flex flex-column gap-2" style="max-height: 200px; overflow-y: auto;">
         <span class="text-muted small text-center py-3">Loading capacities...</span>
       </div>
-    </div>
-  </div>
+    </section>
+  </aside>
 </div>
+
+<!-- Load Mapbox GL JS via CDN (deferred, after page render) -->
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js" defer></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // Guard: only initialize map if Mapbox loaded
+    if (typeof mapboxgl === 'undefined') return;
+
     // Theme Colors
     const style = getComputedStyle(document.documentElement);
     const colorSage = style.getPropertyValue('--sage').trim() || '#3D6B4F';
@@ -93,12 +88,12 @@
 
     const map = new mapboxgl.Map({
       container: 'map',
-      style: 'mapbox://styles/mapbox/dark-v11', // Premium dark theme matching platform aesthetics
-      center: [36.8219, -1.2921], // Nairobi County Center
+      style: 'mapbox://styles/mapbox/dark-v11',
+      center: [36.8219, -1.2921],
       zoom: 12
     });
 
-    const activeMarkers = {}; // Cache active vehicle markers to move them smoothly
+    const activeMarkers = {};
 
     // 2. Telemetry Render Handler
     const updateDashboard = (telemetry) => {
@@ -108,7 +103,7 @@
       updateMapMarkers(telemetry);
     };
 
-    // A. Render Fleet Panel List (SC-13)
+    // A. Render Fleet Panel List (SC-13) — semantic buttons with keyboard support
     const renderFleetPanel = (telemetry) => {
       const list = document.getElementById('fleetPanelList');
       if (telemetry.ambulances.length === 0) {
@@ -128,11 +123,13 @@
           '';
 
         return `
-          <div class="p-2 border border-secondary border-opacity-10 rounded d-flex justify-content-between align-items-center pointer-event hover-glow" 
-               style="cursor: pointer;"
-               onclick="focusAmbulance(${a.current_lat}, ${a.current_lng}, '${a.unit_id}')">
+          <button type="button"
+                  class="p-2 border border-secondary border-opacity-10 rounded d-flex justify-content-between align-items-center hover-glow text-start bg-transparent text-reset focus-ring"
+                  style="min-height: 48px;"
+                  aria-label="Focus on ${a.unit_id} (${a.status})"
+                  onclick="focusAmbulance(${a.current_lat}, ${a.current_lng}, '${a.unit_id}')">
             <div class="d-flex align-items-center gap-2">
-              <span class="badge ${statusDot} rounded-circle p-1" style="width: 8px; height: 8px; display: inline-block;"></span>
+              <span class="badge ${statusDot} rounded-circle p-1" aria-hidden="true" style="width: 8px; height: 8px;"></span>
               <strong class="mono-label text-cream">${a.unit_id}</strong>
               <small class="text-muted">(${a.provider})</small>
             </div>
@@ -140,7 +137,7 @@
               <span class="small text-muted">${a.status}</span>
               ${waitText}
             </div>
-          </div>
+          </button>
         `;
       }).join('');
     };
@@ -160,7 +157,7 @@
               <strong class="text-danger mono-label d-block">${al.ambulance_unit}</strong>
               <small class="text-muted d-block">Detained at ${al.hospital_name}</small>
             </div>
-            <button class="btn btn-xs btn-outline-danger ack-alert-btn" data-id="${al.id}">Ack</button>
+            <button class="btn btn-sm btn-outline-danger ack-alert-btn" data-id="${al.id}" style="min-height: 36px;">Ack</button>
           </div>
         `;
       }).join('');
@@ -196,22 +193,19 @@
 
     // D. Update Mapbox Coordinates Telemetry Markers
     const updateMapMarkers = (telemetry) => {
-      // Create/Update ambulance pins
       telemetry.ambulances.forEach(a => {
         if (!a.current_lat || !a.current_lng) return;
 
-        let color = colorSage; // green
-        if (a.status === 'Transporting') color = '#0DCAF0'; // teal
-        else if (a.status === 'Queued') color = colorRed; // red
-        else if (a.status === 'On Scene') color = colorAmber; // orange
-        else if (a.status === 'Off Duty') color = '#6C757D'; // grey
+        let color = colorSage;
+        if (a.status === 'Transporting') color = '#0DCAF0';
+        else if (a.status === 'Queued') color = colorRed;
+        else if (a.status === 'On Scene') color = colorAmber;
+        else if (a.status === 'Off Duty') color = '#6C757D';
 
         if (activeMarkers[a.unit_id]) {
-          // Marker already exists, update position dynamically
           activeMarkers[a.unit_id].setLngLat([a.current_lng, a.current_lat]);
           activeMarkers[a.unit_id].getElement().style.backgroundColor = color;
         } else {
-          // Create marker element
           const markerEl = document.createElement('div');
           markerEl.className = 'ambulance-map-pin';
           markerEl.style.backgroundColor = color;
@@ -236,7 +230,6 @@
         }
       });
 
-      // Add Hospital Pins
       telemetry.hospitals.forEach(h => {
         let color = colorSage;
         if (h.status === 'RED') color = colorRed;
@@ -246,7 +239,7 @@
         hospEl.style.backgroundColor = color;
         hospEl.style.width = '16px';
         hospEl.style.height = '16px';
-        hospEl.style.borderRadius = '3px'; // Square
+        hospEl.style.borderRadius = '3px';
         hospEl.style.border = '2px solid #EDE9E0';
         hospEl.style.cursor = 'pointer';
 
@@ -259,7 +252,6 @@
       });
     };
 
-    // Helper functions
     window.focusAmbulance = (lat, lng, unitId) => {
       if (lat && lng) {
         map.flyTo({
@@ -272,7 +264,7 @@
       }
     };
 
-    // 3. Telemetry Stream EventSource (Server-Sent Events Listener)
+    // 3. Telemetry Stream EventSource
     const eventSource = new EventSource('<?= url_to('dispatcher.sse') ?>');
 
     eventSource.onmessage = (event) => {
@@ -282,11 +274,11 @@
       }
     };
 
-    eventSource.onerror = (err) => {
+    eventSource.onerror = () => {
       console.warn('SSE disconnected. Reconnecting dynamically...');
     };
 
-    // 4. Alert Acknowledgment Click Actions (Event Delegation)
+    // 4. Alert Acknowledgment Click Actions
     document.getElementById('alertsPanelList').addEventListener('click', async (e) => {
       const btn = e.target.closest('.ack-alert-btn');
       if (!btn) return;
@@ -326,7 +318,6 @@
       const query = unitSearchInput.value.toUpperCase().trim();
       if (!query) return;
 
-      // Poll current local telemetry
       try {
         const response = await fetch('<?= url_to('dispatcher.fleet') ?>');
         const data = await response.json();

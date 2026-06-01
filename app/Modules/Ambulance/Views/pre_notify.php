@@ -68,16 +68,16 @@
         <div class="invalid-feedback" id="error_chief_complaint">Please select a chief complaint.</div>
       </div>
 
-      <!-- Acuity Level Buttons (Fitts's Law touch compliance) -->
+      <!-- Acuity Level Buttons — ARIA radiogroup (Fitts's Law touch compliance) -->
       <div class="mb-4">
-        <label class="mono-label text-muted d-block mb-2">Acuity Level *</label>
-        <div class="d-flex gap-2">
-          <button type="button" class="btn btn-outline-danger flex-fill py-3 acuity-btn fw-bold touch-target-btn-lg" data-acuity="Critical">Critical</button>
-          <button type="button" class="btn btn-outline-warning flex-fill py-3 acuity-btn fw-bold touch-target-btn-lg" data-acuity="Serious">Serious</button>
-          <button type="button" class="btn btn-outline-success flex-fill py-3 acuity-btn fw-bold touch-target-btn-lg" data-acuity="Stable">Stable</button>
+        <span class="mono-label text-muted d-block mb-2" id="acuityLabel">Acuity Level *</span>
+        <div class="d-flex gap-2" role="radiogroup" aria-labelledby="acuityLabel" aria-required="true">
+          <button type="button" role="radio" aria-checked="false" tabindex="-1" class="btn btn-outline-danger flex-fill py-3 acuity-btn fw-bold" style="min-height: 48px;" data-acuity="Critical">Critical</button>
+          <button type="button" role="radio" aria-checked="false" tabindex="-1" class="btn btn-outline-warning flex-fill py-3 acuity-btn fw-bold" style="min-height: 48px;" data-acuity="Serious">Serious</button>
+          <button type="button" role="radio" aria-checked="false" tabindex="-1" class="btn btn-outline-success flex-fill py-3 acuity-btn fw-bold" style="min-height: 48px;" data-acuity="Stable">Stable</button>
         </div>
         <input type="hidden" name="acuity" id="acuityInput" value="" required>
-        <div class="text-danger small d-none mt-1" id="error_acuity">Please select acuity level.</div>
+        <div class="text-danger small d-none mt-1" id="error_acuity" role="alert">Please select acuity level.</div>
       </div>
 
       <!-- Notes -->
@@ -93,7 +93,7 @@
       </div>
 
       <!-- Submit Button -->
-      <button type="submit" id="submitBtn" class="btn btn-primary w-100 py-3 fw-bold fs-5 d-flex align-items-center justify-content-center touch-target-btn-lg">
+      <button type="submit" id="submitBtn" class="btn btn-primary w-100 py-3 fw-bold fs-5 d-flex align-items-center justify-content-center" style="min-height: 48px;">
         <span id="submitSpinner" class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
         <span id="submitText">Send Pre-Notification</span>
       </button>
@@ -103,17 +103,36 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // 1. Acuity Selection Handler
+    // 1. Acuity Selection Handler — keeps ARIA in sync with visual state
     const acuityButtons = document.querySelectorAll('.acuity-btn');
     const acuityInput = document.getElementById('acuityInput');
     const errorAcuity = document.getElementById('error_acuity');
 
-    acuityButtons.forEach(btn => {
+    acuityButtons.forEach((btn, idx) => {
       btn.addEventListener('click', () => {
-        acuityButtons.forEach(b => b.classList.remove('active'));
+        acuityButtons.forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-checked', 'false');
+          b.setAttribute('tabindex', '-1');
+        });
         btn.classList.add('active');
+        btn.setAttribute('aria-checked', 'true');
+        btn.setAttribute('tabindex', '0');
         acuityInput.value = btn.dataset.acuity;
         errorAcuity.classList.add('d-none');
+      });
+      // Roving tabindex: only the checked (or first) button is in the tab order
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          acuityButtons[(idx + 1) % acuityButtons.length].focus();
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          acuityButtons[(idx - 1 + acuityButtons.length) % acuityButtons.length].focus();
+        } else if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          btn.click();
+        }
       });
     });
 
@@ -127,17 +146,14 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      // Validation Check
       if (!acuityInput.value) {
         errorAcuity.classList.remove('d-none');
         return;
       }
 
-      // Reset styles
       feedback.classList.add('d-none');
       form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
 
-      // Loading state
       submitBtn.disabled = true;
       spinner.classList.remove('d-none');
       submitText.textContent = 'Sending...';

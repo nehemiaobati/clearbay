@@ -95,9 +95,9 @@ $isEdit = isset($hospital) && $hospital->id;
                   <?php
                   $statuses = ['Green', 'Amber', 'Red', 'Recruiting'];
                   $currentStatus = old('status', $hospital->status ?? '');
-                  foreach ($statuses as $status) :
+                  foreach ($statuses as $statusOption) :
                   ?>
-                    <option value="<?= esc($status) ?>" <?= $currentStatus === $status ? 'selected' : '' ?>><?= esc($status) ?></option>
+                    <option value="<?= esc($statusOption) ?>" <?= $currentStatus === $statusOption ? 'selected' : '' ?>><?= esc($statusOption) ?></option>
                   <?php endforeach; ?>
                 </select>
                 <?php if (session('errors.status')) : ?>
@@ -108,10 +108,10 @@ $isEdit = isset($hospital) && $hospital->id;
           </div>
 
           <div class="d-flex align-items-center gap-3 mt-4">
-            <button type="submit" class="btn btn-primary admin-btn-submit">
+            <button type="submit" class="btn btn-primary admin-btn-submit" style="min-height: 48px;">
               <?= $isEdit ? 'Save Changes' : 'Register Facility' ?>
             </button>
-            <a href="<?= url_to('admin.hospitals.list') ?>" class="btn btn-outline-secondary admin-btn-submit">
+            <a href="<?= url_to('admin.hospitals.list') ?>" class="btn btn-outline-secondary admin-btn-submit" style="min-height: 48px;">
               Cancel
             </a>
           </div>

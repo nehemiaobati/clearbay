@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var string $page_title
  * @var string $meta_description
@@ -31,7 +32,7 @@
       </h1>
     </div>
     <div class="mt-3 mt-md-0">
-      <a href="<?= url_to('admin.pilots.new') ?>" class="btn btn-primary admin-btn-action">
+      <a href="<?= url_to('admin.pilots.new') ?>" class="btn btn-primary admin-btn-action" style="min-height: 48px;">
         Add Manual Entry +
       </a>
     </div>
@@ -70,12 +71,13 @@
                 </td>
                 <td class="text-end">
                   <div class="d-inline-flex gap-2">
-                    <a href="<?= url_to('admin.pilots.edit', $pilot->id) ?>" class="btn btn-outline-secondary btn-sm px-3 py-2 d-inline-block admin-btn-edit">
+                    <a href="<?= url_to('admin.pilots.edit', $pilot->id) ?>" class="btn btn-outline-secondary btn-sm px-3 py-2 d-inline-block admin-btn-edit" style="min-height: 48px; min-width: 48px;">
                       Edit
                     </a>
-                    <a href="<?= url_to('admin.pilots.delete', $pilot->id) ?>" 
-                       class="btn btn-danger btn-sm px-3 py-2 d-inline-block admin-btn-delete" 
-                       onclick="return confirm('Are you sure you want to delete this pilot application?');">
+                    <a href="<?= url_to('admin.pilots.delete', $pilot->id) ?>"
+                      class="btn btn-danger btn-sm px-3 py-2 d-inline-block admin-btn-delete"
+                      style="min-height: 48px; min-width: 48px;"
+                      onclick="return confirm('Are you sure you want to delete this pilot application?');">
                       Delete
                     </a>
                   </div>
@@ -85,7 +87,7 @@
           </tbody>
         </table>
       </div>
-      
+
       <!-- Pagination -->
       <?php if ($pager) : ?>
         <div class="mt-4 d-flex justify-content-center admin-pager">

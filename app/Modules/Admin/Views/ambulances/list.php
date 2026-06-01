@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var string $page_title
  * @var string $meta_description
@@ -31,7 +32,7 @@
       </h1>
     </div>
     <div class="mt-3 mt-md-0">
-      <a href="<?= url_to('admin.ambulances.new') ?>" class="btn btn-primary admin-btn-action">
+      <a href="<?= url_to('admin.ambulances.new') ?>" class="btn btn-primary admin-btn-action" style="min-height: 48px;">
         Register Vehicle +
       </a>
     </div>
@@ -64,12 +65,13 @@
                 </td>
                 <td class="text-end">
                   <div class="d-inline-flex gap-2">
-                    <a href="<?= url_to('admin.ambulances.edit', $ambulance->id) ?>" class="btn btn-outline-secondary btn-sm px-3 py-1 admin-btn-edit">
+                    <a href="<?= url_to('admin.ambulances.edit', $ambulance->id) ?>" class="btn btn-sm btn-outline-secondary px-3 admin-btn-edit" style="min-height: 48px; min-width: 48px;">
                       Edit
                     </a>
-                    <a href="<?= url_to('admin.ambulances.delete', $ambulance->id) ?>" 
-                       class="btn btn-danger btn-sm px-3 py-1 admin-btn-delete" 
-                       onclick="return confirm('Are you sure you want to delete this ambulance unit? This might affect handovers associated with this vehicle.');">
+                    <a href="<?= url_to('admin.ambulances.delete', $ambulance->id) ?>"
+                      class="btn btn-sm btn-danger px-3 admin-btn-delete"
+                      style="min-height: 48px; min-width: 48px;"
+                      onclick="return confirm('Are you sure you want to delete this ambulance unit? This might affect handovers associated with this vehicle.');">
                       Delete
                     </a>
                   </div>
@@ -79,7 +81,7 @@
           </tbody>
         </table>
       </div>
-      
+
       <!-- Pagination -->
       <?php if ($pager) : ?>
         <div class="mt-4 d-flex justify-content-center admin-pager">

@@ -13,13 +13,15 @@
 <?= $this->extend('layouts/default') ?>
 <?= $this->section('content') ?>
 
-<!-- Include Mapbox GL JS via CDN -->
-<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
-<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
-
 <div class="container-fluid p-0 d-flex flex-column paramedic-layout">
   <!-- Section 1: Map (upper two-thirds) -->
   <div id="map" class="flex-grow-1 w-100 paramedic-map">
+    <noscript>
+      <div class="alert alert-warning m-3" role="alert">
+        Map view requires JavaScript. Please enable it to see hospital locations and your current position.
+      </div>
+    </noscript>
+
     <!-- Floating Quick Stats -->
     <div class="position-absolute top-0 start-0 m-3 p-3 card blueprint-card shadow paramedic-quick-stats">
       <span class="mono-label text-muted d-block mb-1">Ambulance Unit</span>
@@ -44,19 +46,20 @@
         elseif ($h->status === 'AMBER') $status_class = 'bg-warning text-dark';
         ?>
         <div class="col-12 col-md-6 col-lg-4">
-          <div class="card blueprint-card p-3 d-flex flex-row justify-content-between align-items-center hover-glow touch-target-card"
-            onclick="window.location.href='<?= url_to('ambulance.hospital.detail', $h->id) ?>'">
+          <a href="<?= url_to('ambulance.hospital.detail', $h->id) ?>"
+            class="card blueprint-card p-3 d-flex flex-row justify-content-between align-items-center hover-glow text-decoration-none text-reset focus-ring"
+            style="min-height: 48px; gap: 0.75rem;">
             <div class="d-flex align-items-center gap-3">
-              <span class="badge <?= $status_class ?> p-2 rounded-circle" style="width: 12px; height: 12px; display: inline-block;"></span>
+              <span class="badge <?= $status_class ?> rounded-circle p-1" aria-hidden="true" style="width: 12px; height: 12px;"></span>
               <div>
                 <h4 class="h6 m-0 fw-bold text-cream"><?= esc($h->name) ?></h4>
                 <small class="text-muted"><?= esc($item['distance']) ?> km away &nbsp;·&nbsp; ETA: <?= esc($item['eta']) ?> min</small>
               </div>
             </div>
-            <div class="text-end">
-              <span class="badge bg-secondary py-2 px-3"><?= esc($h->bays_available) ?> bays</span>
-            </div>
-          </div>
+            <span class="badge bg-secondary py-2 px-3" aria-label="<?= esc($h->bays_available) ?> bays available">
+              <?= esc($h->bays_available) ?>
+            </span>
+          </a>
         </div>
       <?php endforeach; ?>
     </div>
@@ -72,7 +75,9 @@
     const colorRed = style.getPropertyValue('--red').trim() || '#C23B22';
     const colorAmber = style.getPropertyValue('--amber').trim() || '#D4711A';
 
-    // 1. Mapbox Initialization
+    // 1. Mapbox Initialization (only if Mapbox is available)
+    if (typeof mapboxgl === 'undefined') return;
+
     // Mapped hospital coordinates
     const hospitals = [
       <?php foreach ($hospitals as $item) : ?> {
@@ -92,7 +97,7 @@
 
     const map = new mapboxgl.Map({
       container: 'map',
-      style: 'mapbox://styles/mapbox/dark-v11', // Premium dark theme matching ClearBay aesthetics
+      style: 'mapbox://styles/mapbox/dark-v11',
       center: [myLng, myLat],
       zoom: 12
     });
@@ -116,15 +121,15 @@
 
     // 3. Add Hospital Markers
     hospitals.forEach(h => {
-      let color = colorSage; // Success green
-      if (h.status === 'RED') color = colorRed; // Danger red
-      else if (h.status === 'AMBER') color = colorAmber; // Warning amber
+      let color = colorSage;
+      if (h.status === 'RED') color = colorRed;
+      else if (h.status === 'AMBER') color = colorAmber;
 
       const hMarker = document.createElement('div');
       hMarker.style.backgroundColor = color;
       hMarker.style.width = '14px';
       hMarker.style.height = '14px';
-      hMarker.style.borderRadius = '4px'; // Square block
+      hMarker.style.borderRadius = '4px';
       hMarker.style.cursor = 'pointer';
 
       hMarker.addEventListener('click', () => {
@@ -141,7 +146,6 @@
 
     // 4. GPS Telemetry Coordinate Streamer (Simulated update every 30s)
     const streamLocation = async () => {
-      // Simulate slight movement en-route
       const offsetLat = (Math.random() - 0.5) * 0.002;
       const offsetLng = (Math.random() - 0.5) * 0.002;
       const simLat = myLat + offsetLat;
@@ -164,5 +168,9 @@
     setInterval(streamLocation, 30000);
   });
 </script>
+
+<!-- Load Mapbox GL JS via CDN (deferred, after page render) -->
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js" defer></script>
 
 <?= $this->endSection() ?>

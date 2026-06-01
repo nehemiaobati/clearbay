@@ -34,7 +34,7 @@
 
       <!-- Email Input -->
       <div class="mb-3">
-        <label for="email" class="form-label">Enter your email address</label>
+        <label for="email" class="form-label">Email Address *</label>
         <input type="email"
           name="email"
           id="email"
@@ -51,18 +51,18 @@
 
       <!-- Password Input -->
       <div class="mb-4 position-relative">
-        <label for="password" class="form-label">Enter your password</label>
+        <label for="password" class="form-label">Password *</label>
         <input type="password"
           name="password"
           id="password"
-          class="form-control <?= session('errors.password') ? 'is-invalid' : '' ?>"
+          class="form-control pe-5 <?= session('errors.password') ? 'is-invalid' : '' ?>"
           placeholder="Password"
           required>
         <button type="button"
           id="togglePassword"
-          class="btn position-absolute end-0 top-50 translate-middle-y me-2 text-muted toggle-password-btn">
-          Show
-        </button>
+          class="btn btn-sm btn-outline-secondary position-absolute end-0 top-0 mt-2 me-2"
+          aria-label="Toggle password visibility"
+          style="min-height: 36px; min-width: 48px; z-index: 5;">Show</button>
         <?php if (session('errors.password')) : ?>
           <div class="invalid-feedback">
             <?= (string) esc(session('errors.password')) ?>
@@ -71,7 +71,7 @@
       </div>
 
       <!-- Submit Button -->
-      <button type="submit" id="submitBtn" class="btn btn-primary w-100 py-3 d-flex align-items-center justify-content-center fs-6">
+      <button type="submit" id="submitBtn" class="btn btn-primary w-100 py-3 d-flex align-items-center justify-content-center fs-6" style="min-height: 48px;">
         <span id="submitSpinner" class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
         <span id="submitText">Sign In</span>
       </button>

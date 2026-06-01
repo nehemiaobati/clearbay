@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var string $page_title
  * @var string $meta_description
@@ -63,9 +64,10 @@ elseif ($status === 'AMBER') $status_color = 'bg-warning text-dark';
         </a>
       <?php endif; ?>
 
-      <a href="https://www.google.com/maps/dir/?api=1&destination=<?= $h->lat ?>,<?= $h->lng ?>" 
-         target="_blank" 
-         class="btn btn-outline-secondary py-3 fw-bold fs-6 d-flex align-items-center justify-content-center touch-target-btn">
+      <a href="https://www.google.com/maps/dir/?api=1&destination=<?= $h->lat ?>,<?= $h->lng ?>"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn btn-outline-secondary py-3 fw-bold fs-6 d-flex align-items-center justify-content-center touch-target-btn">
         Get Directions (GPS)
       </a>
     </div>

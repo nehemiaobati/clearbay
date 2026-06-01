@@ -21,16 +21,16 @@
     <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
       <h1 class="s-title admin-heading m-0"><?= esc($hospital->name) ?></h1>
       <div class="d-flex gap-2">
-        <a href="<?= url_to('hospital.analytics') ?>" class="btn btn-sm btn-outline-secondary">View Analytics</a>
+        <a href="<?= url_to('hospital.analytics') ?>" class="btn btn-sm btn-outline-secondary" style="min-height: 36px;">View Analytics</a>
       </div>
     </div>
   </div>
 
-  <!-- Zone 2: ED Status Banner -->
+  <!-- Zone 2: ED Status Banner — semantic button, not clickable div -->
   <div class="mb-4 reveal">
-    <div id="statusBanner" class="p-4 card blueprint-card text-center text-uppercase fw-bold fs-4 pointer-event" data-bs-toggle="modal" data-bs-target="#statusModal">
+    <button type="button" id="statusBanner" class="p-4 card blueprint-card text-center text-uppercase fw-bold fs-4 w-100 bg-transparent text-reset focus-ring" data-bs-toggle="modal" data-bs-target="#statusModal" style="min-height: 48px;">
       Loading ED status...
-    </div>
+    </button>
   </div>
 
   <!-- Zone 3: Metric Cards -->
@@ -99,21 +99,22 @@
       <form id="statusForm" class="form-dark" novalidate>
         <?= csrf_field() ?>
         <div class="modal-body">
-          <div class="d-flex justify-content-between gap-2 mb-4">
-            <button type="button" class="btn btn-outline-success flex-fill py-3 status-select-btn" data-status="GREEN">GREEN<br><small class="mono-label">Accepting</small></button>
-            <button type="button" class="btn btn-outline-warning flex-fill py-3 status-select-btn" data-status="AMBER">AMBER<br><small class="mono-label">Busy</small></button>
-            <button type="button" class="btn btn-outline-danger flex-fill py-3 status-select-btn" data-status="RED">RED<br><small class="mono-label">Full</small></button>
+          <div class="d-flex justify-content-between gap-2 mb-4" role="radiogroup" aria-labelledby="statusGroupLabel">
+            <span class="visually-hidden" id="statusGroupLabel">Select ED capacity status</span>
+            <button type="button" role="radio" aria-checked="false" class="btn btn-outline-success flex-fill py-3 status-select-btn" style="min-height: 48px;" data-status="GREEN">GREEN<br><small class="mono-label">Accepting</small></button>
+            <button type="button" role="radio" aria-checked="false" class="btn btn-outline-warning flex-fill py-3 status-select-btn" style="min-height: 48px;" data-status="AMBER">AMBER<br><small class="mono-label">Busy</small></button>
+            <button type="button" role="radio" aria-checked="false" class="btn btn-outline-danger flex-fill py-3 status-select-btn" style="min-height: 48px;" data-status="RED">RED<br><small class="mono-label">Full</small></button>
           </div>
           <input type="hidden" name="status" id="selectedStatus" value="">
 
           <div class="mb-3">
-            <label for="baysAvailableInput" class="form-label">Available Ambulance Bays</label>
+            <label for="baysAvailableInput" class="form-label">Available Ambulance Bays *</label>
             <input type="number" class="form-control" name="bays_available" id="baysAvailableInput" placeholder="Bays" min="0" required>
           </div>
         </div>
         <div class="modal-footer border-secondary border-opacity-10">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Update Status</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="min-height: 48px;">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="min-height: 48px;">Update Status</button>
         </div>
       </form>
     </div>
@@ -147,12 +148,12 @@
 
           <div class="mb-3">
             <label for="notesInput" class="form-label">Handover Notes (Optional, max 200 chars)</label>
-            <textarea class="form-control" name="notes" id="notesInput" placeholder="Handover Notes" style="height: 100px;"></textarea>
+            <textarea class="form-control" name="notes" id="notesInput" placeholder="Handover Notes" style="height: 100px;" maxlength="200"></textarea>
           </div>
         </div>
         <div class="modal-footer border-secondary border-opacity-10">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Confirm Handover Complete</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="min-height: 48px;">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="min-height: 48px;">Confirm Handover Complete</button>
         </div>
       </form>
     </div>
@@ -167,7 +168,7 @@
     // 1. Initial State UI Load
     const updateBannerUI = (status, bays) => {
       const banner = document.getElementById('statusBanner');
-      banner.className = 'p-4 card blueprint-card text-center text-uppercase fw-bold fs-4 pointer-event';
+      banner.className = 'p-4 card blueprint-card text-center text-uppercase fw-bold fs-4 w-100 bg-transparent text-reset focus-ring';
 
       if (status === 'GREEN') {
         banner.classList.add('bg-success', 'text-white');
@@ -180,14 +181,15 @@
         banner.innerHTML = `RED · Full — no bays available`;
       }
 
-      // Pre-fill status modal elements
       document.getElementById('selectedStatus').value = status;
       document.getElementById('baysAvailableInput').value = bays;
       document.querySelectorAll('.status-select-btn').forEach(btn => {
         if (btn.dataset.status === status) {
           btn.classList.add('active');
+          btn.setAttribute('aria-checked', 'true');
         } else {
           btn.classList.remove('active');
+          btn.setAttribute('aria-checked', 'false');
         }
       });
     };
@@ -197,8 +199,12 @@
     // Status button click handler inside modal
     document.querySelectorAll('.status-select-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.status-select-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.status-select-btn').forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-checked', 'false');
+        });
         btn.classList.add('active');
+        btn.setAttribute('aria-checked', 'true');
         document.getElementById('selectedStatus').value = btn.dataset.status;
       });
     });
@@ -212,7 +218,6 @@
         const data = await response.json();
         if (data.status === 'success') {
           renderQueue(data.result);
-          // Rotate CSRF tokens
           const csrfInputs = document.querySelectorAll('input[name="csrf_test_name"]');
           csrfInputs.forEach(i => i.value = data.csrf_token);
         }
@@ -222,7 +227,6 @@
     };
 
     const renderQueue = (result) => {
-      // Update Metrics
       document.getElementById('metricQueueCount').textContent = result.metrics.ambulances_in_queue;
       document.getElementById('metricAvgWait').textContent = result.metrics.avg_wait_today;
       document.getElementById('metricHandoversCount').textContent = result.metrics.completed_today;
@@ -238,7 +242,6 @@
         baselineEl.className = 'd-block admin-stat-val text-muted';
       }
 
-      // Render Queue Table Body
       const tbody = document.getElementById('queueTableBody');
       if (result.queue.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">No active ambulances in queue. All clear.</td></tr>`;
@@ -253,7 +256,6 @@
 
         const rowHighlight = wait >= 30 ? 'table-danger border-danger border-opacity-10' : '';
 
-        // Formats
         const patientStr = `${h.patient_gender}, ${h.patient_age}`;
         const etaStr = h.status === 'En route' ? `${h.eta_minutes} min` : 'Arrived';
 
@@ -267,13 +269,13 @@
             <td class="fw-bold">${etaStr}</td>
             <td><span class="badge ${waitClass}">${wait} min</span></td>
             <td class="text-end">
-              ${h.status === 'En route' ? 
-                `<span class="text-muted small">En Route</span>` : 
-                `<button class="btn btn-sm btn-primary clear-bay-btn" 
-                         data-id="${h.id}" 
-                         data-unit="${h.unit_id}" 
+              ${h.status === 'En route' ?
+                `<span class="text-muted small">En Route</span>` :
+                `<button class="btn btn-sm btn-primary clear-bay-btn" style="min-height: 36px;"
+                         data-id="${h.id}"
+                         data-unit="${h.unit_id}"
                          data-details="${patientStr} (${h.chief_complaint})"
-                         data-bs-toggle="modal" 
+                         data-bs-toggle="modal"
                          data-bs-target="#handoverModal">Clear Bay</button>`
               }
             </td>
@@ -282,11 +284,9 @@
       }).join('');
     };
 
-    // Poll every 10 seconds (optimized for responsive performance)
     fetchQueue();
     setInterval(fetchQueue, 10000);
 
-    // Event delegation to capture which handover was clicked
     document.getElementById('queueTableBody').addEventListener('click', (e) => {
       if (e.target.classList.contains('clear-bay-btn')) {
         const btn = e.target;
@@ -297,7 +297,6 @@
     });
 
     // 3. Form Submissions (AJAX)
-    // A. Status Update Form
     const statusForm = document.getElementById('statusForm');
     statusForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -311,7 +310,6 @@
         const data = await response.json();
 
         if (data.status === 'success') {
-          // Close modal
           const modalEl = document.getElementById('statusModal');
           const modalInstance = bootstrap.Modal.getInstance(modalEl);
           modalInstance.hide();
@@ -328,7 +326,6 @@
       }
     });
 
-    // B. Handover Form
     const handoverForm = document.getElementById('handoverForm');
     handoverForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -346,7 +343,6 @@
           const modalInstance = bootstrap.Modal.getInstance(modalEl);
           modalInstance.hide();
 
-          // Reset inputs
           document.getElementById('bayNumberInput').value = '';
           document.getElementById('notesInput').value = '';
 

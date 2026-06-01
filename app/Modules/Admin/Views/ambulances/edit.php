@@ -77,10 +77,10 @@ $isEdit = isset($ambulance) && $ambulance->id;
           </div>
 
           <div class="d-flex align-items-center gap-3 mt-4">
-            <button type="submit" class="btn btn-primary admin-btn-submit">
+            <button type="submit" class="btn btn-primary admin-btn-submit" style="min-height: 48px;">
               <?= $isEdit ? 'Save Changes' : 'Register Vehicle' ?>
             </button>
-            <a href="<?= url_to('admin.ambulances.list') ?>" class="btn btn-outline-secondary admin-btn-submit">
+            <a href="<?= url_to('admin.ambulances.list') ?>" class="btn btn-outline-secondary admin-btn-submit" style="min-height: 48px;">
               Cancel
             </a>
           </div>

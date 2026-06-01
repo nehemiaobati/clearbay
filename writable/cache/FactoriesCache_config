@@ -28,9 +28,9 @@
     'Routing' => 'Config\\Routing',
     'Config\\Format' => 'Config\\Format',
     'Config\\Toolbar' => 'Config\\Toolbar',
+    'Config\\Pager' => 'Config\\Pager',
     'Config\\View' => 'Config\\View',
     'Config\\Validation' => 'Config\\Validation',
-    'Config\\Pager' => 'Config\\Pager',
   ),
   'instances' => 
   array (
@@ -617,6 +617,16 @@
         'X-Up-Version' => NULL,
       ),
     )),
+    'Config\\Pager' => 
+    \Config\Pager::__set_state(array(
+       'templates' => 
+      array (
+        'default_full' => 'pagers/bootstrap5_pagination',
+        'default_simple' => 'CodeIgniter\\Pager\\Views\\default_simple',
+        'default_head' => 'CodeIgniter\\Pager\\Views\\default_head',
+      ),
+       'perPage' => 20,
+    )),
     'Config\\View' => 
     \Config\View::__set_state(array(
        'saveData' => true,
@@ -713,16 +723,6 @@
         'list' => 'CodeIgniter\\Validation\\Views\\list',
         'single' => 'CodeIgniter\\Validation\\Views\\single',
       ),
-    )),
-    'Config\\Pager' => 
-    \Config\Pager::__set_state(array(
-       'templates' => 
-      array (
-        'default_full' => 'pagers/bootstrap5_pagination',
-        'default_simple' => 'CodeIgniter\\Pager\\Views\\default_simple',
-        'default_head' => 'CodeIgniter\\Pager\\Views\\default_head',
-      ),
-       'perPage' => 20,
     )),
   ),
 );

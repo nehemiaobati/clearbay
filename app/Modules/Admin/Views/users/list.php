@@ -23,8 +23,8 @@
       <h1 class="s-title m-0 mb-2">User Accounts</h1>
     </div>
     <div class="d-flex gap-2">
-      <a href="<?= url_to('admin.dashboard') ?>" class="btn btn-outline-secondary">Dashboard</a>
-      <a href="<?= url_to('admin.users.new') ?>" class="btn btn-primary">Add User Account +</a>
+      <a href="<?= url_to('admin.dashboard') ?>" class="btn btn-outline-secondary" style="min-height: 48px;">Dashboard</a>
+      <a href="<?= url_to('admin.users.new') ?>" class="btn btn-primary" style="min-height: 48px;">Add User Account +</a>
     </div>
   </div>
 
@@ -69,9 +69,10 @@
                 </td>
                 <td class="text-end">
                   <div class="d-flex gap-2 justify-content-end">
-                    <a href="<?= url_to('admin.users.edit', $u->id) ?>" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    <a href="<?= url_to('admin.users.edit', $u->id) ?>" class="btn btn-sm btn-outline-secondary" style="min-height: 48px; min-width: 48px;">Edit</a>
                     <a href="<?= url_to('admin.users.delete', $u->id) ?>"
-                      class="btn btn-sm btn-outline-danger"
+                      class="btn btn-sm btn-danger"
+                      style="min-height: 48px; min-width: 48px;"
                       onclick="return confirm('Are you sure you want to deactivate/delete this user?');">Delete</a>
                   </div>
                 </td>

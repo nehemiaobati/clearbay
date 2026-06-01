@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var string $page_title
  * @var string $meta_description
@@ -31,7 +32,7 @@
       </h1>
     </div>
     <div class="mt-3 mt-md-0">
-      <a href="<?= url_to('admin.handovers.new') ?>" class="btn btn-primary admin-btn-action">
+      <a href="<?= url_to('admin.handovers.new') ?>" class="btn btn-primary admin-btn-action" style="min-height: 48px;">
         Dispatch Handover +
       </a>
     </div>
@@ -64,21 +65,21 @@
               // Acuity Badge color mapping
               $acuityClass = 'wait-green';
               if ($handover->acuity === 'Critical') {
-                  $acuityClass = 'wait-red';
+                $acuityClass = 'wait-red';
               } elseif ($handover->acuity === 'Serious') {
-                  $acuityClass = 'wait-amber';
+                $acuityClass = 'wait-amber';
               }
 
               // Status Badge color mapping
               $statusClass = 'badge bg-secondary';
               if ($handover->status === 'En route') {
-                  $statusClass = 'badge bg-success text-dark';
+                $statusClass = 'badge bg-success text-dark';
               } elseif ($handover->status === 'Arrived') {
-                  $statusClass = 'badge bg-warning text-dark';
+                $statusClass = 'badge bg-warning text-dark';
               } elseif ($handover->status === 'Acknowledged') {
-                  $statusClass = 'badge bg-info text-dark';
+                $statusClass = 'badge bg-info text-dark';
               } elseif ($handover->status === 'Preparing') {
-                  $statusClass = 'badge bg-primary text-dark';
+                $statusClass = 'badge bg-primary text-dark';
               }
               ?>
               <tr>
@@ -107,12 +108,13 @@
                 </td>
                 <td class="text-end">
                   <div class="d-inline-flex gap-2">
-                    <a href="<?= url_to('admin.handovers.edit', $handover->id) ?>" class="btn btn-outline-secondary btn-sm px-3 py-2 d-inline-block admin-btn-edit">
+                    <a href="<?= url_to('admin.handovers.edit', $handover->id) ?>" class="btn btn-outline-secondary btn-sm px-3 py-2 d-inline-block admin-btn-edit" style="min-height: 48px; min-width: 48px;">
                       Edit
                     </a>
-                    <a href="<?= url_to('admin.handovers.delete', $handover->id) ?>" 
-                       class="btn btn-danger btn-sm px-3 py-2 d-inline-block admin-btn-delete" 
-                       onclick="return confirm('Are you sure you want to delete this handover record?');">
+                    <a href="<?= url_to('admin.handovers.delete', $handover->id) ?>"
+                      class="btn btn-danger btn-sm px-3 py-2 d-inline-block admin-btn-delete"
+                      style="min-height: 48px; min-width: 48px;"
+                      onclick="return confirm('Are you sure you want to delete this handover record?');">
                       Delete
                     </a>
                   </div>
@@ -122,7 +124,7 @@
           </tbody>
         </table>
       </div>
-      
+
       <!-- Pagination -->
       <?php if ($pager) : ?>
         <div class="mt-4 d-flex justify-content-center admin-pager">

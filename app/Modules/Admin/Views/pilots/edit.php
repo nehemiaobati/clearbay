@@ -103,9 +103,9 @@ $isEdit = isset($pilot) && $pilot->id;
                     'Other'
                   ];
                   $currentRole = old('userRole', $pilot->user_role ?? '');
-                  foreach ($roles as $role) :
+                  foreach ($roles as $roleOption) :
                   ?>
-                    <option value="<?= esc($role) ?>" <?= $currentRole === $role ? 'selected' : '' ?>><?= esc($role) ?></option>
+                    <option value="<?= esc($roleOption) ?>" <?= $currentRole === $roleOption ? 'selected' : '' ?>><?= esc($roleOption) ?></option>
                   <?php endforeach; ?>
                 </select>
                 <?php if (session('errors.userRole')) : ?>
@@ -136,10 +136,10 @@ $isEdit = isset($pilot) && $pilot->id;
           </div>
 
           <div class="d-flex align-items-center gap-3 mt-4">
-            <button type="submit" class="btn btn-primary admin-btn-submit">
+            <button type="submit" class="btn btn-primary admin-btn-submit" style="min-height: 48px;">
               <?= $isEdit ? 'Save Changes' : 'Create Application' ?>
             </button>
-            <a href="<?= url_to('admin.pilots.list') ?>" class="btn btn-outline-secondary admin-btn-submit">
+            <a href="<?= url_to('admin.pilots.list') ?>" class="btn btn-outline-secondary admin-btn-submit" style="min-height: 48px;">
               Cancel
             </a>
           </div>

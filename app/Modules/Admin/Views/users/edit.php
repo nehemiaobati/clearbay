@@ -82,7 +82,7 @@ $isEdit = isset($user);
             <?php endif; ?>
           </div>
 
-          <!-- Hospital mapping select (visible only for nurse / hospital_admin) -->
+          <!-- Hospital mapping (visible only for nurse / hospital_admin) -->
           <div class="mb-3 d-none" id="hospitalGroup">
             <label for="hospitalSelect" class="form-label">Map to Hospital Facility</label>
             <select name="hospital_id" id="hospitalSelect" class="form-select">
@@ -93,7 +93,7 @@ $isEdit = isset($user);
             </select>
           </div>
 
-          <!-- EMS Provider mapping select (visible only for paramedic) -->
+          <!-- EMS Provider mapping (visible only for paramedic) -->
           <div class="mb-3 d-none" id="emsGroup">
             <label for="emsSelect" class="form-label">Map to EMS Service Provider</label>
             <select name="ems_provider_id" id="emsSelect" class="form-select">
@@ -104,7 +104,7 @@ $isEdit = isset($user);
             </select>
           </div>
 
-          <!-- Active Status Select -->
+          <!-- Active Status -->
           <div class="mb-4">
             <label for="activeSelect" class="form-label">Account Status</label>
             <select name="active" id="activeSelect" class="form-select" required>
@@ -125,10 +125,10 @@ $isEdit = isset($user);
 
           <!-- Actions -->
           <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-primary py-3 fw-bold fs-6">
+            <button type="submit" class="btn btn-primary py-3 fw-bold fs-6" style="min-height: 48px;">
               <?= $isEdit ? 'Save Changes' : 'Register Account' ?>
             </button>
-            <a href="<?= url_to('admin.users.list') ?>" class="btn btn-outline-secondary py-3 fw-bold fs-6">
+            <a href="<?= url_to('admin.users.list') ?>" class="btn btn-outline-secondary py-3 fw-bold fs-6" style="min-height: 48px;">
               Cancel
             </a>
           </div>

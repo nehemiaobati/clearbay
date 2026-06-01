@@ -54,7 +54,7 @@ $isEdit = isset($handover) && $handover->id;
           <?= csrf_field() ?>
 
           <div class="row">
-            <!-- Ambulance unit lookup select -->
+            <!-- Ambulance unit lookup -->
             <div class="col-md-6 mb-4">
               <div>
                 <label for="ambulanceId" class="form-label">Ambulance Unit *</label>
@@ -75,7 +75,7 @@ $isEdit = isset($handover) && $handover->id;
               </div>
             </div>
 
-            <!-- Hospital destination lookup select -->
+            <!-- Hospital destination lookup -->
             <div class="col-md-6 mb-4">
               <div>
                 <label for="hospitalId" class="form-label">Destination Hospital *</label>
@@ -139,9 +139,9 @@ $isEdit = isset($handover) && $handover->id;
                   <?php
                   $acuities = ['Critical', 'Serious', 'Stable'];
                   $currentAcuity = old('acuity', $handover->acuity ?? '');
-                  foreach ($acuities as $acuity) :
+                  foreach ($acuities as $acuityOption) :
                   ?>
-                    <option value="<?= esc($acuity) ?>" <?= $currentAcuity === $acuity ? 'selected' : '' ?>><?= esc($acuity) ?></option>
+                    <option value="<?= esc($acuityOption) ?>" <?= $currentAcuity === $acuityOption ? 'selected' : '' ?>><?= esc($acuityOption) ?></option>
                   <?php endforeach; ?>
                 </select>
                 <?php if (session('errors.acuity')) : ?>
@@ -177,7 +177,7 @@ $isEdit = isset($handover) && $handover->id;
               </div>
             </div>
 
-            <!-- Status Level -->
+            <!-- Status -->
             <div class="col-md-4 mb-4">
               <div>
                 <label for="status" class="form-label">Dispatch / Queue Status *</label>
@@ -186,9 +186,9 @@ $isEdit = isset($handover) && $handover->id;
                   <?php
                   $statuses = ['En route', 'Arrived', 'Acknowledged', 'Preparing', 'Cleared'];
                   $currentStatus = old('status', $handover->status ?? '');
-                  foreach ($statuses as $status) :
+                  foreach ($statuses as $statusOption) :
                   ?>
-                    <option value="<?= esc($status) ?>" <?= $currentStatus === $status ? 'selected' : '' ?>><?= esc($status) ?></option>
+                    <option value="<?= esc($statusOption) ?>" <?= $currentStatus === $statusOption ? 'selected' : '' ?>><?= esc($statusOption) ?></option>
                   <?php endforeach; ?>
                 </select>
                 <?php if (session('errors.status')) : ?>
@@ -199,10 +199,10 @@ $isEdit = isset($handover) && $handover->id;
           </div>
 
           <div class="d-flex align-items-center gap-3 mt-4">
-            <button type="submit" class="btn btn-primary admin-btn-submit">
+            <button type="submit" class="btn btn-primary admin-btn-submit" style="min-height: 48px;">
               <?= $isEdit ? 'Save Changes' : 'Dispatch Handover' ?>
             </button>
-            <a href="<?= url_to('admin.handovers.list') ?>" class="btn btn-outline-secondary admin-btn-submit">
+            <a href="<?= url_to('admin.handovers.list') ?>" class="btn btn-outline-secondary admin-btn-submit" style="min-height: 48px;">
               Cancel
             </a>
           </div>
