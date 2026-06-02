@@ -160,7 +160,8 @@ class DispatcherService
         // 1. Fetch only necessary ambulance telemetry
         /** @var \App\Modules\Ambulance\Entities\Ambulance[] $ambulances */
         $ambulances = $this->ambulance_model
-            ->select('id, ems_provider_id, unit_id, registration, current_lat, current_lng, status, last_updated')
+            ->select('ambulances.id, ambulances.ems_provider_id, ambulances.unit_id, ambulances.registration, ambulances.current_lat, ambulances.current_lng, ambulances.status, ambulances.last_updated, ems_providers.name as provider')
+            ->join('ems_providers', 'ems_providers.id = ambulances.ems_provider_id', 'left')
             ->findAll();
 
         // 2. Fetch only necessary hospital telemetry

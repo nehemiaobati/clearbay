@@ -50,19 +50,21 @@
       </div>
 
       <!-- Password Input -->
-      <div class="mb-4 position-relative">
+      <div class="mb-4">
         <label for="password" class="form-label">Password *</label>
-        <input type="password"
-          name="password"
-          id="password"
-          class="form-control pe-5 <?= session('errors.password') ? 'is-invalid' : '' ?>"
-          placeholder="Password"
-          required>
-        <button type="button"
-          id="togglePassword"
-          class="btn btn-sm btn-outline-secondary position-absolute end-0 top-0 mt-2 me-2"
-          aria-label="Toggle password visibility"
-          style="min-height: 36px; min-width: 48px; z-index: 5;">Show</button>
+        <div class="position-relative">
+          <input type="password"
+            name="password"
+            id="password"
+            class="form-control pe-5 <?= session('errors.password') ? 'is-invalid' : '' ?>"
+            placeholder="Password"
+            required>
+          <button type="button"
+            id="togglePassword"
+            class="btn btn-sm btn-outline-secondary position-absolute end-0 top-50 translate-middle-y me-2"
+            aria-label="Toggle password visibility"
+            style="min-height: 36px; min-width: 48px; z-index: 5;">Show</button>
+        </div>
         <?php if (session('errors.password')) : ?>
           <div class="invalid-feedback">
             <?= (string) esc(session('errors.password')) ?>

@@ -61,6 +61,7 @@ $meta_image = $meta_image ?? base_url('assets/images/brand.png');
       <div class="logo-mark"></div>
       <span class="logo-name">ClearBay</span>
     </a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
     <ul class="nav-pills">
       <li><a href="<?= $home_url ?>#problem">Problem</a></li>
       <li><a href="<?= $home_url ?>#how">Solution</a></li>
@@ -114,7 +115,6 @@ $meta_image = $meta_image ?? base_url('assets/images/brand.png');
       <li><a href="<?= $home_url ?>#how">Solution</a></li>
       <li><a href="<?= $home_url ?>#serve">Who We Serve</a></li>
       <li><a href="<?= $home_url ?>#evidence">Research</a></li>
-      <li><a href="<?= url_to('auth.login') ?>">Login</a></li>
       <li><a href="mailto:info@clearbayhealthke.com">info@clearbayhealthke.com</a></li>
       <li><a href="#">© 2026 ClearBay Health Ltd</a></li>
     </ul>
@@ -125,6 +125,20 @@ $meta_image = $meta_image ?? base_url('assets/images/brand.png');
 
   <!-- Project JS Application script -->
   <script src="<?= base_url('js/app.js') ?>" defer></script>
+
+  <!-- Mobile hamburger toggle -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggle = document.getElementById('menuToggle');
+      const menu = document.querySelector('.nav-pills');
+      if (toggle && menu) {
+        toggle.addEventListener('click', () => {
+          const expanded = menu.classList.toggle('show');
+          toggle.setAttribute('aria-expanded', expanded);
+        });
+      }
+    });
+  </script>
 </body>
 
 </html>

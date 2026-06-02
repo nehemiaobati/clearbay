@@ -138,26 +138,5 @@
         'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Auth/Views/login.php',
       ),
     ),
-    'App\\Modules\\Hospital\\Views\\dashboard.php' => 
-    array (
-      'Views' => 
-      array (
-        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Hospital/Views/dashboard.php',
-      ),
-    ),
-    'App\\Modules\\Ambulance\\Views\\home.php' => 
-    array (
-      'Views' => 
-      array (
-        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Ambulance/Views/home.php',
-      ),
-    ),
-    'App\\Modules\\Dispatcher\\Views\\map.php' => 
-    array (
-      'Views' => 
-      array (
-        'php' => '/Users/nehemia/Documents/DEV/green/app/Modules/Dispatcher/Views/map.php',
-      ),
-    ),
   ),
 );
