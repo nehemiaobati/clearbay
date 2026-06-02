@@ -21,6 +21,7 @@ class MainSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call('App\Modules\Hospital\Database\Seeds\ClearBaySeeder');
         $this->call('App\Modules\Pilot\Database\Seeds\PilotSignupSeeder');
         $this->call('App\Modules\Queue\Database\Seeds\QueueSeeder');
     }
