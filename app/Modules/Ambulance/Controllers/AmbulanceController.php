@@ -57,7 +57,7 @@ class AmbulanceController extends BaseController
     {
         $ambulance = $this->_getActiveAmbulance();
         if ($ambulance === null) {
-            return redirect()->to(url_to('auth.login'))->with('error', 'Session invalid or vehicle mapping missing.');
+            return redirect()->to(url_to('auth.logout'))->with('error', 'Session invalid or vehicle mapping missing.');
         }
 
         // Check for active run and redirect to it (Tab State Restorer)

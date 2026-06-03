@@ -120,7 +120,13 @@ class AuthController extends BaseController
      */
     public function logout(): RedirectResponse
     {
+        $error = session()->getFlashdata('error');
         $this->auth_service->logout();
-        return redirect()->to(url_to('auth.login'))->with('success', 'You have been logged out successfully.');
+
+        $redirect = redirect()->to(url_to('auth.login'));
+        if ($error) {
+            return $redirect->with('error', $error);
+        }
+        return $redirect->with('success', 'You have been logged out successfully.');
     }
 }

@@ -24,6 +24,20 @@ class AuthFilter implements FilterInterface
     public function before(RequestInterface $request, $arguments = null)
     {
         if (! session()->get('is_logged_in')) {
+            // If it's an AJAX request, return JSON with 401 Unauthorized status instead of a redirect
+            if (method_exists($request, 'isAJAX') && $request->isAJAX()) {
+                /** @var ResponseInterface $response */
+                $response = service('response');
+                $response->setHeader('Content-Type', 'application/json');
+                $response->setBody(json_encode([
+                    'status'     => 'error',
+                    'message'    => 'Session expired.',
+                    'csrf_token' => csrf_hash()
+                ]));
+                $response->setStatusCode(401);
+                return $response;
+            }
+
             // Save the intended URL for post-login redirect
             session()->set('redirect_url', current_url());
 

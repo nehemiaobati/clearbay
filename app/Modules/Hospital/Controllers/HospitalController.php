@@ -53,7 +53,7 @@ class HospitalController extends BaseController
     {
         $hospital = $this->_getMappedHospital();
         if ($hospital === null) {
-            return redirect()->to(url_to('auth.login'))->with('error', 'Authentication session is invalid or you are not mapped to a facility.');
+            return redirect()->to(url_to('auth.logout'))->with('error', 'Your account is not mapped to a hospital facility. Please contact an administrator.');
         }
 
         $data = [
@@ -204,7 +204,7 @@ class HospitalController extends BaseController
     {
         $hospital = $this->_getMappedHospital();
         if ($hospital === null) {
-            return redirect()->to(url_to('auth.login'))->with('error', 'Session invalid.');
+            return redirect()->to(url_to('auth.logout'))->with('error', 'Your account is not mapped to a hospital facility. Please contact an administrator.');
         }
 
         $range = (string) ($this->request->getGet('range') ?? '7');

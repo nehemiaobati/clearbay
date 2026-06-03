@@ -36,7 +36,10 @@ class RoleFilter implements FilterInterface
             return; // No role restrictions specified, allow access
         }
 
-        $allowed_roles = explode(',', $arguments[0]);
+        $allowed_roles = [];
+        foreach ($arguments as $arg) {
+            $allowed_roles = array_merge($allowed_roles, explode(',', $arg));
+        }
 
         if (!in_array($user_role, $allowed_roles, true)) {
             // AJAX requests get JSON error (header check to avoid interface type conflict)
@@ -51,6 +54,12 @@ class RoleFilter implements FilterInterface
                 ]));
                 $response->setStatusCode(403);
                 return $response;
+            }
+
+            // Safe fallback redirect to avoid redirect loops if there is no referer or referer is the same page
+            $referrer = $request->getHeaderLine('Referer');
+            if (empty($referrer) || urldecode(current_url()) === urldecode($referrer)) {
+                return redirect()->to(url_to('home'))->with('error', 'You do not have permission to access this resource.');
             }
 
             return redirect()->back()->with('error', 'You do not have permission to access this resource.');
