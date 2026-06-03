@@ -9,7 +9,7 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-$routes->group('dispatcher', ['namespace' => 'App\Modules\Dispatcher\Controllers', 'filter' => 'auth'], static function ($routes) {
+$routes->group('dispatcher', ['namespace' => 'App\Modules\Dispatcher\Controllers', 'filter' => ['auth', 'role:dispatcher']], static function ($routes) {
     $routes->get('/', 'DispatcherController::index', ['as' => 'dispatcher.index']);
     $routes->get('fleet-status', 'DispatcherController::fleetStatus', ['as' => 'dispatcher.fleet']);
     $routes->post('alerts/(:num)/acknowledge', 'DispatcherController::acknowledgeAlert/$1', ['as' => 'dispatcher.alert.acknowledge']);

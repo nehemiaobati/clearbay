@@ -53,16 +53,47 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const preId = <?= $pre_id ?>;
+    let gpsWatchId = null;
+    let isRunComplete = false;
 
-    // Telemetry Polling (every 5 seconds)
+    // --- GPS Tracking (Event-Driven: starts on page load, clears on completion) ---
+    if (navigator.geolocation) {
+      gpsWatchId = navigator.geolocation.watchPosition(
+        (position) => {
+          const {
+            latitude,
+            longitude
+          } = position.coords;
+
+          const formData = new FormData();
+          formData.append('lat', latitude.toFixed(6));
+          formData.append('lng', longitude.toFixed(6));
+
+          fetch('<?= url_to('ambulance.location.update') ?>', {
+            method: 'POST',
+            body: formData
+          }).catch(err => console.error('Telemetry push failed:', err));
+        },
+        (error) => {
+          console.error('GPS Error:', error.message);
+        }, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    }
+
+    // --- Status Polling (every 5 seconds) ---
     const pollStatus = async () => {
+      if (isRunComplete) return;
+
       try {
         const runUrl = '<?= url_to('ambulance.active_run', $pre_id) ?>';
         const apiResponse = await fetch(runUrl + '?ajax=1');
         if (!apiResponse.ok) return;
 
         const data = await apiResponse.json();
-
         if (data.status === 'success') {
           updateUI(data.result);
         }
@@ -96,7 +127,14 @@
         feed.innerHTML = '<strong class="text-success">✔ Bay is being prepared for your arrival.</strong> ED clinicians are standing by.';
         radar.className = 'spinner-grow text-success active-run-radar';
       } else if (run.status === 'Cleared') {
-        // Confirmed clear!
+        // Confirmed clear — kill GPS and polling
+        isRunComplete = true;
+
+        if (gpsWatchId !== null) {
+          navigator.geolocation.clearWatch(gpsWatchId);
+          gpsWatchId = null;
+        }
+
         mainText.textContent = 'Handover Confirmed';
         mainText.className = 'h3 fw-bold text-success mb-2';
         feed.textContent = 'Handover completed. Crew is cleared and free to return to service.';

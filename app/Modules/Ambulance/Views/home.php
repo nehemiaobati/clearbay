@@ -144,28 +144,10 @@
         .addTo(map);
     });
 
-    // 4. GPS Telemetry Coordinate Streamer (Simulated update every 30s)
-    const streamLocation = async () => {
-      const offsetLat = (Math.random() - 0.5) * 0.002;
-      const offsetLng = (Math.random() - 0.5) * 0.002;
-      const simLat = myLat + offsetLat;
-      const simLng = myLng + offsetLng;
-
-      try {
-        const formData = new FormData();
-        formData.append('lat', simLat.toFixed(6));
-        formData.append('lng', simLng.toFixed(6));
-
-        await fetch('<?= url_to('ambulance.location.update') ?>', {
-          method: 'POST',
-          body: formData
-        });
-      } catch (err) {
-        console.error('Telemetry update failed:', err);
-      }
-    };
-
-    setInterval(streamLocation, 30000);
+    // GPS Telemetry is NOT activated on the home screen.
+    // Tracking is event-driven: it starts only when the paramedic
+    // enters an Active Run (SC-11) and ends when the handover is cleared.
+    // See active_run.php for the GPS watchPosition implementation.
   });
 </script>
 

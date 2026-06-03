@@ -49,32 +49,7 @@ class AmbulanceController extends BaseController
     }
 
     /**
-     * Calculates simple distance using Haversine formula.
-     *
-     * @param float $lat1
-     * @param float $lon1
-     * @param float $lat2
-     * @param float $lon2
-     * @return float
-     */
-    private function _haversineDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
-    {
-        $earth_radius = 6371; // Kilometers
-
-        $d_lat = deg2rad($lat2 - $lat1);
-        $d_lon = deg2rad($lon2 - $lon1);
-
-        $a = sin($d_lat / 2) * sin($d_lat / 2) +
-            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
-            sin($d_lon / 2) * sin($d_lon / 2);
-
-        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-
-        return round($earth_radius * $c, 1);
-    }
-
-    /**
-     * Renders the mobile-responsive home dashboard (SC-07).
+     * Renders the mobile-responsive home dashboard (SC-07) or redirects to active run.
      *
      * @return ResponseInterface|string
      */
@@ -85,10 +60,22 @@ class AmbulanceController extends BaseController
             return redirect()->to(url_to('auth.login'))->with('error', 'Session invalid or vehicle mapping missing.');
         }
 
+        // Check for active run and redirect to it (Tab State Restorer)
+        // Verifies the pre-notification record actually exists to prevent redirect loops
+        if ($this->ambulance_service->hasActiveRun((int) $ambulance->id)) {
+            $pre_id = $this->ambulance_service->getActiveRunId((int) $ambulance->id);
+            if ($pre_id !== null && $pre_id > 0) {
+                $status = $this->ambulance_service->getActiveRunStatus($pre_id);
+                if (!empty($status)) {
+                    return redirect()->to(url_to('ambulance.active_run', $pre_id));
+                }
+            }
+        }
+
         // Fetch hospitals
         $hospitals = $this->ambulance_service->getHospitals();
 
-        // Sort by distance (Haversine)
+        // Sort by distance
         $hosp_list = [];
         $my_lat = $ambulance->current_lat ?? -1.2921; // Nairobi default
         $my_lng = $ambulance->current_lng ?? 36.8219;
@@ -96,12 +83,17 @@ class AmbulanceController extends BaseController
         foreach ($hospitals as $h) {
             $h_lat = (float) $h->lat;
             $h_lng = (float) $h->lng;
-            $dist  = $this->_haversineDistance((float) $my_lat, (float) $my_lng, $h_lat, $h_lng);
+            $eta   = $this->ambulance_service->calculateEta(
+                (float) $my_lat,
+                (float) $my_lng,
+                $h_lat,
+                $h_lng
+            );
 
             $hosp_list[] = [
                 'hospital' => $h,
-                'distance' => $dist,
-                'eta'      => (int) round($dist * 2.5 + 2), // Rough traffic ETA calculation
+                'distance' => $eta, // Reuse ETA value as distance metric for sorting
+                'eta'      => $eta,
             ];
         }
 
@@ -158,6 +150,17 @@ class AmbulanceController extends BaseController
     public function preNotifyForm(string $id): string|RedirectResponse
     {
         $hospital_id = (int) $id;
+        $ambulance = $this->_getActiveAmbulance();
+
+        if ($ambulance === null) {
+            return redirect()->to(url_to('auth.login'))->with('error', 'Session invalid.');
+        }
+
+        // Concurrency lock: block form if active run exists
+        if ($this->ambulance_service->hasActiveRun((int) $ambulance->id)) {
+            return redirect()->to(url_to('ambulance.home'))->with('error', 'You already have an active run. Complete it before starting a new one.');
+        }
+
         $details = $this->ambulance_service->getHospitalDetails($hospital_id);
 
         if (empty($details)) {
@@ -168,11 +171,14 @@ class AmbulanceController extends BaseController
             return redirect()->back()->with('error', 'Facility is full. Please select another.');
         }
 
-        $ambulance = $this->_getActiveAmbulance();
         $my_lat = $ambulance->current_lat ?? -1.2921;
         $my_lng = $ambulance->current_lng ?? 36.8219;
-        $dist  = $this->_haversineDistance((float) $my_lat, (float) $my_lng, (float) $details['hospital']->lat, (float) $details['hospital']->lng);
-        $eta   = (int) round($dist * 2.5 + 2);
+        $eta    = $this->ambulance_service->calculateEta(
+            (float) $my_lat,
+            (float) $my_lng,
+            (float) $details['hospital']->lat,
+            (float) $details['hospital']->lng
+        );
 
         $data = [
             'page_title'       => 'Pre-Notify ED | ClearBay',
@@ -221,6 +227,24 @@ class AmbulanceController extends BaseController
             ]);
         }
 
+        $ambulance = $this->_getActiveAmbulance();
+        if ($ambulance === null) {
+            return $this->response->setJSON([
+                'status'     => 'error',
+                'message'    => 'Vehicle mapping missing.',
+                'csrf_token' => csrf_hash()
+            ]);
+        }
+
+        // Concurrency lock: block submission if active run exists
+        if ($this->ambulance_service->hasActiveRun((int) $ambulance->id)) {
+            return $this->response->setJSON([
+                'status'     => 'error',
+                'message'    => 'You already have an active run. Complete it before starting a new one.',
+                'csrf_token' => csrf_hash()
+            ]);
+        }
+
         $hospital_id     = (int) $this->request->getPost('hospital_id');
         $patient_age     = (int) $this->request->getPost('patient_age');
         $patient_sex     = (string) $this->request->getPost('patient_sex');
@@ -265,6 +289,12 @@ class AmbulanceController extends BaseController
     public function activeRun(string $id): ResponseInterface|string
     {
         $pre_id = (int) $id;
+
+        // Guard against invalid or zero ID to prevent redirect loops
+        if ($pre_id <= 0) {
+            return redirect()->to(url_to('ambulance.home'))->with('error', 'Invalid run identifier.');
+        }
+
         $status = $this->ambulance_service->getActiveRunStatus($pre_id);
 
         if (empty($status)) {
@@ -299,7 +329,7 @@ class AmbulanceController extends BaseController
     }
 
     /**
-     * REST Endpoint updating paramedic's current coordinates every 30s with CSRF rotation.
+     * REST Endpoint updating paramedic's current coordinates every 30s with dynamic ETA recalculation.
      *
      * @return ResponseInterface
      */
@@ -330,19 +360,69 @@ class AmbulanceController extends BaseController
         $lat = (float) $this->request->getPost('lat');
         $lng = (float) $this->request->getPost('lng');
 
-        $success = $this->ambulance_service->updateLocation((int) $ambulance->id, $lat, $lng);
+        // Retrieve the target hospital coordinates from active handover
+        /** @var \App\Modules\Hospital\Models\HandoverModel $handover_model */
+        $handover_model = model('App\Modules\Hospital\Models\HandoverModel');
+        /** @var \App\Modules\Hospital\Entities\Handover|null $handover */
+        $handover = $handover_model
+            ->where('ambulance_id', (int) $ambulance->id)
+            ->where('status !=', 'Cleared')
+            ->first();
 
-        if (!$success) {
+        if ($handover === null) {
+            // No active handover — just update coordinates without ETA
+            $success = $this->ambulance_service->updateCoordinatesOnly((int) $ambulance->id, $lat, $lng);
+
+            if (!$success) {
+                return $this->response->setJSON([
+                    'status'     => 'error',
+                    'message'    => 'Failed to save location.',
+                    'csrf_token' => csrf_hash()
+                ]);
+            }
+
+            return $this->response->setJSON([
+                'status'     => 'success',
+                'message'    => 'Location synchronized.',
+                'csrf_token' => csrf_hash()
+            ]);
+        }
+
+        // Load hospital to get destination coordinates
+        /** @var \App\Modules\Hospital\Models\HospitalModel $hospital_model */
+        $hospital_model = model('App\Modules\Hospital\Models\HospitalModel');
+        /** @var \App\Modules\Hospital\Entities\Hospital|null $hospital */
+        $hospital = $hospital_model->find($handover->hospital_id);
+
+        if ($hospital === null) {
             return $this->response->setJSON([
                 'status'     => 'error',
-                'message'    => 'Failed to save location updates.',
+                'message'    => 'Destination hospital not found.',
+                'csrf_token' => csrf_hash()
+            ]);
+        }
+
+        // Update location with dynamic ETA calculation
+        $result = $this->ambulance_service->updateLocation(
+            (int) $ambulance->id,
+            $lat,
+            $lng,
+            (float) $hospital->lat,
+            (float) $hospital->lng
+        );
+
+        if (!$result['success']) {
+            return $this->response->setJSON([
+                'status'     => 'error',
+                'message'    => 'Failed to save location and update ETA.',
                 'csrf_token' => csrf_hash()
             ]);
         }
 
         return $this->response->setJSON([
             'status'     => 'success',
-            'message'    => 'Ambulance location coordinates synchronized.',
+            'message'    => 'Ambulance location synchronized.',
+            'result'     => ['eta_minutes' => $result['eta']],
             'csrf_token' => csrf_hash()
         ]);
     }

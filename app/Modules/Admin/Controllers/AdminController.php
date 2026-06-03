@@ -369,6 +369,9 @@ class AdminController extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
+        $old_status = $handover->status;
+        $new_status = (string) $this->request->getPost('status');
+
         $handover->ambulance_id       = (int) $this->request->getPost('ambulanceId');
         $handover->hospital_id        = (int) $this->request->getPost('hospitalId');
         $handover->patient_age        = (int) $this->request->getPost('patientAge');
@@ -376,7 +379,12 @@ class AdminController extends BaseController
         $handover->acuity             = (string) $this->request->getPost('acuity');
         $handover->eta_minutes        = (int) $this->request->getPost('etaMinutes');
         $handover->wait_time_minutes  = (int) $this->request->getPost('waitTimeMinutes');
-        $handover->status             = (string) $this->request->getPost('status');
+        $handover->status             = $new_status;
+
+        // Admin-only arrival declaration: record timestamp on transition to 'Arrived'
+        if ($old_status === 'En route' && $new_status === 'Arrived') {
+            $handover->arrived_at = date('Y-m-d H:i:s');
+        }
 
         $success = $this->admin_service->saveHandover($handover);
 

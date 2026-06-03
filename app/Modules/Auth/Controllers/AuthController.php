@@ -20,14 +20,14 @@ class AuthController extends BaseController
     /**
      * @var AuthService
      */
-    private AuthService $_auth_service;
+    private AuthService $auth_service;
 
     /**
      * AuthController constructor.
      */
     public function __construct()
     {
-        $this->_auth_service = new AuthService();
+        $this->auth_service = new AuthService();
         helper(['form', 'url']);
     }
 
@@ -61,8 +61,8 @@ class AuthController extends BaseController
      */
     public function loginView(): string|RedirectResponse
     {
-        if ($this->_auth_service->isLoggedIn()) {
-            $user = $this->_auth_service->getCurrentUser();
+        if ($this->auth_service->isLoggedIn()) {
+            $user = $this->auth_service->getCurrentUser();
             if ($user !== null) {
                 return redirect()->to(url_to($this->_getRedirectRoute($user)));
             }
@@ -97,7 +97,7 @@ class AuthController extends BaseController
         $email    = (string) $this->request->getPost('email');
         $password = (string) $this->request->getPost('password');
 
-        $user = $this->_auth_service->login($email, $password);
+        $user = $this->auth_service->login($email, $password);
 
         if ($user === null) {
             return redirect()->back()->withInput()->with('error', 'Incorrect email or password. Please try again.');
@@ -120,7 +120,7 @@ class AuthController extends BaseController
      */
     public function logout(): RedirectResponse
     {
-        $this->_auth_service->logout();
+        $this->auth_service->logout();
         return redirect()->to(url_to('auth.login'))->with('success', 'You have been logged out successfully.');
     }
 }
