@@ -5,7 +5,7 @@
  * @var string $meta_description
  * @var string $canonical_url
  * @var string $robots_tag
- * @var \App\Modules\Queue\Entities\Hospital|null $hospital
+ * @var \App\Modules\Hospital\Entities\Hospital|null $hospital
  */
 $isEdit = isset($hospital) && $hospital->id;
 ?>
@@ -104,6 +104,72 @@ $isEdit = isset($hospital) && $hospital->id;
                   <div class="invalid-feedback"><?= esc(session('errors.status')) ?></div>
                 <?php endif; ?>
               </div>
+            </div>
+          </div>
+
+          <!-- Section: Capacity & Location -->
+          <h5 class="mono-label text-muted mt-4 mb-3 border-bottom border-secondary border-opacity-10 pb-2">Capacity & Location</h5>
+
+          <div class="row">
+            <div class="col-md-4 mb-4">
+              <div>
+                <label for="bays_available" class="form-label">Available Bays</label>
+                <input type="number" id="bays_available" name="bays_available" class="form-control <?= session('errors.bays_available') ? 'is-invalid' : '' ?>" min="0" placeholder="0"
+                  value="<?= esc(old('bays_available', $hospital->bays_available ?? 0)) ?>">
+                <?php if (session('errors.bays_available')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.bays_available')) ?></div>
+                <?php endif; ?>
+              </div>
+            </div>
+            <div class="col-md-4 mb-4">
+              <div>
+                <label for="lat" class="form-label">Latitude</label>
+                <input type="text" id="lat" name="lat" class="form-control <?= session('errors.lat') ? 'is-invalid' : '' ?>" placeholder="-1.2921"
+                  value="<?= esc(old('lat', $hospital->lat ?? '')) ?>">
+                <?php if (session('errors.lat')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.lat')) ?></div>
+                <?php endif; ?>
+              </div>
+            </div>
+            <div class="col-md-4 mb-4">
+              <div>
+                <label for="lng" class="form-label">Longitude</label>
+                <input type="text" id="lng" name="lng" class="form-control <?= session('errors.lng') ? 'is-invalid' : '' ?>" placeholder="36.8219"
+                  value="<?= esc(old('lng', $hospital->lng ?? '')) ?>">
+                <?php if (session('errors.lng')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.lng')) ?></div>
+                <?php endif; ?>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-8 mb-4">
+              <div>
+                <label for="address" class="form-label">Address</label>
+                <input type="text" id="address" name="address" class="form-control <?= session('errors.address') ? 'is-invalid' : '' ?>" placeholder="Full address"
+                  value="<?= esc(old('address', $hospital->address ?? '')) ?>">
+                <?php if (session('errors.address')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.address')) ?></div>
+                <?php endif; ?>
+              </div>
+            </div>
+            <div class="col-md-4 mb-4">
+              <div>
+                <label for="contact_phone" class="form-label">Contact Phone</label>
+                <input type="text" id="contact_phone" name="contact_phone" class="form-control <?= session('errors.contact_phone') ? 'is-invalid' : '' ?>" placeholder="+254..."
+                  value="<?= esc(old('contact_phone', $hospital->contact_phone ?? '')) ?>">
+                <?php if (session('errors.contact_phone')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.contact_phone')) ?></div>
+                <?php endif; ?>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <div class="form-check form-switch">
+              <input type="checkbox" class="form-check-input" id="active" name="active" value="1" <?= (old('active', $hospital->active ?? 1) == 1) ? 'checked' : '' ?>>
+              <label class="form-check-label" for="active">Active Facility</label>
             </div>
           </div>
 

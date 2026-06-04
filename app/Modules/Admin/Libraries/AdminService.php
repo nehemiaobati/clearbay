@@ -6,12 +6,12 @@ namespace App\Modules\Admin\Libraries;
 
 use App\Modules\Pilot\Models\PilotSignupModel;
 use App\Modules\Pilot\Entities\PilotSignup;
-use App\Modules\Queue\Models\HandoverModel;
-use App\Modules\Queue\Entities\Handover;
-use App\Modules\Queue\Models\HospitalModel;
-use App\Modules\Queue\Entities\Hospital;
-use App\Modules\Queue\Models\AmbulanceModel;
-use App\Modules\Queue\Entities\Ambulance;
+use App\Modules\Hospital\Models\HandoverModel;
+use App\Modules\Hospital\Entities\Handover;
+use App\Modules\Hospital\Models\HospitalModel;
+use App\Modules\Hospital\Entities\Hospital;
+use App\Modules\Ambulance\Models\AmbulanceModel;
+use App\Modules\Ambulance\Entities\Ambulance;
 use App\Modules\Auth\Models\UserModel;
 use App\Modules\Auth\Entities\User;
 
@@ -389,7 +389,8 @@ class AdminService
     }
 
     /**
-     * Deletes a user record wrapped in a database transaction.
+     * Deactivates a user account (soft delete) to prevent login without data loss.
+     * Per PRD SC-16: "Deactivate a user account — this prevents them from logging in without deleting their data."
      *
      * @param int $id
      * @return bool
@@ -398,7 +399,7 @@ class AdminService
     {
         $db = \Config\Database::connect();
         $db->transStart();
-        $this->user_model->delete($id);
+        $this->user_model->update($id, ['active' => 0]);
         $db->transComplete();
         return $db->transStatus() !== false;
     }

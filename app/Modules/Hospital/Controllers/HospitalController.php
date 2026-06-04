@@ -126,6 +126,13 @@ class HospitalController extends BaseController
         $status         = (string) $this->request->getPost('status');
         $bays_available = (int) $this->request->getPost('bays_available');
 
+        // Role guard: only hospital_admin and admin can modify bay configuration (structural data)
+        $user_role = session()->get('user_role');
+        if ($user_role !== 'hospital_admin' && $user_role !== 'admin') {
+            // Nurses can update status color only, not bay count
+            $bays_available = (int) $hospital->bays_available;
+        }
+
         $success = $this->hospital_service->updateStatus((int) $hospital->id, $status, $bays_available, (int) $user_id);
 
         if (!$success) {

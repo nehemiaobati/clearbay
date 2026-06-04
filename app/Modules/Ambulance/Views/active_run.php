@@ -147,6 +147,16 @@
       }
     };
 
+    // Client-side ETA countdown between server polls
+    let displayedEta = <?= (int) ($status['eta_minutes'] ?? 0) ?>;
+    setInterval(() => {
+      if (isRunComplete) return;
+      if (displayedEta > 0) {
+        displayedEta--;
+        document.getElementById('etaDisplay').textContent = `${displayedEta} min`;
+      }
+    }, 60000);
+
     // Polling setup
     setInterval(pollStatus, 5000);
   });

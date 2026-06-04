@@ -285,7 +285,7 @@
         hMarker.style.cursor = 'pointer';
 
         hMarker.addEventListener('click', () => {
-          window.location.href = '/ambulance/hospital/' + h.id;
+          window.location.href = '<?= url_to('ambulance.hospital.detail', '__ID__') ?>'.replace('__ID__', h.id);
         });
 
         new mapboxgl.Marker(hMarker)

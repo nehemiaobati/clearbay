@@ -360,16 +360,10 @@ class AmbulanceController extends BaseController
         $lat = (float) $this->request->getPost('lat');
         $lng = (float) $this->request->getPost('lng');
 
-        // Retrieve the target hospital coordinates from active handover
-        /** @var \App\Modules\Hospital\Models\HandoverModel $handover_model */
-        $handover_model = model('App\Modules\Hospital\Models\HandoverModel');
-        /** @var \App\Modules\Hospital\Entities\Handover|null $handover */
-        $handover = $handover_model
-            ->where('ambulance_id', (int) $ambulance->id)
-            ->where('status !=', 'Cleared')
-            ->first();
+        // Retrieve the active handover and destination hospital via service
+        $active = $this->ambulance_service->getActiveHandoverWithHospital((int) $ambulance->id);
 
-        if ($handover === null) {
+        if ($active === null) {
             // No active handover — just update coordinates without ETA
             $success = $this->ambulance_service->updateCoordinatesOnly((int) $ambulance->id, $lat, $lng);
 
@@ -388,27 +382,13 @@ class AmbulanceController extends BaseController
             ]);
         }
 
-        // Load hospital to get destination coordinates
-        /** @var \App\Modules\Hospital\Models\HospitalModel $hospital_model */
-        $hospital_model = model('App\Modules\Hospital\Models\HospitalModel');
-        /** @var \App\Modules\Hospital\Entities\Hospital|null $hospital */
-        $hospital = $hospital_model->find($handover->hospital_id);
-
-        if ($hospital === null) {
-            return $this->response->setJSON([
-                'status'     => 'error',
-                'message'    => 'Destination hospital not found.',
-                'csrf_token' => csrf_hash()
-            ]);
-        }
-
         // Update location with dynamic ETA calculation
         $result = $this->ambulance_service->updateLocation(
             (int) $ambulance->id,
             $lat,
             $lng,
-            (float) $hospital->lat,
-            (float) $hospital->lng
+            (float) $active['hospital']->lat,
+            (float) $active['hospital']->lng
         );
 
         if (!$result['success']) {

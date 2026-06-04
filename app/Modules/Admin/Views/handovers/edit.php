@@ -5,7 +5,7 @@
  * @var string $meta_description
  * @var string $canonical_url
  * @var string $robots_tag
- * @var \App\Modules\Queue\Entities\Handover|null $handover
+ * @var \App\Modules\Hospital\Entities\Handover|null $handover
  * @var array $hospitals
  * @var array $ambulances
  */
@@ -195,6 +195,32 @@ $isEdit = isset($handover) && $handover->id;
                   <div class="invalid-feedback"><?= esc(session('errors.status')) ?></div>
                 <?php endif; ?>
               </div>
+            </div>
+          </div>
+
+          <!-- Section: Completion Details -->
+          <h5 class="mono-label text-muted mt-4 mb-3 border-bottom border-secondary border-opacity-10 pb-2">Completion Details</h5>
+
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <div>
+                <label for="bayNumber" class="form-label">Bay Number</label>
+                <input type="text" id="bayNumber" name="bayNumber" class="form-control <?= session('errors.bayNumber') ? 'is-invalid' : '' ?>" placeholder="e.g. Bay 3"
+                  value="<?= esc(old('bayNumber', $handover->bay_number ?? '')) ?>">
+                <?php if (session('errors.bayNumber')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.bayNumber')) ?></div>
+                <?php endif; ?>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <div>
+              <label for="notes" class="form-label">Handover Notes</label>
+              <textarea id="notes" name="notes" class="form-control <?= session('errors.notes') ? 'is-invalid' : '' ?>" rows="3" maxlength="200" placeholder="Optional notes (max 200 chars)"><?= esc(old('notes', $handover->notes ?? '')) ?></textarea>
+              <?php if (session('errors.notes')) : ?>
+                <div class="invalid-feedback"><?= esc(session('errors.notes')) ?></div>
+              <?php endif; ?>
             </div>
           </div>
 

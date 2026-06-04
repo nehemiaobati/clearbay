@@ -156,6 +156,34 @@ class AmbulanceService
     }
 
     /**
+     * Retrieves the active handover and its destination hospital for the given ambulance.
+     *
+     * @param int $ambulance_id
+     * @return array{handover: Handover, hospital: \App\Modules\Hospital\Entities\Hospital}|null
+     */
+    public function getActiveHandoverWithHospital(int $ambulance_id): ?array
+    {
+        /** @var Handover|null $handover */
+        $handover = $this->handover_model
+            ->where('ambulance_id', $ambulance_id)
+            ->where('status !=', 'Cleared')
+            ->first();
+
+        if ($handover === null) {
+            return null;
+        }
+
+        /** @var \App\Modules\Hospital\Entities\Hospital|null $hospital */
+        $hospital = $this->hospital_model->find($handover->hospital_id);
+
+        if ($hospital === null) {
+            return null;
+        }
+
+        return ['handover' => $handover, 'hospital' => $hospital];
+    }
+
+    /**
      * Updates active ambulance coordinates and recalculates dynamic ETA.
      *
      * @param int   $ambulance_id

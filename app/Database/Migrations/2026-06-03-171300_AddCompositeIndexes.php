@@ -12,6 +12,10 @@ use CodeIgniter\Database\Migration;
  * Adds composite indexes to optimize telemetry and queue lookups:
  * - handovers: [hospital_id, status] for dashboard queue queries
  * - ambulances: [ems_provider_id, status] for provider-based status scans
+ *
+ * Note: Raw ALTER TABLE is used because CI4 Forge does not support adding
+ * keys to existing tables without dropping/recreating them. This is an Add
+ * migration (not a Create migration), so raw SQL is the correct pattern.
  */
 class AddCompositeIndexes extends Migration
 {

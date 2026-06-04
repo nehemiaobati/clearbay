@@ -174,6 +174,11 @@ class HospitalService
         $db = \Config\Database::connect();
         $db->transStart();
 
+        // Ensure arrived_at is set for accurate wait time calculation
+        if ($handover->arrived_at === null) {
+            $handover->arrived_at = date('Y-m-d H:i:s');
+        }
+
         // Calculate wait time since arrived_at (or created_at if arrived_at null)
         $start_time = $handover->arrived_at ?? $handover->created_at;
         $end_time   = date('Y-m-d H:i:s');
