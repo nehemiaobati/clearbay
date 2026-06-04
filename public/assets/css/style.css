@@ -1110,6 +1110,27 @@ footer {
   overflow-y: auto;
 }
 
+/* Dispatcher sidebar: responsive width with no min-width on mobile */
+.dispatcher-sidebar {
+  min-width: 320px;
+  width: 100%;
+}
+
+/* Dispatcher search overlay: responsive width that doesn't overflow */
+.dispatcher-search-overlay {
+  width: min(280px, calc(100vw - 24px));
+}
+
+@media (max-width: 991.98px) {
+  .dispatcher-sidebar {
+    min-width: unset;
+    width: 100%;
+  }
+  .dispatcher-search-overlay {
+    width: min(200px, calc(100vw - 24px));
+  }
+}
+
 
 /* ════════════════ 12. MAPBOX POPUP OVERRIDES ════════════════ */
 

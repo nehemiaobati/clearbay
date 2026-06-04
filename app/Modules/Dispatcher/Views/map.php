@@ -11,7 +11,7 @@
 <?= $this->extend('layouts/default') ?>
 <?= $this->section('content') ?>
 
-<div class="container-fluid p-0 d-flex flex-column flex-lg-row gap-3 mt-5 pt-4 dispatcher-layout">
+<div class="container-fluid p-0 d-flex flex-column flex-lg-row gap-3 mt-5 pt-4 dispatcher-layout" style="overflow-x: hidden; overflow-y: auto;">
   <!-- Left Side: Map Area -->
   <div class="map-container flex-grow-1 position-relative" style="min-height: 400px;">
     <noscript>
@@ -22,7 +22,7 @@
     <div id="map" class="w-100 h-100"></div>
 
     <!-- Floating Map Control Search Bar -->
-    <div class="position-absolute top-0 end-0 m-3" style="z-index: 10; width: 280px;">
+    <div class="position-absolute top-0 end-0 m-3 dispatcher-search-overlay" style="z-index: 10;">
       <div class="input-group">
         <input type="text" id="unitSearchInput" class="form-control bg-dark border-secondary border-opacity-25 text-cream" placeholder="Search Unit ID (e.g. AAR-04)" aria-label="Search ambulance unit by ID">
         <button class="btn btn-outline-secondary" type="button" id="searchBtn" style="min-height: 48px;">Find</button>
@@ -31,7 +31,7 @@
   </div>
 
   <!-- Right Side: Sidebar Panels -->
-  <aside class="p-4 d-flex flex-column gap-4 border-start border-secondary border-opacity-10" style="min-width: 320px;">
+  <aside class="p-4 d-flex flex-column gap-4 border-start border-secondary border-opacity-10 dispatcher-sidebar">
     <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-10">
       <span class="mono-label text-muted">EMS Dispatcher Console</span>
       <div>
