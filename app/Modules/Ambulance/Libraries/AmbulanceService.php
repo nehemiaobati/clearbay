@@ -21,6 +21,10 @@ use App\Modules\Auth\Entities\User;
  */
 class AmbulanceService
 {
+    /** Default Nairobi center coordinates for server-side fallback when ambulance has no stored GPS. */
+    public const NAIROBI_LAT = -1.2921;
+    public const NAIROBI_LNG = 36.8219;
+
     /**
      * @var AmbulanceModel
      */
@@ -61,43 +65,130 @@ class AmbulanceService
     // --- Helper Methods ---
 
     /**
-     * Calculates the great-circle distance between two GPS coordinates using the Haversine formula.
+     * Calls the Mapbox Directions Matrix API for a single origin → destination pair.
      *
-     * @param float $lat1 Starting latitude in degrees.
-     * @param float $lon1 Starting longitude in degrees.
-     * @param float $lat2 Destination latitude in degrees.
-     * @param float $lon2 Destination longitude in degrees.
-     * @return float Distance in kilometers, rounded to one decimal.
+     * @param float $originLat  Source latitude.
+     * @param float $originLng  Source longitude.
+     * @param float $destLat    Destination latitude.
+     * @param float $destLng    Destination longitude.
+     * @return int|null Duration in minutes, or null on API failure.
      */
-    private function _haversineDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
+    private function _fetchMatrixEta(float $originLat, float $originLng, float $destLat, float $destLng): ?int
     {
-        $earth_radius = 6371; // Kilometers
+        $token = env('mapboxgl.accessToken');
+        if (empty($token)) {
+            return null;
+        }
 
-        $d_lat = deg2rad($lat2 - $lat1);
-        $d_lon = deg2rad($lon2 - $lon1);
+        $coords = "{$originLng},{$originLat};{$destLng},{$destLat}";
+        $url = "https://api.mapbox.com/directions-matrix/v1/mapbox/driving/{$coords}" .
+            "?sources=0&annotations=duration&access_token={$token}";
 
-        $a = sin($d_lat / 2) * sin($d_lat / 2) +
-            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
-            sin($d_lon / 2) * sin($d_lon / 2);
-
-        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-
-        return round($earth_radius * $c, 1);
+        try {
+            $response = service('curlrequest')->get($url);
+            $data = json_decode($response->getBody(), true);
+            if (($data['code'] ?? '') !== 'Ok' || !isset($data['durations'][0][1])) {
+                return null;
+            }
+            return (int) round($data['durations'][0][1] / 60); // seconds → minutes
+        } catch (\Throwable $e) {
+            log_message('error', 'Mapbox Matrix API call failed: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**
-     * Calculates ETA in minutes using Haversine distance and a traffic multiplier.
+     * Fetches driving distances and ETAs from Mapbox Matrix API for all hospitals in a single batch.
+     *
+     * @param float $sourceLat  Paramedic current latitude.
+     * @param float $sourceLng  Paramedic current longitude.
+     * @param array $hospitals  Array of Hospital entities with ->lat, ->lng properties.
+     * @return array Array of ['hospital' => Entity, 'distance' => float, 'eta' => int], sorted by distance.
+     */
+    public function getMatrixEtas(float $sourceLat, float $sourceLng, array $hospitals): array
+    {
+        $token = env('mapboxgl.accessToken');
+        $results = [];
+        $use_fallback = true;
+
+        if (!empty($token)) {
+            // Build coordinate string: source + all hospitals
+            $coords = "{$sourceLng},{$sourceLat}";
+            $index_map = [];
+            foreach ($hospitals as $i => $h) {
+                $coords .= ";{$h->lng},{$h->lat}";
+                $index_map[$i] = $h;
+            }
+
+            $url = "https://api.mapbox.com/directions-matrix/v1/mapbox/driving/{$coords}" .
+                "?sources=0&annotations=distance,duration&access_token={$token}";
+
+            try {
+                $response = service('curlrequest')->get($url);
+                $data = json_decode($response->getBody(), true);
+
+                if (($data['code'] ?? '') === 'Ok' && isset($data['durations'][0])) {
+                    $use_fallback = false;
+                    $distance_row = $data['distances'][0] ?? null;
+                    $duration_row = $data['durations'][0];
+
+                    foreach ($hospitals as $i => $h) {
+                        $raw_distance = $distance_row[$i] ?? null;
+                        $raw_duration = $duration_row[$i] ?? null;
+
+                        if ($raw_distance !== null && $raw_duration !== null) {
+                            $results[] = [
+                                'hospital' => $h,
+                                'distance' => round($raw_distance / 1000, 1), // meters → km
+                                'eta'      => (int) round($raw_duration / 60), // seconds → min
+                            ];
+                        } else {
+                            // Matrix returned null for this pair — indicate unknown
+                            $results[] = [
+                                'hospital' => $h,
+                                'distance' => 0,
+                                'eta'      => 0,
+                            ];
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                log_message('error', 'Mapbox Matrix batch call failed: ' . $e->getMessage());
+            }
+        }
+
+        // If Mapbox batch failed entirely, return unsorted list with zeroed ETAs
+        if ($use_fallback && empty($results)) {
+            foreach ($hospitals as $h) {
+                $results[] = [
+                    'hospital' => $h,
+                    'distance' => 0,
+                    'eta'      => 0,
+                ];
+            }
+        }
+
+        // Sort by distance ascending
+        usort($results, static function (array $a, array $b): int {
+            return $a['distance'] <=> $b['distance'];
+        });
+
+        return $results;
+    }
+
+    /**
+     * Fetches single-pair ETA from Mapbox Matrix API exclusively.
      *
      * @param float $lat1 Starting latitude.
      * @param float $lon1 Starting longitude.
      * @param float $lat2 Destination latitude.
      * @param float $lon2 Destination longitude.
-     * @return int Estimated minutes, rounded to nearest integer.
+     * @return int Estimated minutes, or 0 if Mapbox unavailable.
      */
-    public function calculateEta(float $lat1, float $lon1, float $lat2, float $lon2): int
+    public function fetchSingleEta(float $lat1, float $lon1, float $lat2, float $lon2): int
     {
-        $distance = $this->_haversineDistance($lat1, $lon1, $lat2, $lon2);
-        return (int) round($distance * 2.5 + 2); // Traffic multiplier model
+        $matrix = $this->_fetchMatrixEta($lat1, $lon1, $lat2, $lon2);
+        return $matrix ?? 0;
     }
 
     /**
@@ -205,8 +296,8 @@ class AmbulanceService
             'last_updated' => date('Y-m-d H:i:s'),
         ]);
 
-        // Calculate dynamic ETA
-        $eta = $this->calculateEta($lat, $lng, $hospital_lat, $hospital_lng);
+        // Calculate dynamic ETA via Mapbox Matrix (exclusive — no Haversine fallback)
+        $eta = $this->fetchSingleEta($lat, $lng, $hospital_lat, $hospital_lng);
 
         // Update pre_notifications.eta_minutes
         /** @var Handover|null $handover */

@@ -72,35 +72,16 @@ class AmbulanceController extends BaseController
             }
         }
 
-        // Fetch hospitals
+        // Fetch hospitals sorted by driving distance via Mapbox Matrix API
         $hospitals = $this->ambulance_service->getHospitals();
+        $my_lat = $ambulance->current_lat ?? AmbulanceService::NAIROBI_LAT;
+        $my_lng = $ambulance->current_lng ?? AmbulanceService::NAIROBI_LNG;
 
-        // Sort by distance
-        $hosp_list = [];
-        $my_lat = $ambulance->current_lat ?? -1.2921; // Nairobi default
-        $my_lng = $ambulance->current_lng ?? 36.8219;
-
-        foreach ($hospitals as $h) {
-            $h_lat = (float) $h->lat;
-            $h_lng = (float) $h->lng;
-            $eta   = $this->ambulance_service->calculateEta(
-                (float) $my_lat,
-                (float) $my_lng,
-                $h_lat,
-                $h_lng
-            );
-
-            $hosp_list[] = [
-                'hospital' => $h,
-                'distance' => $eta, // Reuse ETA value as distance metric for sorting
-                'eta'      => $eta,
-            ];
-        }
-
-        // Sort by distance
-        usort($hosp_list, static function ($a, $b) {
-            return $a['distance'] <=> $b['distance'];
-        });
+        $hosp_list = $this->ambulance_service->getMatrixEtas(
+            (float) $my_lat,
+            (float) $my_lng,
+            $hospitals
+        );
 
         $data = [
             'page_title'       => 'Ambulance Navigator | ClearBay',
@@ -171,9 +152,9 @@ class AmbulanceController extends BaseController
             return redirect()->back()->with('error', 'Facility is full. Please select another.');
         }
 
-        $my_lat = $ambulance->current_lat ?? -1.2921;
-        $my_lng = $ambulance->current_lng ?? 36.8219;
-        $eta    = $this->ambulance_service->calculateEta(
+        $my_lat = $ambulance->current_lat ?? AmbulanceService::NAIROBI_LAT;
+        $my_lng = $ambulance->current_lng ?? AmbulanceService::NAIROBI_LNG;
+        $eta    = $this->ambulance_service->fetchSingleEta(
             (float) $my_lat,
             (float) $my_lng,
             (float) $details['hospital']->lat,

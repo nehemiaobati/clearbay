@@ -13,7 +13,7 @@
 
 <div class="container-fluid p-0 d-flex flex-column flex-lg-row gap-3 mt-5 pt-4 dispatcher-layout" style="overflow-x: hidden; overflow-y: auto;">
   <!-- Left Side: Map Area -->
-  <div class="map-container flex-grow-1 position-relative" style="min-height: 400px;">
+  <div class="map-container flex-grow-1 position-relative" style="min-height: 400px; height: calc(100vh - 80px);">
     <noscript>
       <div class="alert alert-warning m-3" role="alert">
         Dispatcher map requires JavaScript. Please enable it to view live fleet positions.
@@ -31,7 +31,7 @@
   </div>
 
   <!-- Right Side: Sidebar Panels -->
-  <aside class="p-4 d-flex flex-column gap-4 border-start border-secondary border-opacity-10 dispatcher-sidebar">
+  <aside class="p-4 d-flex flex-column gap-4 border-start border-secondary border-opacity-10 dispatcher-sidebar" style="width: 380px; flex-shrink: 0;">
     <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-10">
       <span class="mono-label text-muted">EMS Dispatcher Console</span>
       <div>

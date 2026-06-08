@@ -110,8 +110,8 @@
     });
 
     // --- Initial fallback coordinates ---
-    let myLat = <?= $ambulance->current_lat ?? -1.2921 ?>;
-    let myLng = <?= $ambulance->current_lng ?? 36.8219 ?>;
+    let myLat = <?= $ambulance->current_lat ?? \App\Modules\Ambulance\Libraries\AmbulanceService::NAIROBI_LAT ?>;
+    let myLng = <?= $ambulance->current_lng ?? \App\Modules\Ambulance\Libraries\AmbulanceService::NAIROBI_LNG ?>;
     let gpsResolved = false;
 
     // --- GPS Status Indicator ---
