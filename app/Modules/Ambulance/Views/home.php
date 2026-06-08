@@ -197,10 +197,11 @@
         const durationRow = data.durations ? data.durations[0] : null;
 
         // Build an array of {element, drivingDistance, drivingDuration}
+        // Mapbox Matrix returns [0] = source→self, [1] = source→first hospital, etc.
         const sorted = [];
         cards.forEach((card, index) => {
-          const rawDistance = distanceRow ? distanceRow[index] : null;
-          const rawDuration = durationRow ? durationRow[index] : null;
+          const rawDistance = distanceRow ? distanceRow[index + 1] : null;
+          const rawDuration = durationRow ? durationRow[index + 1] : null;
 
           if (rawDistance !== null && rawDistance !== undefined) {
             const distanceKm = (rawDistance / 1000).toFixed(1); // meters → km

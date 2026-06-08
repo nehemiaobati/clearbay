@@ -133,8 +133,8 @@ class AmbulanceService
                     $duration_row = $data['durations'][0];
 
                     foreach ($hospitals as $i => $h) {
-                        $raw_distance = $distance_row[$i] ?? null;
-                        $raw_duration = $duration_row[$i] ?? null;
+                        $raw_distance = $distance_row[$i + 1] ?? null;
+                        $raw_duration = $duration_row[$i + 1] ?? null;
 
                         if ($raw_distance !== null && $raw_duration !== null) {
                             $results[] = [
