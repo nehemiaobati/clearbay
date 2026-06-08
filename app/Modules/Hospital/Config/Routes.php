@@ -14,6 +14,7 @@ $routes->group('hospital', ['namespace' => 'App\Modules\Hospital\Controllers', '
     $routes->get('queue', 'HospitalController::getQueue', ['as' => 'hospital.queue']);
     $routes->post('status', 'HospitalController::updateStatus', ['as' => 'hospital.status.update']);
     $routes->post('handover', 'HospitalController::completeHandover', ['as' => 'hospital.handover.complete']);
+    $routes->post('handover/arrived', 'HospitalController::markArrived', ['as' => 'hospital.handover.arrived']);
     $routes->get('analytics', 'HospitalController::analytics', ['as' => 'hospital.analytics']);
     $routes->get('analytics/export', 'HospitalController::exportPdf', ['as' => 'hospital.analytics.export']);
 });

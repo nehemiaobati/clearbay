@@ -245,9 +245,9 @@
         if (baselineEl.textContent !== formattedBaseline) {
           baselineEl.textContent = formattedBaseline;
         }
-        const expectedClass = baseline < 0 
-          ? 'd-block admin-stat-val text-success' 
-          : (baseline > 0 ? 'd-block admin-stat-val text-danger' : 'd-block admin-stat-val text-muted');
+        const expectedClass = baseline < 0 ?
+          'd-block admin-stat-val text-success' :
+          (baseline > 0 ? 'd-block admin-stat-val text-danger' : 'd-block admin-stat-val text-muted');
         if (baselineEl.className !== expectedClass) {
           baselineEl.className = expectedClass;
         }
@@ -287,7 +287,8 @@
             <td><span class="badge ${waitClass}">${wait} min</span></td>
             <td class="text-end">
               ${h.status === 'En route' ?
-                `<span class="text-muted small">En Route</span>` :
+                `<button class="btn btn-sm btn-success mark-arrived-btn" style="min-height: 36px;"
+                         data-id="${h.id}">Mark Arrived</button>` :
                 `<button class="btn btn-sm btn-primary clear-bay-btn" style="min-height: 36px;"
                          data-id="${h.id}"
                          data-unit="${h.unit_id}"
@@ -308,7 +309,36 @@
     fetchQueue();
     setInterval(fetchQueue, 10000);
 
-    document.getElementById('queueTableBody').addEventListener('click', (e) => {
+    document.getElementById('queueTableBody').addEventListener('click', async (e) => {
+      const arrivedBtn = e.target.closest('.mark-arrived-btn');
+      if (arrivedBtn) {
+        const handoverId = arrivedBtn.dataset.id;
+        const formData = new FormData();
+        const csrfInput = document.querySelector('input[name="csrf_test_name"]');
+        if (csrfInput) formData.append(csrfInput.name, csrfInput.value);
+        formData.append('handover_id', handoverId);
+
+        try {
+          const response = await fetch('<?= url_to('hospital.handover.arrived') ?>', {
+            method: 'POST',
+            body: formData
+          });
+          const data = await response.json();
+
+          if (data.status === 'success') {
+            // Rotate CSRF token
+            const csrfInputs = document.querySelectorAll('input[name="csrf_test_name"]');
+            csrfInputs.forEach(i => i.value = data.csrf_token);
+            fetchQueue();
+          } else {
+            alert(data.message);
+          }
+        } catch (err) {
+          alert('Failed to mark as arrived.');
+        }
+        return;
+      }
+
       if (e.target.classList.contains('clear-bay-btn')) {
         const btn = e.target;
         document.getElementById('handoverIdInput').value = btn.dataset.id;

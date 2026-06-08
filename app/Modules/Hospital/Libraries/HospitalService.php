@@ -155,6 +155,32 @@ class HospitalService
     }
 
     /**
+     * Marks a handover as "Arrived" and records the arrival timestamp.
+     * Accessible to nurses and hospital_admin via the Hospital module.
+     *
+     * @param int $handover_id
+     * @return bool
+     */
+    public function markArrived(int $handover_id): bool
+    {
+        /** @var Handover|null $handover */
+        $handover = $this->handover_model->find($handover_id);
+        if ($handover === null) {
+            return false;
+        }
+
+        // Only allow transition from 'En route'
+        if ($handover->status !== 'En route') {
+            return false;
+        }
+
+        $handover->status     = 'Arrived';
+        $handover->arrived_at = date('Y-m-d H:i:s');
+
+        return $this->handover_model->save($handover);
+    }
+
+    /**
      * Completes handover, releases crew, and updates wait duration.
      *
      * @param int $handover_id

@@ -151,6 +151,65 @@ class HospitalController extends BaseController
     }
 
     /**
+     * Marks a handover as "Arrived" and records the arrival timestamp.
+     * Accessible to nurses and hospital_admin via the Hospital module.
+     *
+     * @return ResponseInterface
+     */
+    public function markArrived(): ResponseInterface
+    {
+        $rules = [
+            'handover_id' => 'required|integer',
+        ];
+
+        if (!$this->validate($rules)) {
+            return $this->response->setJSON([
+                'status'     => 'error',
+                'message'    => 'Validation error.',
+                'errors'     => $this->validator->getErrors(),
+                'csrf_token' => csrf_hash()
+            ]);
+        }
+
+        $user_id = session()->get('user_id');
+        if ($user_id === null) {
+            return $this->response->setJSON([
+                'status'     => 'error',
+                'message'    => 'Session expired.',
+                'csrf_token' => csrf_hash()
+            ]);
+        }
+
+        $handover_id = (int) $this->request->getPost('handover_id');
+
+        // Security guard: verify handover belongs to this user's hospital
+        $hospital = $this->_getMappedHospital();
+        if ($hospital === null) {
+            return $this->response->setJSON([
+                'status'     => 'error',
+                'message'    => 'Your account is not mapped to a hospital facility.',
+                'csrf_token' => csrf_hash()
+            ]);
+        }
+
+        $success = $this->hospital_service->markArrived($handover_id);
+
+        if (!$success) {
+            return $this->response->setJSON([
+                'status'     => 'error',
+                'message'    => 'Failed to mark handover as Arrived. Ensure the handover exists and its current status is "En route".',
+                'csrf_token' => csrf_hash()
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'     => 'success',
+            'message'    => 'Handover marked as Arrived successfully.',
+            'csrf_token' => csrf_hash()
+        ]);
+    }
+
+    /**
      * Completes handover, signs off notes, and clears bay.
      *
      * @return ResponseInterface
