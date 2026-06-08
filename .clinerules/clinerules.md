@@ -1,11 +1,7 @@
-# CodeIgniter 4 Handbook: The "Simple over Easy" Standard
+# CodeIgniter 4 System Architecture Standard (.clinerules)
 
-## Meta-Rules: Managing This Handbook
-
-1. **Universal Applicability**: This document describes a standard for **ANY** CodeIgniter 4 project. It must remain project-agnostic.
-2. **No Specifics**: Do not verify or enforce rules using specific project file names (e.g., `GeminiController`). Use generic terms (`DomainController`, `BillingService`).
-3. **Living Document**: When a new architectural pattern is proven effective and generic, update this file.
-4. **First Source**: Read this file **before** starting any task on a new or existing project to align with the architectural standard.
+> [!WARNING]
+> This file contains absolute, non-negotiable architectural mandates for this repository. Any deviation from these rules during code review, generation, or modification constitutes a system failure and is strictly FORBIDDEN.
 
 ---
 
@@ -23,343 +19,562 @@ This project adheres to a strict philosophical standard. Every architectural dec
 
 ---
 
-## 1. Project Initialization & Architecture
+## Part 1: Core Meta-Rules
 
-### 1.1 The "3-Command" Boot Protocol
+1. **Universal Applicability**: These rules apply to EVERY file, class, and method within the application. No exceptions are permitted.
+2. **Project-Agnostic Specification**: All rules and examples MUST use generic placeholders (e.g., `DomainController`, `BillingService`, `user_id`) rather than specific domain names or temporary files.
+3. **No Ambiguity**: All instructions MUST use RFC 2119 deterministic terms (MUST, MUST NOT, REQUIRED, SHALL, FORBIDDEN). Permissive phrases like "should", "generally", "recommended", or "best practice" are FORBIDDEN.
+4. **First Source Check**: The AI agent MUST read and align with this file before initiating any task.
 
-A developer must be able to boot a fresh instance in exactly 3 steps.
+---
 
-1. **Install Dependencies**: `composer install` (Use `--no-dev` for production).
-2. **Migrate**: `php spark migrate --all` (Runs core & module migrations).
-3. **Seed**: `php spark db:seed MainSeeder` (Populates reference data).
+## Part 2: Philosophy: Simple over Easy
 
-### 1.2 Modular MVC-S Structure
+This architecture prioritizes **Simplicity** (objective, unentangled design) over **Ease** (subjective, familiar convenience).
 
-We do not build a "Monolith" in `app/`. We build independent **Features** in `app/Modules/`.
+| Attribute | Simple | Easy |
+|-----------|--------|------|
+| **Nature** | Objective system structure | Subjective developer comfort |
+| **Focus** | Single responsibility, disentangled | Familiar, adjacent, copy-paste |
+| **Cost** | Upfront design and refactoring | Immediate speed |
+| **Outcome** | Long-term reliability and maintainability | Short-term speed, long-term technical debt |
 
-- **Core Shell** (`app/`): Contains only shared resources (BaseController, Auth filters, AppConfig).
-- **Modules** (`app/Modules/`): Self-contained features (e.g., `Auth`, `Billing`, `Blog`).
+**Core Mandate**: Architectural purity is NEVER sacrificed for developer convenience.
 
-**Directory Structure per Module:**
+---
+
+## Part 3: Folder Structure & Modular Architecture
+
+The application strictly enforces a **Modular Model-View-Controller-Service (MVC-S)** architecture.
+
+### 3.1 Directory Layout
+
+All business features MUST be isolated inside self-contained modules under `app/Modules/`. The root `app/` directory is reserved solely for core, shared infrastructure.
+
+A module directory MUST adhere to this structural layout:
 
 ```text
-app/Modules/User/
-├── Config/      # Routes.php (Manual registration required)
-├── Controllers/ # HTTP Orchestration only
+app/Modules/[ModuleName]/
+├── Config/              # Module-specific configuration
+│   └── Routes.php       # REQUIRED: Manual route registration
+├── Controllers/         # HTTP Request/Response orchestration
 ├── Database/
-│   ├── Migrations/
-│   └── Seeds/
-├── Entities/    # Business Objects (Data shape, not logic)
-├── Libraries/   # Services (Business Logic)
-├── Models/      # DB Interaction
-└── Views/       # Presentation
+│   ├── Migrations/      # Schema modifications
+│   └── Seeds/           # Initial data population
+├── Entities/            # Business data objects with casting
+├── Helpers/             # Module-specific standalone functions
+├── Libraries/           # Services (sole location of business logic)
+├── Models/              # Database access layer
+└── Views/               # Presentation templates
 ```
 
-### 1.3 Generating a New Module
+All directories are OPTIONAL unless explicitly marked REQUIRED. Create ONLY directories that contain files.
 
-1. Run: `php spark make:module [Name]`
-2. **Register Namespace** in `app/Config/Autoload.php`:
+### 3.2 Module Registration Protocol
 
-    ```php
-    public $psr4 = [
-        APP_NAMESPACE => APPPATH, // Keep existing
-        'App\Modules\Name' => APPPATH . 'Modules/Name',
-    ];
-    ```
+1. **Command Generation**: Modules MUST be generated via `php spark make:module [ModuleName]`.
 
-3. **Define Routes** in `app/Modules/Name/Config/Routes.php`.
+2. **Namespace Registration**: The module's namespace MUST be registered in `app/Config/Autoload.php` within the `$psr4` array:
 
-### 1.4 Standard Tooling (Custom Commands)
+   ```php
+   public $psr4 = [
+       APP_NAMESPACE => APPPATH,
+       'App\Modules\[ModuleName]' => APPPATH . 'Modules/[ModuleName]',
+   ];
+   ```
 
-The following commands are **NOT** native to CodeIgniter 4 and must be implemented manually in `app/Commands/`.
+3. **Route Registration**: Routes MUST be defined within `app/Modules/[ModuleName]/Config/Routes.php`. To prevent default namespace failures, routes MUST be wrapped inside a route group with an explicit, fully-qualified module namespace:
 
-- `make:module`: Scaffolds MVC-S structure.
-- `db:backup`: Wrapper for `mysqldump` (requires system binary).
-- `db:restore`: Wrapper for `mysql` client (requires system binary).
+   ```php
+   <?php
+   
+   namespace App\Modules\[ModuleName]\Config;
+   
+   use CodeIgniter\Router\RouteCollection;
+   
+   /**
+    * @var RouteCollection $routes
+    */
+   
+   $routes->group('domain', ['namespace' => 'App\Modules\[ModuleName]\Controllers'], static function ($routes) {
+       // Define all module routes here with explicit names
+       $routes->get('action', 'DomainController::action', ['as' => 'module.domain.action']);
+   });
+   ```
 
-> **Implementation Source**: See `tooling_setup.md` in this directory for the full source code.
+4. **Helper Loading**: Globally loading module-specific helper files via `app/Config/Autoload.php` is FORBIDDEN. To preserve performance and isolate execution, module-level helper files MUST be dynamically declared and loaded within the destination controller's `$helpers` array property using their namespaced paths:
 
-### 1.5 Code Quality & Standards
-
-- **Standards**: All PHP files MUST be PSR-12 compliant and start with `declare(strict_types=1);`.
-- **Documentation**: Every class, property, and method MUST have a complete and accurate PHPDoc block.
-- **Naming Conventions (Direct & Specific)**:
-  - **Variables/Properties**: MUST be `snake_case` (e.g., `$user_id`, `$form_errors`). Avoid abbreviations like `$req` or `$msg`.
-  - **Methods**: MUST be `camelCase` (e.g., `processPayment()`, `validateInput()`).
-  - **Private Helpers**:
-    - **Naming**: MUST be `private` and prefixed with an underscore (e.g., `_buildResponse()`).
-    - **Organization**: MUST be grouped in a section marked with `// --- Helper Methods ---`.
-    - **Ordering**: MUST be defined **before** the public methods that use them.
-  - **Classes/Controllers**: MUST be `PascalCase` (e.g., `OrderService`, `AdminController`).
-  - **Keys**: Array keys MUST be `snake_case` and descriptive.
-- **Type Accuracy & Static Analysis**:
-  - **Strict Typing**: All methods MUST have explicit return types (e.g., `: bool`, `: array`).
-  - **Casting**: Always cast data retrieved from arrays/DB if not handled by Entity casts (e.g., `(int) $id`).
-  - **Inline PHPDoc**: Variables assigned from ambiguous framework returns (e.g., CodeIgniter Model `find()`, `first()`, `findAll()`) MUST have an inline PHPDoc type hint immediately preceding the assignment. (Prevents Intelephense P1006 errors).
-    - _Example_: `/** @var \App\Entities\User|null $user */ $user = $this->model->find($id);`
-  - **Entity Properties**: PHPDoc properties in `Entity` classes MUST match the dynamic cast generated by CodeIgniter.
-    - Dates mapped inside `$dates` are returned as `\CodeIgniter\I18n\Time|null`. They are NOT `string`.
-    - Arrays mapped inside `$casts` as `json-array` are returned as `array|null`. They are NOT `string`.
-  - **Strict Conditional Types**: When extracting a complex property for an IDE-sensitive function (e.g., `is_array()`), assign the property to a local variable first or use an explicit `instanceof` check (e.g., `if ($date instanceof \CodeIgniter\I18n\Time)`) to prevent static analyzer confusion.
+   ```php
+   protected $helpers = ['App\Modules\[ModuleName]\Helpers\domain'];
+   ```
 
 ---
 
-## 2. Layer Responsibilities (Strict Separation)
+## Part 4: Layer Responsibilities
 
-### 2.1 Controllers (The Traffic Cop)
+### 4.1 Controllers (`app/Modules/[ModuleName]/Controllers/`)
 
-- **Role**: Accept Request -> Validate -> Call Service -> Return Response.
-- **Forbidden**:
-  - Direct Database calls (Model instantiation allowed, but queries discouraged).
-  - Business Logic or Calculations.
-  - HTML generation (use Views).
-- **Key Pattern**: "Skinny Controller". If it has `if` statements for business rules, move them to the Service.
-- **SEO Mandatory**: Every method rendering a view MUST prepare the standard SEO `$data` array.
+Controllers are HTTP request handlers. They orchestrate input validation and delegate to services.
 
-### 2.2 Services (The Engine Room)
+- **MUST** extend `CodeIgniter\Controller` or `App\Controllers\BaseController`.
+- **MUST** declare return types as `string|ResponseInterface` inside method signatures to satisfy PHP strict typing rules under all outcome variations.
+- **MUST** validate incoming HTTP requests using the Validation service.
+- **MUST** invoke Service classes to process business operations.
+- **MUST** return `ResponseInterface` objects (via `$this->response` or `return redirect()`) or `string` values (via `return view()`).
+- **MUST** pass SEO variables (`pageTitle`, `metaDescription`, `canonicalUrl`, `robotsTag`) in the view data array:
 
-- **Location**: `app/Modules/[Name]/Libraries/` or `app/Libraries/`.
-- **Role**: The **only** place where business logic lives.
-- **Requirement**: Must be reusable and registered in module-level `Config/Services.php` (preferred) or global `app/Config/Services.php` (if shared).
-- **Responsibilities**:
-  - Handle Transactions (`db->transStart()`).
-  - Manage File Uploads/Processing.
-  - Interact with 3rd Party APIs.
-  - Perform calculations.
-- **Output**: Returns standardized arrays or Entities.
-
-### 2.3 Models (The Librarian)
-
-- **Role**: Fetching and Storing raw data.
-- **Principle**: "Objects for Data, Arrays for Config." Passing raw arrays for business objects is **FORBIDDEN**.
-- **Configuration**:
-  - `protected $returnType = \App\Entities\User::class;` (Always use Entities).
-  - `protected $allowedFields = [...]` (Strict definition).
-- **Forbidden**:
-  - Business logic methods.
-  - Being called directly by a **View**.
-
-### 2.4 Views (The Canvas)
-
-- **Role**: Display data.
-- **Security**: MUST use `esc($var)` for dynamic output.
-- **Logic**: Loops (`foreach`) and simple conditionals (`if`) only. No complex processing.
-
-### 2.5 Database (The Vault)
-
-- **Role**: Persistent storage.
-- **Mandatory**:
-  - **Schema**: managed strictly via **Migrations**.
-  - **Data**: Initial/Test data managed via **Seeds**.
-  - **Migration Lifecycle**:
-    - **Continuous Development (Default)**: In active development or production at scale, use incremental "Update" migrations. This ensures safe, fast deployments without altering the historical record of change.
-    - **Fresh Development Environments (Compression)**: Consolidating/compressing migrations is preferred ONLY for building optimized fresh environments from scratch.
-      - **Compression Plan**: A documented strategy identifying which "Update" migrations will be merged into their corresponding "Create" migrations (e.g., merging `AddCategoryToAffiliateLinks` into `CreateAffiliateLinksTable`).
-      - **Implementation Plan**: The execution roadmap detailing how the consolidation will be tested and verified (e.g., backup strategy, rollback plan, verification commands like `migrate:refresh --all`).
-    - **Directive**: If the developer specifies a "Fresh Environment", a **Compression Plan** and **Implementation Plan** are MANDATORY before merging updates into base migrations, unless explicitly declined by the user.
-  - **Performance Optimization (Indexing)**:
-    - **Mandatory**: Every table MUST be optimized for lookup.
-    - **Columns to Index**: `status`, `user_id`, `type`, `slug`, `prompt_hash`, and timestamps (`created_at`, `published_at`, `timestamp`).
-    - **Method**: Use `$this->forge->addKey('column_name')` **before** the `createTable()` call.
-    - **Composite Keys**: Use `$this->forge->addKey(['col1', 'col2'])` for frequently paired filters.
-  - **Query Standards**:
-    - **Explicit Selection**: Avoid `SELECT *`. Always use `select('id, name, status')` to minimize memory usage.
-    - **Predictable Keys**: Database column names MUST be `snake_case` and match their corresponding Entity property names exactly.
-- **Forbidden**:
-  - Manual schema changes (SQL/GUI) outside of migrations.
-  - Raw SQL `ALTER TABLE` queries for indexing within a `Create` migration (Use native `addKey()` instead).
-
-### 2.6 Helpers (`app/Helpers/`)
-
-- **Role**: Small, stateless, reusable procedural functions.
-- **One-Time Setup**: New helpers MUST be registered in `app/Config/Autoload.php`.
-- **Forbidden**:
-  - Business logic (Use Services).
-  - Database queries (Use Models/Services).
-  - Stateful operations.
-
-### 2.7 Configuration (`app/Config/`)
-
-- **Sensitive**: API Keys/Secrets MUST live in `.env`.
-- **Custom**: Feature-specific config MUST use `App\Config\Custom` namespace (e.g., `app/Config/Custom/BlogConfig.php`).
-
-### 2.8 Performance Rules (& Pagination)
-
-- **Pagination**: Use `paginate()` for lists. `findAll()` on potentially large tables is **FORBIDDEN**.
-- **Optimization**: Deployment script MUST run `php spark optimize`.
-- **Auto-Routing**: `$autoRoute = false` is Mandatory.
-
-### 2.9 Architectural Topology: Parallel vs. Braided
-
-- **Parallel Structure**: Dependencies must flow vertically (Controller -> Domain Service -> Sub-Services).
-- **The "Ping Pong" Prohibition**: Triangular dependencies are **FORBIDDEN**.
-  - _Definition_: A Controller talking to a Main Service AND that Main Service's dependency.
-  - _Example_: `MainController` talking to `SubService` (e.g., formatting helper) while `MainService` also uses `SubService`.
-  - _Fix_: Use the **Facade Pattern**. The Main Service (`MainService`) must wrap the required methods of the Sub-Service (`SubService`) so the Controller has a single point of entry.
-- **Brother-Service Isolation**: Services at the same level (e.g., `ModuleAService` and `ModuleBService`) should generally NOT call each other directly. If orchestration is needed, create a higher-level "Orchestrator Service" or handle it in the Controller.
-- **Goal**: Clean, parallel execution stacks that don't "criss-cross" or braid together, ensuring ease of debugging and future scaling.
-
----
-
-## 3. Data & Request Protocol
-
-### 3.1 Routing & URLs
-
-- **Named Routes**: All routes MUST be named (`['as' => 'name']`).
-- **Grouping**: Use `$routes->group()` to organize by feature or access level (e.g., `['filter' => 'auth']`).
-- **Callbacks**: Group callbacks MUST be `static function`.
-- **Target**: Routes MUST point to `Controller::method`. Logic Closures (`function() {...}`) in routes are **FORBIDDEN**.
-- **Usage**: `url_to('name')` is mandatory. Hardcoded paths are **FORBIDDEN**.
-
-### 3.2 Form Handling (PRG Pattern)
-
-1. **POST Request**: Controller validates input.
-2. **Processing**: Service handles the job.
-3. **Response**: Controller redirects (`return redirect()->back()->with('success', '...');`).
-    - **NEVER** return a View directly from a POST method.
-
-### 3.3 Stateless/Serverless Compliance (The Unlink Pattern)
-
-We treat the filesystem as ephemeral.
-
-1. **Uploads**: Controller accepts file -> Service processes it -> Service **deletes** temp file.
-2. **Generated Assets**: Create file -> Stream to user (`readfile`) -> **Delete** file (`@unlink`).
-3. **Session**: No binary data (images/PDFs) in session. Store IDs only.
-4. **Database**: Session driver uses `DatabaseHandler` (`ci_sessions` table with `MEDIUMBLOB`).
-
-### 3.4 Tempfile Pattern (Secure & Randomized)
-
-For consistency and security when handling ephemeral data:
-
-1. **Storage**: Centralize uploads in `WRITEPATH . 'uploads/[type]/[userId]/'`.
-2. **Naming**: Always use `$file->getRandomName()` to prevent collisions and enumeration.
-3. **Encapsulation**: Services MUST handle directory creation (`mkdir($path, 0755, true)`) and file moving.
-4. **Cleanup**: Provide a `cleanupTempFiles(array $fileIds, int $userId)` method in the Service for idempotent deletion.
-
-### 3.5 API & AJAX
-
-- **Response Format**: Standardized JSON format.
-
-  ```json
-  {
-      "status": "success|error",
-      "message": "Human readable string",
-      "result": { ... }, // Main payload
-      "errors": [ ... ], // Optional validation errors
-      "csrf_token": "new_csrf_hash" // MANDATORY
-  }
+  ```php
+  return view('App\Modules\[ModuleName]\Views\domain\view', [
+      'pageTitle'       => 'Page Title',
+      'metaDescription' => 'Meta description content',
+      'canonicalUrl'    => url_to('named.route'),
+      'robotsTag'       => 'index, follow',
+      'data'            => $serviceResult,
+  ]);
   ```
 
-- **CSRF**: Every JSON response (Success, Error, or Edge Case) MUST include a fresh CSRF token (`csrf_token`) to keep the client in sync.
-- **Frontend Handler**: All AJAX calls MUST use a centralized `_handleAjaxResponse` method to:
-  1. Extract and rotate the `csrf_token`.
-  2. Handle `403 Forbidden` redirects seamlessly.
-  3. Provide consistent UI feedback.
-- **SSE (Streaming)**:
-  - **Headers**: Flush immediately (`ob_flush(); flush()`). Content-Type MUST be `text/event-stream`.
-  - **Session**: MUST call `session_write_close()` before the loop to prevent locking.
-  - **Auth**: Send a fresh CSRF token in the first data event.
+- **MUST NOT** execute database queries directly.
+- **MUST NOT** perform business calculations or logic.
+- **MUST NOT** instantiate the file system directly (use Services).
+- **MUST NOT** generate inline HTML.
+
+### 4.2 Services (`app/Modules/[ModuleName]/Libraries/`)
+
+Services encapsulate 100% of business logic and external integrations.
+
+- **MUST** be instantiated via the Service container: `service('serviceName')`.
+- **MUST** be registered in the module-level `Config/Services.php` file. If a service is generic, shared, and consumed across multiple modules, it MUST be registered in the global `app/Config/Services.php` file.
+- **MUST** contain all business logic, external API integrations, file system operations, and transaction initialization.
+- **MUST** use dependency injection through the constructor for required services.
+- **MUST** return standardized arrays or Entity instances.
+- **MUST NOT** access HTTP-specific globals (`$_POST`, `$_GET`, `$_SERVER`) directly.
+- **MUST NOT** manage HTTP redirects or session flash data directly.
+
+**Service Dependency Topology (Parallel vs. Braided)**:
+
+The architecture enforces clean, parallel execution stacks that do not "criss-cross" or braid together, ensuring ease of debugging and future scaling.
+
+- **Parallel Structure**: Dependencies MUST flow strictly vertically: `Controller -> Main Service -> Sub-Service`.
+
+- **The "Ping Pong" Prohibition**: Triangular dependencies are FORBIDDEN.
+  - **Definition**: A Controller talking to a Main Service AND that Main Service's dependency (Sub-Service).
+  - **Example**: `MainController` talking to `SubService` (e.g., formatting helper) while `MainService` also uses `SubService`.
+  - **Fix**: Use the **Facade Pattern**. The Main Service (`MainService`) MUST wrap the required methods of the Sub-Service (`SubService`) so the Controller has a single point of entry.
+
+- **Brother-Service Isolation**: Services at the same level (e.g., `ModuleAService` and `ModuleBService`) MUST NOT call each other directly. If orchestration is needed, create a higher-level "Orchestrator Service" or handle coordination in the Controller.
+
+### 4.3 Models (`app/Modules/[ModuleName]/Models/`)
+
+Models are the database access layer. They handle data persistence and retrieval.
+
+- **MUST** extend `CodeIgniter\Model`.
+- **MUST** define the `$table` property specifying the database table name.
+- **MUST** define `$primaryKey` property (defaults to `id` if omitted).
+- **MUST** define `$returnType` as a fully-qualified Entity class:
+
+  ```php
+  protected $returnType = \App\Modules\[ModuleName]\Entities\DomainEntity::class;
+  ```
+
+- **MUST** define `$allowedFields` as an array of writable column names (FORBIDDEN to omit).
+- **MUST NOT** use Model-level field casting (`$casts` property) when returning Entities, as model-level casts run in direct conflict with Entity property casting. Entity property casting MUST manage data transformation.
+- **MUST NOT** contain business calculations.
+- **MUST NOT** be invoked directly from Views.
+
+### 4.4 Entities (`app/Modules/[ModuleName]/Entities/`)
+
+Entities are strict data objects that represent business records with type safety.
+
+- **MUST** extend `CodeIgniter\Entity\Entity`.
+- **MUST** be used for all business data representation. Passing raw associative arrays between application layers is FORBIDDEN.
+- **MUST** utilize the Entity `$casts` property to enforce type safety:
+
+  ```php
+  protected $casts = [
+      'id'         => 'integer',
+      'is_active'  => 'boolean',
+      'metadata'   => 'json-array',
+  ];
+  ```
+
+- **MUST** utilize `$dates` array for timestamp properties. Properties in `$dates` are returned as `\CodeIgniter\I18n\Time|null`, NOT `string`.
+- **MUST** house data-shaping logic via accessors and mutators (e.g., `setPassword(string $pass)`).
+- **MUST NOT** query the database.
+- **MUST NOT** contain service-level operations.
+- **MUST NOT** depend on external services.
+
+### 4.5 Views (`app/Modules/[ModuleName]/Views/`)
+
+Views render Presentation Layer output.
+
+- **MUST** extend the master layout file: `<?= $this->extend('layouts/default') ?>`.
+- **MUST NOT** contain nested conditional statements (maximum nesting depth of 1).
+- **MUST NOT** contain any PHP code blocks exceeding 5 lines.
+- **MUST** escape ALL output using the native `esc()` helper: `<?= esc($variable) ?>`.
+- **MUST NOT** make database calls.
+- **MUST NOT** instantiate Services or Models.
+
+### 4.6 Helpers (`app/Helpers/` or `app/Modules/[ModuleName]/Helpers/`)
+
+Helpers are small, stateless, reusable procedural functions.
+
+- **MUST** be pure functions (no side effects).
+- **MUST** be loaded dynamically when execution scope demands them.
+- **MUST NOT** contain business logic (use Services).
+- **MUST NOT** execute database queries (use Models/Services).
+- **MUST NOT** perform stateful operations.
 
 ---
 
-## 4. Security Mandates
+## Part 5: Database Management & Schema
 
-1. **CSRF**: Enabled globally.
-    - **Forms**: Must use `csrf_field()`.
-    - **Backend Responsibility**: Every JSON response (Success/Error/Edge Case) MUST include a fresh token (`['csrf_token' => csrf_hash()]`).
-    - **Frontend**: JS MUST update its token from the response payload (`json.csrf_token`). Manual cookie logic is **FORBIDDEN**.
-2. **Validation**: Strict input validation rules in Controller.
-3. **reCAPTCHA**:
-    - **Views**: Get key via `service('recaptchaService')->getSiteKey()`.
-    - **Controllers**: Verify via `service('recaptchaService')->verify($response)`.
-    - **Config**: Keys MUST be in `.env`. Custom config files are **FORBIDDEN**.
-4. **Throttling**: The Throttler MUST be enabled on:
-    - **Authentication & Reset Routes**: To prevent brute-force attacks (e.g., `throttle:5,60`).
-    - **Resource-Heavy Endpoints**: Any route invoking expensive 3rd-party APIs or local models (AI Generation, Crypto Queries) MUST be throttled to prevent resource exhaustion or quota abuse (e.g., `throttle:10,60`).
-5. **Escaping**: Double-check `esc()` in Views. Unescaped output requires explicit approval comments.
-6. **Transactions**: Any method modifying the DB MUST use transactions.
+### 5.1 Migrations & Seeders
 
-    ```php
-    $this->db->transStart();
-    // operations
-    $this->db->transComplete();
-    if ($this->db->transStatus() === false) { ... }
-    ```
+- **Migrations MANDATORY**: All schema modifications MUST use Migration classes. Direct table alteration via CLI or GUI tools on any environment is FORBIDDEN.
+- **Seeder Protocol**: Initial data states MUST be created exclusively through Seeder classes invoked via `php spark db:seed MainSeeder`.
+- **Compression Protocol**: Consolidating migrations is permitted ONLY for fresh environment setup with documented Compression and Implementation Plans.
 
----
+### 5.2 Index Requirements
 
-## 5. Development & Observability
+`addKey()` in migrations is REQUIRED for all columns used in:
+- Foreign key references
+- `WHERE` clause conditions (`status`, `type`, `state`)
+- Lookup columns (`slug`, `hash`, `email`)
+- Timestamp range queries (`created_at`, `updated_at`)
 
-### 5.1 Logging & Observability
+Use composite keys for frequently paired filters: `$this->forge->addKey(['user_id', 'status'])`.
 
-- **Principle**: In Development, errors MUST be visible and loud. In Production, errors MUST be silent to the user but strictly recorded.
-- **Source of Truth**: `writable/logs/` is the first step in ANY investigation.
-- **Usage**: `log_message($level, $message, $context)`.
-- **Context**: Logs MUST include context arrays (variables, IDs, error traces), not just strings.
-- **Levels**:
-  - `critical`: System unusable (DB down). Triggers immediate alert.
-  - `error`: Runtime failure (Transaction rollback, Upload failed).
-  - `info`: Key business events (User login, Report generated).
-- **User Feedback**:
-  - Use `session()->setFlashdata()` to communicate outcomes (Success/Error/Warning).
-  - **UI Standard**: Use persistent **Bootstrap Alerts** for operation results (Success/Error). Transient "Toasts" are reserved for system connectivity issues only.
+### 5.3 Query Standards
 
-### 5.2 Testing
+- Raw SQL queries via `$db->query()` are FORBIDDEN except for complex reporting queries reviewed by a senior developer.
+- `SELECT *` is FORBIDDEN. Always use explicit column selection: `$this->select('id, name, status')`.
+- Column names MUST be `snake_case` and match Entity property names exactly.
 
-- **Slogan**: "No feature is done' without a test. Default to False unless requested"
-- **Tool**: PHPUnit (`php spark test`).
-- **Strategy**:
-  - **Unit**: Test Services (mock DB/API).
-  - **Feature**: Test Controllers (use real DB with `DatabaseTransactions` trait).
+### 5.4 Transaction Integrity
 
-### 5.3 Deployment Checklist
+Any execution chain containing more than one database write operation (INSERT, UPDATE, DELETE) MUST be wrapped in a transaction:
 
-- Set `CI_ENVIRONMENT = production`.
-- Run `composer install --no-dev --optimize-autoloader`.
-- Run `php spark optimize`.
-- Ensure `writable/` is writable by web user.
-- **Document Root**: MUST point strictly to the `/public` directory.
-- Disable `display_errors`.
+```php
+$db = \Config\Database::connect();
+$db->transStart();
 
-### 5.4 Exception Strategy
+try {
+    $this->modelA->insert($dataA);
+    $this->modelB->update($id, $dataB);
+    
+    $db->transComplete();
+} catch (\Exception $e) {
+    $db->transRollback();
+    
+    log_message('critical', 'Transaction failure in DomainService::operation', [
+        'exception' => $e->getMessage(),
+        'trace'     => $e->getTraceAsString(),
+    ]);
+    
+    throw $e;
+}
+```
 
-- **Services**: SHOULD return a standardized error array: `['status' => 'error', 'message' => 'Human readable message']` OR throw specific, typed Exceptions (e.g., `InsufficientFundsException`).
-- **Controllers**:
-  - MUST validate the returned `status` OR wrap Service calls in `try/catch` blocks.
-  - Catch `\Throwable` for unexpected crashes to prevent white screens, log the error, and redirect with flash data.
+All financial balance modifications (credits, debits, transfers) MUST use transactions regardless of operation count.
 
 ---
 
+## Part 6: Code Quality, Typing & Documentation
+
+1. **PSR-12 Compliance**: Every PHP file MUST be PSR-12 compliant.
+
+2. **Strict Typing**: The declaration `declare(strict_types=1);` MUST be the first statement in every PHP file.
+
+3. **Namespace Declaration**: The `namespace` declaration MUST follow immediately after `declare()`, with exactly one blank line before class declaration.
+
+4. **PHPDoc Standards**:
+   - Every class MUST contain a descriptive PHPDoc block with `@package`, `@author`, and `@since` tags.
+   - Every method MUST contain complete PHPDoc with `@param`, `@return`, and `@throws` where applicable.
+   - Every property MUST specify type and description.
+   - Entity PHPDoc properties MUST match the dynamic cast types returned by CodeIgniter.
+
+5. **Naming Conventions**:
+   - Variables/Properties: MUST be `snake_case` (e.g., `$user_id`, `$form_errors`).
+   - Methods: MUST be `camelCase` (e.g., `processPayment()`, `validateInput()`).
+   - Classes/Controllers: MUST be `PascalCase` (e.g., `OrderService`, `AdminController`).
+   - Array keys: MUST be `snake_case`.
+   - Private helpers: MUST be prefixed with underscore (e.g., `private function _normalizeData()`).
+   - Private helpers MUST be grouped beneath `// --- Helper Methods ---` and defined BEFORE public methods that invoke them.
+
+6. **Type Safety**:
+   - All methods MUST have explicit return types (`: bool`, `: array`, `: RedirectResponse`, `: string|ResponseInterface`).
+   - Inline PHPDoc type hints are REQUIRED for variables assigned from framework dynamic methods:
+
+     ```php
+     /** @var \App\Modules\[ModuleName]\Entities\DomainEntity|null $entity */
+     $entity = $this->model->find($id);
+     ```
+
 ---
 
-## 6. Frontend Blueprints
+## Part 7: Request, Response & Protocol
+
+### 7.1 Routing Configuration
+
+- **Auto-Routing DISABLED**: Auto-routing is FORBIDDEN. Set `public bool $autoRoute = false;` in `app/Config/Routing.php`.
+- **No Route Closures**: Placing logic inside route closures (`$routes->get('/', function(){...})`) is FORBIDDEN.
+- **Named Routes MANDATORY**: Every defined route MUST have an explicit name using the `as` option:
+
+  ```php
+  $routes->get('profile/settings', 'ProfileController::settings', ['as' => 'profile.settings']);
+  $routes->post('profile/settings', 'ProfileController::updateSettings', ['as' => 'profile.settings.update']);
+  ```
+
+- **Route Groups**: Use `$routes->group()` to organize by feature or access level. Group callbacks MUST be `static function`.
+- **URL Generation**: All links, form actions, and redirects MUST use named route resolution via `url_to()`. Hardcoded paths are FORBIDDEN.
+
+### 7.2 Form Submission (Post/Redirect/Get Pattern)
+
+All POST request handlers MUST implement the PRG pattern:
+
+1. The POST handler controller MUST NOT return `view()` directly.
+2. The controller MUST process data, set flash messages via `session()->setFlashdata()`, and return `redirect()`.
+3. The redirect target MUST be a named GET route.
+4. The GET destination controller renders the view and displays flash messages via `app/Views/partials/flash_messages.php`.
+
+```php
+public function store(): RedirectResponse
+{
+    if (! $this->validate($rules)) {
+        return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+    }
+    
+    service('domainService')->create($this->request->getPost());
+    
+    return redirect()->to(url_to('domain.index'))
+                     ->with('success', 'Record created successfully');
+}
+```
+
+### 7.3 AJAX Responses
+
+All JSON responses MUST return a uniform envelope format:
+
+```php
+return $this->response->setJSON([
+    'status'     => 'success',           // 'success', 'error', or 'validation_error'
+    'message'    => 'Human-readable summary',
+    'result'     => $data,               // Payload object/array
+    'errors'     => $validationErrors,   // Validation error array
+    'csrf_token' => csrf_hash(),         // REQUIRED: Fresh CSRF token
+]);
+```
+
+### 7.4 Server-Sent Events (SSE) Streaming
+
+- The `Content-Type` header MUST be set to `text/event-stream`.
+- Server-side buffering MUST be bypassed immediately with `ob_flush(); flush();` after each output.
+- `session_write_close()` MUST be called before entering streaming loops to prevent session locks.
+- The first stream packet MUST transmit the fresh CSRF token.
+
+---
+
+## Part 8: Security Protocols
+
+### 8.1 CSRF Enforcement
+
+- CSRF protection MUST be enabled globally in `app/Config/Security.php`.
+- Every HTML form with `method="post"`, `put`, `patch`, or `delete` MUST include `csrf_field()`.
+- Every JSON response (success, validation error, or exception) MUST include `csrf_token` with a fresh hash via `csrf_hash()`.
+- Manual CSRF token passing via cookie headers is FORBIDDEN.
+
+### 8.2 Input Validation
+
+- Controllers MUST validate ALL incoming input using the Validation service.
+- Validation rules MUST be strictly defined and reviewed.
+
+### 8.3 Environment Secrets
+
+- API keys, secrets, and credentials MUST reside ONLY in the `.env` file.
+- `.env` file MUST be excluded from version control via `.gitignore`.
+- Access secrets via `env('KEY_NAME')` or `service('settings')` ONLY.
+- Custom config files for secrets are FORBIDDEN.
+
+### 8.4 Rate Limiting
+
+The native `Throttler` service MUST be active on:
+
+- All authentication endpoints (login, register, password reset)
+- All authorization endpoints (2FA, API token generation)
+- High-cost computational routes (AI generation, cryptocurrency operations, bulk exports)
+
+Configure in `app/Config/Filters.php` using the `throttle` filter alias.
+
+### 8.5 XSS Prevention
+
+- ALL View output MUST be escaped using `esc()`.
+- Unescaped output requires explicit security review and approval comments.
+
+---
+
+## Part 9: Stateless File Handling (The Unlink Pattern)
+
+To maintain compatibility with stateless and serverless platforms:
+
+- **Immediate Cleanup**: After a temporary file is read into memory or served to the client, `@unlink($path)` MUST be called immediately.
+- **Randomized Naming**: Temporary file names MUST use framework-generated random names (`$file->getRandomName()`).
+- **Centralized Storage**: Uploads MUST be stored in `WRITEPATH . 'uploads/[type]/[userId]/'`.
+- **No Persistent Local Storage**: Storing uploaded assets permanently on local disk is FORBIDDEN. Offload to external object storage (S3, GCS, etc.) within the same request cycle.
+- **Session Data Restrictions**: Saving binary data or raw files in session storage is FORBIDDEN. Store IDs ONLY. Use the `DatabaseHandler` session driver with the `data` column configured as `MEDIUMBLOB` or larger for serialized data.
+- **Directory Creation**: Services MUST handle directory creation (`mkdir($path, 0755, true)`) and file moving.
+
+---
+
+## Part 10: Error Handling, Logging & Environment
+
+### 10.1 Exception Handling
+
+- Controllers MUST catch `\Throwable` in all action methods to prevent information leaks.
+- Service layer methods MUST bubble up domain-specific exceptions with context OR return standardized error arrays:
+  ```php
+  ['status' => 'error', 'message' => 'Human readable message']
+  ```
+- Unhandled exceptions in Production mode MUST display the static error layout from `app/Views/errors/html/production.php`.
+
+### 10.2 Logging Standards
+
+- Logging MUST use `log_message($level, $message, $context)` with array contexts:
+
+  ```php
+  // REQUIRED:
+  log_message('error', 'Payment processing failed', [
+      'transaction_id' => $transactionId,
+      'user_id'        => $userId,
+      'gateway'        => $gateway,
+  ]);
+  ```
+
+- **Log Levels**:
+  - `critical`: System unusable (DB down, disk full). Triggers immediate alert.
+  - `error`: Runtime failures (transaction rollbacks, upload failures).
+  - `info`: Key business events (user login, report generated).
+
+### 10.3 User Feedback
+
+- Flash messages MUST use `session()->setFlashdata()`.
+- UI Standard: Use persistent Bootstrap Alerts for operation results (Success/Error/Warning). Transient Toasts are reserved for system connectivity issues ONLY.
+
+### 10.4 Environment Configuration
+
+| Environment | `CI_ENVIRONMENT` | `display_errors` | Debug Toolbar |
+|-------------|------------------|------------------|---------------|
+| Development | `development`    | `1`              | Enabled       |
+| Staging     | `testing`        | `0`              | Disabled      |
+| Production  | `production`     | `0`              | Disabled      |
+
+- Committing `d()`, `dd()`, `die()`, `var_dump()`, or `print_r()` statements to version control is FORBIDDEN.
+
+---
+
+## Part 11: Frontend Blueprints
+
+### 11.1 Framework & Structure
 
 - **Framework**: Bootstrap 5 (Utility-first approach).
-- **Layouts**: All views extend `layouts/default`.
-- **Partials**: Reusable UI chunks go in `partials/` (e.g., `flash_messages.php`).
+- **Layouts**: All views MUST extend `layouts/default`.
+- **Partials**: Reusable UI chunks MUST be placed in `partials/` (e.g., `flash_messages.php`).
 - **Structure (The Blueprint Method)**:
   - **Container**: Wrap content in `<div class="container my-5">`.
   - **Header**: Use `<div class="blueprint-header">`.
   - **Card**: Use `<div class="card blueprint-card">`.
-- **Theme Awareness**: Hardcoding colors is **FORBIDDEN**.
-  1. Use Theme-aware Bootstrap utilities first (e.g., `bg-body-tertiary`).
-  2. Use project CSS variables second (e.g., `var(--card-bg)`).
-- **UI Components**:
-  - **Inputs**: All text inputs MUST use Bootstrap 5 "Floating labels".
-  - **Buttons**:
-    - Primary Action: `btn-primary`
-    - Secondary Action: `btn-outline-secondary`
-    - Destructive Action: `btn-danger`
-- **SEO**:
-  - **Meta Data**: Controller MUST pass `pageTitle`, `metaDescription`, `canonicalUrl`, and `robotsTag`.
-  - **Social Sharing**: Layout MUST include complete Open Graph AND Twitter Card meta tags:
-    - **Open Graph**: `og:type`, `og:url`, `og:title`, `og:description`, `og:image`
-    - **Twitter Card**: `twitter:card`, `twitter:site`, `twitter:title`, `twitter:description`, `twitter:image`, `twitter:image:alt`
-    - **Note**: LinkedIn uses Twitter Card tags for link previews, so both sets are mandatory.
-  - **Images**: Pass `metaImage` for specific content (e.g., blog posts, portraits); defaults to a standard brand image in the layout.
-  - **Indexing Strategy**:
-    - **Public Pages**: Use `index, follow` (Marketing, informative, and public tool pages).
-    - **Private/Auth Pages**: Use `noindex, follow` (Auth forms, User dashboards, Admin panels).
+
+### 11.2 Theme Awareness
+
+Hardcoding colors is FORBIDDEN. Priority order:
+1. Use Theme-aware Bootstrap utilities first (e.g., `bg-body-tertiary`).
+2. Use project CSS variables second (e.g., `var(--card-bg)`).
+
+### 11.3 UI Components
+
+- **Inputs**: All text inputs MUST use Bootstrap 5 "Floating labels".
+- **Buttons**:
+  - Primary Action: `btn-primary`
+  - Secondary Action: `btn-outline-secondary`
+  - Destructive Action: `btn-danger`
+
+### 11.4 SEO & Social Sharing
+
+**Meta Data**: Controllers MUST pass these variables in view data:
+- `pageTitle`
+- `metaDescription`
+- `canonicalUrl`
+- `robotsTag`
+- `metaImage`
+
+**Indexing Strategy**:
+- **Public Pages**: USE `index, follow` (Marketing, informative, and public tool pages).
+- **Private/Auth Pages**: USE `noindex, follow` (Auth forms, User dashboards, Admin panels).
+
+**Social Sharing**: Layouts MUST include complete Open Graph AND Twitter Card meta tags:
+- **Open Graph**: `og:type`, `og:url`, `og:title`, `og:description`, `og:image`
+- **Twitter Card**: `twitter:card`, `twitter:site`, `twitter:title`, `twitter:description`, `twitter:image`, `twitter:image:alt`
+
+> [!NOTE]
+> LinkedIn uses Twitter Card tags for link previews; both sets are mandatory.
+
+**Images**: Pass `metaImage` for specific content (e.g., blog posts, portraits); defaults to a standard brand image in the layout.
+
+---
+
+## Part 12: Testing
+
+**Mandate**: No feature is complete without automated tests.
+
+- **Tool**: PHPUnit (`php spark test`).
+- **Unit Tests**: Test Services with mocked DB/API dependencies.
+- **Feature Tests**: Test Controllers using real DB with `DatabaseTransactions` trait.
+
+---
+
+## Part 13: Boot & Deployment Standard Operating Procedure
+
+### 13.1 Local Development Boot (3 Steps)
+
+A developer MUST initialize the local workspace using exactly three sequential commands:
+
+```bash
+composer install
+php spark migrate --all
+php spark db:seed MainSeeder
+```
+
+### 13.2 Production Deployment Checklist
+
+The deployment process MUST execute in this exact sequence:
+
+1. **Environment Configuration**: Set `CI_ENVIRONMENT = production` and `display_errors = 0`.
+
+2. **Dependency Installation**:
+   ```bash
+   composer install --no-dev --optimize-autoloader --no-interaction
+   ```
+
+3. **Framework Optimization**:
+   ```bash
+   php spark optimize
+   ```
+   This serializes and caches routing and configuration definitions.
+
+4. **Database Migration**:
+   ```bash
+   php spark migrate --all
+   ```
+
+5. **Web Server Configuration**:
+   - Document root MUST point strictly to `/public`.
+   - Access to `/app`, `/system`, `/writable`, `/vendor` is FORBIDDEN.
+   - `mod_rewrite` or equivalent MUST be enabled.
+   - The `writable/` directory MUST be writable by the web server user.
+
+---
+
+> [!IMPORTANT]
+> This file is a living document. Modifications require architectural review and team sign-off.
 
 # Simple vs. Easy: Summary
 
