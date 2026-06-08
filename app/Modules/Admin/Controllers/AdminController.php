@@ -916,9 +916,16 @@ class AdminController extends BaseController
         $user->ems_provider_id = $this->request->getPost('ems_provider_id') ? (int) $this->request->getPost('ems_provider_id') : null;
         $user->active          = (int) $this->request->getPost('active');
 
-        // Optional reset password if check box selected
-        if ($this->request->getPost('reset_password')) {
-            $user->password_hash = password_hash('12345678', PASSWORD_BCRYPT);
+        // Optional set new password if field is not empty
+        $new_password = $this->request->getPost('new_password');
+        if (!empty($new_password)) {
+            $password_rules = [
+                'new_password' => 'required|min_length[6]',
+            ];
+            if (!$this->validate($password_rules)) {
+                return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            }
+            $user->password_hash = password_hash((string) $new_password, PASSWORD_BCRYPT);
         }
 
         $success = $this->admin_service->saveUser($user);

@@ -113,14 +113,53 @@ $isEdit = isset($user);
             </select>
           </div>
 
-          <!-- Optional Password Reset (Edit only) -->
+          <!-- Optional Custom Password (Edit only) -->
           <?php if ($isEdit) : ?>
-            <div class="form-check mb-4 text-start">
-              <input class="form-check-input" type="checkbox" name="reset_password" value="1" id="resetPassCheck">
-              <label class="form-check-label text-muted" for="resetPassCheck">
-                Reset password to default temporary "12345678"
-              </label>
+            <div class="mb-4">
+              <label for="newPasswordInput" class="form-label">Set New Password <span class="text-muted fw-normal">(optional)</span></label>
+              <div class="input-group">
+                <input type="password"
+                  name="new_password"
+                  id="newPasswordInput"
+                  class="form-control <?= session('errors.new_password') ? 'is-invalid' : '' ?>"
+                  placeholder="Leave blank to keep current password"
+                  autocomplete="new-password">
+                <button type="button" class="btn btn-outline-secondary" id="generatePassBtn" title="Generate secure password">
+                  🔑 Generate
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="togglePassBtn" title="Show/Hide password">
+                  👁️
+                </button>
+              </div>
+              <?php if (session('errors.new_password')) : ?>
+                <div class="invalid-feedback d-block"><?= (string) esc(session('errors.new_password')) ?></div>
+              <?php endif; ?>
+              <div class="form-text text-muted">Min 6 characters. Leave blank to keep the current password unchanged.</div>
             </div>
+
+            <script>
+              document.addEventListener('DOMContentLoaded', () => {
+                const passInput = document.getElementById('newPasswordInput');
+                const genBtn = document.getElementById('generatePassBtn');
+                const toggleBtn = document.getElementById('togglePassBtn');
+
+                // Generate a random 12-character password
+                genBtn.addEventListener('click', () => {
+                  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+                  let password = '';
+                  for (let i = 0; i < 12; i++) {
+                    password += chars.charAt(Math.floor(Math.random() * chars.length));
+                  }
+                  passInput.value = password;
+                });
+
+                // Toggle password visibility
+                toggleBtn.addEventListener('click', () => {
+                  const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                  passInput.setAttribute('type', type);
+                });
+              });
+            </script>
           <?php endif; ?>
 
           <!-- Actions -->
