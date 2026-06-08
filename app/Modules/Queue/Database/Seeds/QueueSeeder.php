@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Modules\Queue\Database\Seeds;
 
 use CodeIgniter\Database\Seeder;
-use App\Modules\Queue\Models\HospitalModel;
-use App\Modules\Queue\Models\AmbulanceModel;
-use App\Modules\Queue\Models\HandoverModel;
-use App\Modules\Queue\Entities\Hospital;
-use App\Modules\Queue\Entities\Ambulance;
-use App\Modules\Queue\Entities\Handover;
+use App\Modules\Hospital\Models\HospitalModel;
+use App\Modules\Ambulance\Models\AmbulanceModel;
+use App\Modules\Hospital\Models\HandoverModel;
+use App\Modules\Hospital\Entities\Hospital;
+use App\Modules\Ambulance\Entities\Ambulance;
+use App\Modules\Hospital\Entities\Handover;
 
 /**
  * Class QueueSeeder
@@ -98,6 +98,10 @@ class QueueSeeder extends Seeder
                 continue;
             }
 
+            // Provide minimum default active value
+            $data['status'] = 'Available';
+            $data['ems_provider_id'] = 1; // Default EMS provider reference
+
             $ambulance = new Ambulance($data);
             $ambulance_model->save($ambulance);
             $new_id = $ambulance_model->getInsertID();
@@ -159,16 +163,7 @@ class QueueSeeder extends Seeder
 
         // 5. Seed 14 Completed Handovers (Cleared today) to match the mockup metric "Handovers completed today: 14"
         // Also gives wait times that average around 38 minutes to match "Avg wait today (min): 38"
-        // Seed wait times: [20, 25, 30, 35, 40, 45, 50, 20, 25, 30, 35, 40, 45, 30] -> average is approx 33 mins
-        // Sum: 20*2 + 25*2 + 30*3 + 35*2 + 40*2 + 45*2 + 50 = 40 + 50 + 90 + 70 + 80 + 90 + 50 = 470 mins.
-        // 470 mins / 14 = 33.5 mins. Plus active handovers (52 + 18 + 0 + 0 = 70 mins), total = 540 mins / 18 handovers = 30 mins average.
-        // Let's adjust to hit exactly 38 mins on average across the 18 total handovers (14 cleared + 4 active):
-        // Total wait time target for 18 handovers = 38 * 18 = 684 mins.
-        // Active handovers sum wait time = 52 + 18 + 0 + 0 = 70 mins.
-        // Required sum wait time for 14 completed handovers = 684 - 70 = 614 mins.
-        // Average wait time for 14 completed handovers = 614 / 14 = ~43.8 mins.
-        // Let's seed 14 completed handovers with wait times summing to 614:
-        // Wait times: [40, 45, 50, 35, 38, 42, 55, 30, 48, 52, 40, 45, 50, 44] -> Sum: 614.
+        // Seed wait times: [40, 45, 50, 35, 38, 42, 55, 30, 48, 52, 40, 45, 50, 44] -> Sum: 614.
         $completed_wait_times = [40, 45, 50, 35, 38, 42, 55, 30, 48, 52, 40, 45, 50, 44];
         
         $genders = ['M', 'F'];

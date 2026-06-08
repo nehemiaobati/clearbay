@@ -130,10 +130,17 @@ class HospitalService
      * @param string $status
      * @param int $bays_available
      * @param int $user_id
+     * @param string $user_role
      * @return bool
      */
-    public function updateStatus(int $hospital_id, string $status, int $bays_available, int $user_id): bool
+    public function updateStatus(int $hospital_id, string $status, int $bays_available, int $user_id, string $user_role): bool
     {
+        // Role guard: only hospital_admin and admin can modify bay configuration (structural data)
+        if ($user_role !== 'hospital_admin' && $user_role !== 'admin') {
+            $hospital = $this->hospital_model->find($hospital_id);
+            $bays_available = $hospital ? (int) $hospital->bays_available : 0;
+        }
+
         $db = \Config\Database::connect();
         $db->transStart();
 
@@ -302,7 +309,7 @@ class HospitalService
         $user = new User();
         $user->name          = $name;
         $user->email         = $email;
-        $user->password_hash = password_hash('12345678', PASSWORD_BCRYPT);
+        $user->password      = '12345678';
         $user->role          = $role;
         $user->hospital_id   = $hospital_id;
         $user->active        = 1;
@@ -331,18 +338,21 @@ class HospitalService
         $db = \Config\Database::connect();
         $db->transStart();
 
-        $data = [
-            'name'  => $name,
-            'email' => $email,
-            'role'  => $role,
-            'active' => $active,
-        ];
-
-        if (!empty($new_password)) {
-            $data['password_hash'] = password_hash($new_password, PASSWORD_BCRYPT);
+        $user = $this->getHospitalUser($user_id, $hospital_id);
+        if ($user === null) {
+            return false;
         }
 
-        $user_model->where('id', $user_id)->where('hospital_id', $hospital_id)->set($data)->update();
+        $user->name   = $name;
+        $user->email  = $email;
+        $user->role   = $role;
+        $user->active = $active;
+
+        if (!empty($new_password)) {
+            $user->password = $new_password;
+        }
+
+        $user_model->save($user);
 
         $db->transComplete();
         return $db->transStatus() !== false;

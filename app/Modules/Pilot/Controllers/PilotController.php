@@ -24,12 +24,16 @@ class PilotController extends BaseController
     private \App\Modules\Pilot\Libraries\PilotService $_pilot_service;
 
     /**
+     * Declared helpers.
+     */
+    protected $helpers = ['form', 'url'];
+
+    /**
      * PilotController constructor.
      */
     public function __construct()
     {
-        $this->_pilot_service = new \App\Modules\Pilot\Libraries\PilotService();
-        helper(['form', 'url']);
+        $this->_pilot_service = service('pilotService');
     }
 
     // ==========================================

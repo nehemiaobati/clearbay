@@ -24,12 +24,16 @@ class HospitalController extends BaseController
     private HospitalService $hospital_service;
 
     /**
+     * Declared helpers.
+     */
+    protected $helpers = ['form', 'url'];
+
+    /**
      * HospitalController constructor.
      */
     public function __construct()
     {
-        $this->hospital_service = new HospitalService();
-        helper(['form', 'url']);
+        $this->hospital_service = service('hospitalService');
     }
 
     // --- Helper Methods ---
@@ -126,15 +130,9 @@ class HospitalController extends BaseController
 
         $status         = (string) $this->request->getPost('status');
         $bays_available = (int) $this->request->getPost('bays_available');
+        $user_role      = (string) session()->get('user_role');
 
-        // Role guard: only hospital_admin and admin can modify bay configuration (structural data)
-        $user_role = session()->get('user_role');
-        if ($user_role !== 'hospital_admin' && $user_role !== 'admin') {
-            // Nurses can update status color only, not bay count
-            $bays_available = (int) $hospital->bays_available;
-        }
-
-        $success = $this->hospital_service->updateStatus((int) $hospital->id, $status, $bays_available, (int) $user_id);
+        $success = $this->hospital_service->updateStatus((int) $hospital->id, $status, $bays_available, (int) $user_id, $user_role);
 
         if (!$success) {
             return $this->response->setJSON([

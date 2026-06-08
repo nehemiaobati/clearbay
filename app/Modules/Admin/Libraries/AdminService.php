@@ -4,403 +4,243 @@ declare(strict_types=1);
 
 namespace App\Modules\Admin\Libraries;
 
-use App\Modules\Pilot\Models\PilotSignupModel;
 use App\Modules\Pilot\Entities\PilotSignup;
-use App\Modules\Hospital\Models\HandoverModel;
 use App\Modules\Hospital\Entities\Handover;
-use App\Modules\Hospital\Models\HospitalModel;
 use App\Modules\Hospital\Entities\Hospital;
-use App\Modules\Ambulance\Models\AmbulanceModel;
 use App\Modules\Ambulance\Entities\Ambulance;
-use App\Modules\Auth\Models\UserModel;
 use App\Modules\Auth\Entities\User;
 
 /**
  * Class AdminService
+ *
+ * Facade orchestrating administrative sub-services for each domain.
+ *
+ * @package App\Modules\Admin\Libraries
+ * @author Senior Developer
+ * @since 1.0.0
  */
 class AdminService
 {
-    /**
-     * @var PilotSignupModel
-     */
-    private PilotSignupModel $pilot_model;
+    private PilotAdminService $pilot_service;
+    private HandoverAdminService $handover_service;
+    private HospitalAdminService $hospital_service;
+    private AmbulanceAdminService $ambulance_service;
+    private UserAdminService $user_service;
 
-    /**
-     * @var HandoverModel
-     */
-    private HandoverModel $handover_model;
-
-    /**
-     * @var HospitalModel
-     */
-    private HospitalModel $hospital_model;
-
-    /**
-     * @var AmbulanceModel
-     */
-    private AmbulanceModel $ambulance_model;
-
-    /**
-     * @var UserModel
-     */
-    private UserModel $user_model;
-
-    /**
-     * AdminService constructor.
-     */
     public function __construct()
     {
-        $this->pilot_model = new PilotSignupModel();
-        $this->handover_model = new HandoverModel();
-        $this->hospital_model = new HospitalModel();
-        $this->ambulance_model = new AmbulanceModel();
-        $this->user_model = new UserModel();
+        $this->pilot_service     = service('pilotAdminService');
+        $this->handover_service  = service('handoverAdminService');
+        $this->hospital_service  = service('hospitalAdminService');
+        $this->ambulance_service = service('ambulanceAdminService');
+        $this->user_service      = service('userAdminService');
     }
 
     /**
      * Resolves a single pilot signup record by primary key.
-     *
-     * @param int $pilot_id
-     * @return PilotSignup|null
      */
     public function getPilot(int $pilot_id): ?PilotSignup
     {
-        /** @var PilotSignup|null $pilot */
-        $pilot = $this->pilot_model->find($pilot_id);
-        return $pilot;
+        return $this->pilot_service->getPilot($pilot_id);
     }
 
     /**
      * Resolves a single handover record by primary key.
-     *
-     * @param int $handover_id
-     * @return Handover|null
      */
     public function getHandover(int $handover_id): ?Handover
     {
-        /** @var Handover|null $handover */
-        $handover = $this->handover_model->find($handover_id);
-        return $handover;
+        return $this->handover_service->getHandover($handover_id);
     }
 
     /**
      * Resolves a single hospital record by primary key.
-     *
-     * @param int $hospital_id
-     * @return Hospital|null
      */
     public function getHospital(int $hospital_id): ?Hospital
     {
-        /** @var Hospital|null $hospital */
-        $hospital = $this->hospital_model->find($hospital_id);
-        return $hospital;
+        return $this->hospital_service->getHospital($hospital_id);
     }
 
     /**
      * Resolves a single ambulance record by primary key.
-     *
-     * @param int $ambulance_id
-     * @return Ambulance|null
      */
     public function getAmbulance(int $ambulance_id): ?Ambulance
     {
-        /** @var Ambulance|null $ambulance */
-        $ambulance = $this->ambulance_model->find($ambulance_id);
-        return $ambulance;
+        return $this->ambulance_service->getAmbulance($ambulance_id);
     }
 
     /**
      * Resolves a single user record by primary key.
-     *
-     * @param int $user_id
-     * @return User|null
      */
     public function getUser(int $user_id): ?User
     {
-        /** @var User|null $user */
-        $user = $this->user_model->find($user_id);
-        return $user;
+        return $this->user_service->getUser($user_id);
     }
 
     /**
-     * Retrieves all hospitals ordered by name (for form dropdowns).
-     *
-     * @return array
+     * Retrieves all hospitals ordered by name.
      */
     public function getAllHospitals(): array
     {
-        return $this->hospital_model->orderBy('name', 'ASC')->findAll();
+        return $this->hospital_service->getAllHospitals();
     }
 
     /**
-     * Retrieves all ambulances ordered by unit_id (for form dropdowns).
-     *
-     * @return array
+     * Retrieves all ambulances ordered by unit_id.
      */
     public function getAllAmbulances(): array
     {
-        return $this->ambulance_model->orderBy('unit_id', 'ASC')->findAll();
+        return $this->ambulance_service->getAllAmbulances();
     }
 
     /**
-     * Retrieves all EMS providers ordered by name (for form dropdowns).
-     *
-     * @return array
+     * Retrieves all EMS providers.
      */
     public function getAllEmsProviders(): array
     {
-        $db = \Config\Database::connect();
-        return $db->table('ems_providers')
-            ->select('id, name')
-            ->orderBy('name', 'ASC')
-            ->get()
-            ->getResultArray();
+        return $this->ambulance_service->getAllEmsProviders();
     }
 
     /**
      * Returns count results for pilots, handovers, hospitals, ambulances, and users.
-     *
-     * @return array
      */
     public function getDashboardMetrics(): array
     {
         return [
-            'pilotCount'      => $this->pilot_model->countAllResults(),
-            'handoverCount'   => $this->handover_model->countAllResults(),
-            'hospitalCount'   => $this->hospital_model->countAllResults(),
-            'ambulanceCount'  => $this->ambulance_model->countAllResults(),
-            'userCount'       => $this->user_model->countAllResults(),
+            'pilotCount'      => $this->pilot_service->countPilots(),
+            'handoverCount'   => $this->handover_service->countHandovers(),
+            'hospitalCount'   => $this->hospital_service->countHospitals(),
+            'ambulanceCount'  => $this->ambulance_service->countAmbulances(),
+            'userCount'       => $this->user_service->countUsers(),
         ];
     }
 
     /**
      * Returns paginated pilots list and the pager instance.
-     *
-     * @param int $perPage
-     * @return array
      */
     public function getPilotsList(int $perPage): array
     {
-        return [
-            'pilots' => $this->pilot_model->orderBy('created_at', 'DESC')->paginate($perPage, 'pilots'),
-            'pager'  => $this->pilot_model->pager,
-        ];
+        return $this->pilot_service->getPilotsList($perPage);
     }
 
     /**
      * Returns paginated handovers list and the pager instance.
-     *
-     * @param int $perPage
-     * @return array
      */
     public function getHandoversList(int $perPage): array
     {
-        return [
-            'handovers' => $this->handover_model
-                ->select('handovers.id, handovers.ambulance_id, handovers.hospital_id, handovers.patient_age, handovers.patient_gender, handovers.acuity, handovers.eta_minutes, handovers.wait_time_minutes, handovers.status, handovers.created_at, ambulances.unit_id as ambulance_unit, hospitals.name as hospital_name')
-                ->join('ambulances', 'ambulances.id = handovers.ambulance_id')
-                ->join('hospitals', 'hospitals.id = handovers.hospital_id')
-                ->orderBy('handovers.created_at', 'DESC')
-                ->paginate($perPage, 'handovers'),
-            'pager'     => $this->handover_model->pager,
-        ];
+        return $this->handover_service->getHandoversList($perPage);
     }
 
     /**
      * Returns paginated hospitals list and the pager instance.
-     *
-     * @param int $perPage
-     * @return array
      */
     public function getHospitalsList(int $perPage): array
     {
-        return [
-            'hospitals' => $this->hospital_model->orderBy('name', 'ASC')->paginate($perPage, 'hospitals'),
-            'pager'     => $this->hospital_model->pager,
-        ];
+        return $this->hospital_service->getHospitalsList($perPage);
     }
 
     /**
      * Returns paginated ambulances list and the pager instance.
-     *
-     * @param int $perPage
-     * @return array
      */
     public function getAmbulancesList(int $perPage): array
     {
-        return [
-            'ambulances' => $this->ambulance_model->orderBy('unit_id', 'ASC')->paginate($perPage, 'ambulances'),
-            'pager'      => $this->ambulance_model->pager,
-        ];
+        return $this->ambulance_service->getAmbulancesList($perPage);
     }
 
     /**
      * Returns paginated users list and the pager instance.
-     *
-     * @param int $perPage
-     * @return array
      */
     public function getUsersList(int $perPage): array
     {
-        return [
-            'users' => $this->user_model
-                ->select('users.id, users.name, users.email, users.role, users.hospital_id, users.ems_provider_id, users.active, users.created_at, hospitals.name as hospital_name, ems_providers.name as ems_name')
-                ->join('hospitals', 'hospitals.id = users.hospital_id', 'left')
-                ->join('ems_providers', 'ems_providers.id = users.ems_provider_id', 'left')
-                ->orderBy('users.created_at', 'DESC')
-                ->paginate($perPage, 'users'),
-            'pager' => $this->user_model->pager,
-        ];
+        return $this->user_service->getUsersList($perPage);
     }
 
     /**
-     * Saves a pilot record wrapped in a database transaction.
-     *
-     * @param PilotSignup $pilot
-     * @return bool
+     * Saves a pilot record.
      */
     public function savePilot(PilotSignup $pilot): bool
     {
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->pilot_model->save($pilot);
-        $db->transComplete();
-        return $db->transStatus() !== false;
+        $result = $this->pilot_service->savePilot($pilot);
+        return $result['status'] === 'success';
     }
 
     /**
-     * Deletes a pilot record wrapped in a database transaction.
-     *
-     * @param int $id
-     * @return bool
+     * Deletes a pilot record.
      */
     public function deletePilot(int $id): bool
     {
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->pilot_model->delete($id);
-        $db->transComplete();
-        return $db->transStatus() !== false;
+        $result = $this->pilot_service->deletePilot($id);
+        return $result['status'] === 'success';
     }
 
     /**
-     * Saves a handover record wrapped in a database transaction.
-     *
-     * @param Handover $handover
-     * @return bool
+     * Saves a handover record.
      */
     public function saveHandover(Handover $handover): bool
     {
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->handover_model->save($handover);
-        $db->transComplete();
-        return $db->transStatus() !== false;
+        $result = $this->handover_service->saveHandover($handover);
+        return $result['status'] === 'success';
     }
 
     /**
-     * Deletes a handover record wrapped in a database transaction.
-     *
-     * @param int $id
-     * @return bool
+     * Deletes a handover record.
      */
     public function deleteHandover(int $id): bool
     {
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->handover_model->delete($id);
-        $db->transComplete();
-        return $db->transStatus() !== false;
+        $result = $this->handover_service->deleteHandover($id);
+        return $result['status'] === 'success';
     }
 
     /**
-     * Saves a hospital record wrapped in a database transaction.
-     *
-     * @param Hospital $hospital
-     * @return bool
+     * Saves a hospital record.
      */
     public function saveHospital(Hospital $hospital): bool
     {
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->hospital_model->save($hospital);
-        $db->transComplete();
-        return $db->transStatus() !== false;
+        $result = $this->hospital_service->saveHospital($hospital);
+        return $result['status'] === 'success';
     }
 
     /**
-     * Deletes a hospital record wrapped in a database transaction.
-     *
-     * @param int $id
-     * @return bool
+     * Deletes a hospital record.
      */
     public function deleteHospital(int $id): bool
     {
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->hospital_model->delete($id);
-        $db->transComplete();
-        return $db->transStatus() !== false;
+        $result = $this->hospital_service->deleteHospital($id);
+        return $result['status'] === 'success';
     }
 
     /**
-     * Saves an ambulance record wrapped in a database transaction.
-     *
-     * @param Ambulance $ambulance
-     * @return bool
+     * Saves an ambulance record.
      */
     public function saveAmbulance(Ambulance $ambulance): bool
     {
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->ambulance_model->save($ambulance);
-        $db->transComplete();
-        return $db->transStatus() !== false;
+        $result = $this->ambulance_service->saveAmbulance($ambulance);
+        return $result['status'] === 'success';
     }
 
     /**
-     * Deletes an ambulance record wrapped in a database transaction.
-     *
-     * @param int $id
-     * @return bool
+     * Deletes an ambulance record.
      */
     public function deleteAmbulance(int $id): bool
     {
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->ambulance_model->delete($id);
-        $db->transComplete();
-        return $db->transStatus() !== false;
+        $result = $this->ambulance_service->deleteAmbulance($id);
+        return $result['status'] === 'success';
     }
 
     /**
-     * Saves a user record wrapped in a database transaction.
-     *
-     * @param User $user
-     * @return bool
+     * Saves a user record.
      */
     public function saveUser(User $user): bool
     {
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->user_model->save($user);
-        $db->transComplete();
-        return $db->transStatus() !== false;
+        $result = $this->user_service->saveUser($user);
+        return $result['status'] === 'success';
     }
 
     /**
-     * Deactivates a user account (soft delete) to prevent login without data loss.
-     * Per PRD SC-16: "Deactivate a user account — this prevents them from logging in without deleting their data."
-     *
-     * @param int $id
-     * @return bool
+     * Deactivates a user account.
      */
     public function deleteUser(int $id): bool
     {
-        $db = \Config\Database::connect();
-        $db->transStart();
-        $this->user_model->update($id, ['active' => 0]);
-        $db->transComplete();
-        return $db->transStatus() !== false;
+        $result = $this->user_service->deleteUser($id);
+        return $result['status'] === 'success';
     }
 }

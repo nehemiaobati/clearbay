@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Queue\Libraries;
 
-use App\Modules\Queue\Models\HandoverModel;
+use App\Modules\Hospital\Models\HandoverModel;
 use Config\Database;
 
 /**
@@ -56,7 +56,7 @@ class QueueService
 
         // 3. Calculate average wait time today (active + completed today)
         // Let's use database aggregation using query builder select(SUM(wait_time_minutes)) and count
-        $db = \Config\Database::connect();
+        $db = Database::connect();
         
         // Active queue records
         $active_stats = $db->table('handovers')

@@ -23,11 +23,16 @@ class QueueController extends BaseController
     private QueueService $_queue_service;
 
     /**
+     * Declared helpers.
+     */
+    protected $helpers = ['form', 'url'];
+
+    /**
      * QueueController constructor.
      */
     public function __construct()
     {
-        $this->_queue_service = new QueueService();
+        $this->_queue_service = service('queueService');
     }
 
     /**

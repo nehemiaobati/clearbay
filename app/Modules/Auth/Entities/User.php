@@ -36,4 +36,16 @@ class User extends Entity
         'ems_provider_id' => 'integer',
         'active'          => 'integer',
     ];
+
+    /**
+     * Hashes the password automatically when set.
+     *
+     * @param string $pass
+     * @return self
+     */
+    public function setPassword(string $pass): self
+    {
+        $this->attributes['password_hash'] = password_hash($pass, PASSWORD_BCRYPT);
+        return $this;
+    }
 }

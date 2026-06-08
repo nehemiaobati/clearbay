@@ -29,14 +29,18 @@ class AdminController extends BaseController
     private AdminService $admin_service;
 
     /**
+     * Declared helpers.
+     */
+    protected $helpers = ['form', 'url'];
+
+    /**
      * AdminController constructor.
      *
      * @param AdminService|null $admin_service
      */
     public function __construct(?AdminService $admin_service = null)
     {
-        $this->admin_service = $admin_service ?? new AdminService();
-        helper(['form', 'url']);
+        $this->admin_service = $admin_service ?? service('adminService');
     }
 
     /**

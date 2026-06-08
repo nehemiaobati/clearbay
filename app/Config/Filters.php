@@ -38,6 +38,7 @@ class Filters extends BaseFilters
         'performance'   => PerformanceMetrics::class,
         'auth'          => \App\Filters\AuthFilter::class,
         'role'          => \App\Filters\RoleFilter::class,
+        'throttle'      => \App\Filters\ThrottleFilter::class,
     ];
 
     /**
@@ -110,5 +111,12 @@ class Filters extends BaseFilters
      *
      * @var array<string, array<string, list<string>>>
      */
-    public array $filters = [];
+    public array $filters = [
+        'throttle' => [
+            'before' => [
+                'login',
+                'pilot/signup',
+            ],
+        ],
+    ];
 }

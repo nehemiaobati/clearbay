@@ -22,12 +22,16 @@ class DispatcherController extends BaseController
     private DispatcherService $dispatcher_service;
 
     /**
+     * Declared helpers.
+     */
+    protected $helpers = ['form', 'url'];
+
+    /**
      * DispatcherController constructor.
      */
     public function __construct()
     {
-        $this->dispatcher_service = new DispatcherService();
-        helper(['form', 'url']);
+        $this->dispatcher_service = service('dispatcherService');
     }
 
     /**

@@ -23,12 +23,16 @@ class AuthController extends BaseController
     private AuthService $auth_service;
 
     /**
+     * Declared helpers.
+     */
+    protected $helpers = ['form', 'url'];
+
+    /**
      * AuthController constructor.
      */
     public function __construct()
     {
-        $this->auth_service = new AuthService();
-        helper(['form', 'url']);
+        $this->auth_service = service('authService');
     }
 
     /**
@@ -85,32 +89,40 @@ class AuthController extends BaseController
      */
     public function login(): RedirectResponse
     {
-        $rules = [
-            'email'    => 'required|valid_email',
-            'password' => 'required|min_length[6]',
-        ];
+        try {
+            $rules = [
+                'email'    => 'required|valid_email',
+                'password' => 'required|min_length[6]',
+            ];
 
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            if (!$this->validate($rules)) {
+                return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            }
+
+            $email    = (string) $this->request->getPost('email');
+            $password = (string) $this->request->getPost('password');
+
+            $user = $this->auth_service->login($email, $password);
+
+            if ($user === null) {
+                return redirect()->back()->withInput()->with('error', 'Incorrect email or password. Please try again.');
+            }
+
+            // Check for saved redirect URL from AuthFilter
+            $redirect = session()->get('redirect_url');
+            if ($redirect) {
+                session()->remove('redirect_url');
+                return redirect()->to($redirect)->with('success', 'Welcome back, ' . $user->name . '!');
+            }
+
+            return redirect()->to(url_to($this->_getRedirectRoute($user)))->with('success', 'Welcome back, ' . $user->name . '!');
+        } catch (\Throwable $e) {
+            log_message('error', 'Exception during login request', [
+                'exception' => $e->getMessage(),
+                'trace'     => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->withInput()->with('error', 'An unexpected system error occurred. Please try again later.');
         }
-
-        $email    = (string) $this->request->getPost('email');
-        $password = (string) $this->request->getPost('password');
-
-        $user = $this->auth_service->login($email, $password);
-
-        if ($user === null) {
-            return redirect()->back()->withInput()->with('error', 'Incorrect email or password. Please try again.');
-        }
-
-        // Check for saved redirect URL from AuthFilter
-        $redirect = session()->get('redirect_url');
-        if ($redirect) {
-            session()->remove('redirect_url');
-            return redirect()->to($redirect)->with('success', 'Welcome back, ' . $user->name . '!');
-        }
-
-        return redirect()->to(url_to($this->_getRedirectRoute($user)))->with('success', 'Welcome back, ' . $user->name . '!');
     }
 
     /**

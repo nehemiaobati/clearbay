@@ -23,12 +23,16 @@ class AmbulanceController extends BaseController
     private AmbulanceService $ambulance_service;
 
     /**
+     * Declared helpers.
+     */
+    protected $helpers = ['form', 'url'];
+
+    /**
      * AmbulanceController constructor.
      */
     public function __construct()
     {
-        $this->ambulance_service = new AmbulanceService();
-        helper(['form', 'url']);
+        $this->ambulance_service = service('ambulanceService');
     }
 
     // --- Helper Methods ---
