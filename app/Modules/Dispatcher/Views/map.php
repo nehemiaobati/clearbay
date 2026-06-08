@@ -172,22 +172,33 @@
       }
 
       list.innerHTML = telemetry.hospitals.map(h => {
+        const status = h.status.toUpperCase();
+        let borderClass = 'border-success border-opacity-20';
+        let bgClass = 'bg-success bg-opacity-10';
         let statusColor = 'text-success';
-        if (h.status === 'RED') statusColor = 'text-danger';
-        else if (h.status === 'AMBER') statusColor = 'text-warning';
+
+        if (status === 'RED') {
+          borderClass = 'border-danger border-opacity-20';
+          bgClass = 'bg-danger bg-opacity-10';
+          statusColor = 'text-danger';
+        } else if (status === 'AMBER') {
+          borderClass = 'border-warning border-opacity-20';
+          bgClass = 'bg-warning bg-opacity-10';
+          statusColor = 'text-warning';
+        }
 
         return `
-          <div class="p-2 border border-secondary border-opacity-10 rounded d-flex justify-content-between align-items-center">
-            <div>
-              <span class="small text-cream fw-bold d-block">${h.name}</span>
-              <small class="text-muted mono-label">${h.code}</small>
-            </div>
-            <div class="text-end">
-              <span class="small fw-bold ${statusColor} d-block">${h.status}</span>
-              <small class="text-muted mono-label">${h.bays_available} bays</small>
-            </div>
-          </div>
-        `;
+              <div class="p-2 border ${borderClass} rounded d-flex justify-content-between align-items-center ${bgClass}">
+                <div>
+                  <span class="small text-cream fw-bold d-block">${h.name}</span>
+                  <small class="text-muted mono-label">${h.code}</small>
+                </div>
+                <div class="text-end">
+                  <span class="small fw-bold ${statusColor} d-block">${h.status}</span>
+                  <small class="text-muted mono-label">${h.bays_available} bays</small>
+                </div>
+              </div>
+            `;
       }).join('');
     };
 
@@ -231,9 +242,10 @@
       });
 
       telemetry.hospitals.forEach(h => {
+        const hospStatus = h.status.toUpperCase();
         let color = colorSage;
-        if (h.status === 'RED') color = colorRed;
-        else if (h.status === 'AMBER') color = colorAmber;
+        if (hospStatus === 'RED') color = colorRed;
+        else if (hospStatus === 'AMBER') color = colorAmber;
 
         const hospEl = document.createElement('div');
         hospEl.style.backgroundColor = color;

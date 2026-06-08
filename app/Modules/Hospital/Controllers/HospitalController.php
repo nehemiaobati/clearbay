@@ -62,6 +62,7 @@ class HospitalController extends BaseController
             'canonical_url'    => url_to('hospital.dashboard'),
             'robots_tag'       => 'noindex, nofollow',
             'hospital'         => $hospital,
+            'user_role'        => session()->get('user_role'),
         ];
 
         return view('App\Modules\Hospital\Views\dashboard', $data);
@@ -330,6 +331,201 @@ class HospitalController extends BaseController
             ->setHeader('Content-Type', 'text/csv')
             ->setHeader('Content-Disposition', 'attachment; filename="clearbay_report_' . $hospital->code . '.csv"')
             ->setBody($content);
+    }
+
+    // =========================================================================
+    // HOSPITAL USER MANAGEMENT (hospital_admin only)
+    // =========================================================================
+
+    /**
+     * Lists users scoped to the hospital_admin's own hospital.
+     *
+     * @return string|RedirectResponse
+     */
+    public function usersList(): string|RedirectResponse
+    {
+        $hospital = $this->_getMappedHospital();
+        if ($hospital === null) {
+            return redirect()->to(url_to('auth.logout'))->with('error', 'Your account is not mapped to a hospital facility.');
+        }
+
+        $users = $this->hospital_service->getHospitalUsers((int) $hospital->id);
+
+        $data = [
+            'page_title'       => 'Manage Users | ' . $hospital->name,
+            'meta_description' => 'Manage hospital-specific user accounts.',
+            'canonical_url'    => url_to('hospital.users.list'),
+            'robots_tag'       => 'noindex, nofollow',
+            'users'            => $users,
+            'hospital'         => $hospital,
+        ];
+
+        return view('App\Modules\Hospital\Views\users\list', $data);
+    }
+
+    /**
+     * Renders form to create a new hospital-scoped user.
+     *
+     * @return string|RedirectResponse
+     */
+    public function userNew(): string|RedirectResponse
+    {
+        $hospital = $this->_getMappedHospital();
+        if ($hospital === null) {
+            return redirect()->to(url_to('auth.logout'))->with('error', 'Your account is not mapped to a hospital facility.');
+        }
+
+        $data = [
+            'page_title'       => 'Add User | ' . $hospital->name,
+            'meta_description' => 'Register a new user for your hospital facility.',
+            'canonical_url'    => url_to('hospital.users.new'),
+            'robots_tag'       => 'noindex, nofollow',
+            'hospital'         => $hospital,
+        ];
+
+        return view('App\Modules\Hospital\Views\users\edit', $data);
+    }
+
+    /**
+     * Validates and saves a new hospital-scoped user.
+     *
+     * @return RedirectResponse
+     */
+    public function userCreate(): RedirectResponse
+    {
+        $hospital = $this->_getMappedHospital();
+        if ($hospital === null) {
+            return redirect()->to(url_to('auth.logout'))->with('error', 'Session expired.');
+        }
+
+        $rules = [
+            'name'  => 'required|min_length[3]|max_length[255]',
+            'email' => 'required|valid_email|max_length[255]|is_unique[users.email]',
+            'role'  => 'required|in_list[nurse,hospital_admin]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $name  = (string) $this->request->getPost('name');
+        $email = (string) $this->request->getPost('email');
+        $role  = (string) $this->request->getPost('role');
+
+        $success = $this->hospital_service->createHospitalUser($name, $email, $role, (int) $hospital->id);
+
+        if (!$success) {
+            return redirect()->back()->withInput()->with('error', 'Database transaction failed while creating user.');
+        }
+
+        return redirect()->to(url_to('hospital.users.list'))->with('success', 'User account created successfully with temporary password "12345678"!');
+    }
+
+    /**
+     * Renders form to edit an existing hospital-scoped user.
+     *
+     * @param string $user_id
+     * @return string|RedirectResponse
+     */
+    public function userEdit(string $user_id): string|RedirectResponse
+    {
+        $hospital = $this->_getMappedHospital();
+        if ($hospital === null) {
+            return redirect()->to(url_to('auth.logout'))->with('error', 'Your account is not mapped to a hospital facility.');
+        }
+
+        /** @var \App\Modules\Auth\Entities\User|null $user */
+        $user = $this->hospital_service->getHospitalUser((int) $user_id, (int) $hospital->id);
+
+        if ($user === null) {
+            return redirect()->to(url_to('hospital.users.list'))->with('error', 'User not found or does not belong to your hospital.');
+        }
+
+        $data = [
+            'page_title'       => 'Edit User | ' . $hospital->name,
+            'meta_description' => 'Modify user account details.',
+            'canonical_url'    => url_to('hospital.users.edit', $user_id),
+            'robots_tag'       => 'noindex, nofollow',
+            'user'             => $user,
+            'hospital'         => $hospital,
+        ];
+
+        return view('App\Modules\Hospital\Views\users\edit', $data);
+    }
+
+    /**
+     * Validates and updates an existing hospital-scoped user.
+     *
+     * @param string $user_id
+     * @return RedirectResponse
+     */
+    public function userUpdate(string $user_id): RedirectResponse
+    {
+        $hospital = $this->_getMappedHospital();
+        if ($hospital === null) {
+            return redirect()->to(url_to('auth.logout'))->with('error', 'Session expired.');
+        }
+
+        $user = $this->hospital_service->getHospitalUser((int) $user_id, (int) $hospital->id);
+        if ($user === null) {
+            return redirect()->to(url_to('hospital.users.list'))->with('error', 'User not found or does not belong to your hospital.');
+        }
+
+        $rules = [
+            'name'         => 'required|min_length[3]|max_length[255]',
+            'email'        => 'required|valid_email|max_length[255]|is_unique[users.email,id,' . $user_id . ']',
+            'role'         => 'required|in_list[nurse,hospital_admin]',
+            'active'       => 'required|in_list[0,1]',
+            'new_password' => 'permit_empty|min_length[6]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $name         = (string) $this->request->getPost('name');
+        $email        = (string) $this->request->getPost('email');
+        $role         = (string) $this->request->getPost('role');
+        $active       = (int) $this->request->getPost('active');
+        $new_password = $this->request->getPost('new_password');
+
+        $success = $this->hospital_service->updateHospitalUser(
+            (int) $user_id,
+            (int) $hospital->id,
+            $name,
+            $email,
+            $role,
+            $active,
+            !empty($new_password) ? (string) $new_password : null
+        );
+
+        if (!$success) {
+            return redirect()->back()->withInput()->with('error', 'Database transaction failed while updating user.');
+        }
+
+        return redirect()->to(url_to('hospital.users.list'))->with('success', 'User account updated successfully!');
+    }
+
+    /**
+     * Deactivates a hospital-scoped user (soft delete).
+     *
+     * @param string $user_id
+     * @return RedirectResponse
+     */
+    public function userDelete(string $user_id): RedirectResponse
+    {
+        $hospital = $this->_getMappedHospital();
+        if ($hospital === null) {
+            return redirect()->to(url_to('auth.logout'))->with('error', 'Session expired.');
+        }
+
+        $success = $this->hospital_service->deleteHospitalUser((int) $user_id, (int) $hospital->id);
+
+        if (!$success) {
+            return redirect()->to(url_to('hospital.users.list'))->with('error', 'Database transaction failed while deleting user.');
+        }
+
+        return redirect()->to(url_to('hospital.users.list'))->with('success', 'User account deactivated successfully.');
     }
 
     /**

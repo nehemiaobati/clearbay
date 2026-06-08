@@ -6,6 +6,7 @@
  * @var string $canonical_url
  * @var string $robots_tag
  * @var \App\Modules\Hospital\Entities\Hospital $hospital
+ * @var string $user_role
  */
 ?>
 <?= $this->extend('layouts/default') ?>
@@ -21,6 +22,9 @@
     <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
       <h1 class="s-title admin-heading m-0"><?= esc($hospital->name) ?></h1>
       <div class="d-flex gap-2">
+        <?php if ($user_role === 'hospital_admin') : ?>
+          <a href="<?= url_to('hospital.users.list') ?>" class="btn btn-sm btn-outline-secondary" style="min-height: 36px;">Manage Users</a>
+        <?php endif; ?>
         <a href="<?= url_to('hospital.analytics') ?>" class="btn btn-sm btn-outline-secondary" style="min-height: 36px;">View Analytics</a>
       </div>
     </div>

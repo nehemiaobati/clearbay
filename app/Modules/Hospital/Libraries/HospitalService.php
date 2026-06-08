@@ -10,6 +10,9 @@ use App\Modules\Hospital\Models\HandoverModel;
 use App\Modules\Hospital\Entities\Hospital;
 use App\Modules\Hospital\Entities\HospitalStatus;
 use App\Modules\Hospital\Entities\Handover;
+use App\Modules\Auth\Models\UserModel;
+use App\Modules\Auth\Entities\User;
+use CodeIgniter\I18n\Time;
 
 /**
  * Class HospitalService
@@ -242,6 +245,123 @@ class HospitalService
                     'received_at' => $end_time
                 ]);
         }
+
+        $db->transComplete();
+        return $db->transStatus() !== false;
+    }
+
+    // --- Hospital User Management Methods ---
+
+    /**
+     * Returns all users scoped to a specific hospital, ordered by creation date descending.
+     *
+     * @param int $hospital_id
+     * @return array
+     */
+    public function getHospitalUsers(int $hospital_id): array
+    {
+        $user_model = new UserModel();
+        return $user_model
+            ->select('users.id, users.name, users.email, users.role, users.active, users.created_at')
+            ->where('users.hospital_id', $hospital_id)
+            ->orderBy('users.created_at', 'DESC')
+            ->findAll();
+    }
+
+    /**
+     * Retrieves a single user by ID, verifying it belongs to the given hospital.
+     *
+     * @param int $user_id
+     * @param int $hospital_id
+     * @return User|null
+     */
+    public function getHospitalUser(int $user_id, int $hospital_id): ?User
+    {
+        $user_model = new UserModel();
+        /** @var User|null $user */
+        $user = $user_model->where('id', $user_id)->where('hospital_id', $hospital_id)->first();
+        return $user;
+    }
+
+    /**
+     * Creates a new hospital-scoped user with a temporary password.
+     * Only nurse and hospital_admin roles are permitted.
+     *
+     * @param string $name
+     * @param string $email
+     * @param string $role
+     * @param int $hospital_id
+     * @return bool
+     */
+    public function createHospitalUser(string $name, string $email, string $role, int $hospital_id): bool
+    {
+        $user_model = new UserModel();
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $user = new User();
+        $user->name          = $name;
+        $user->email         = $email;
+        $user->password_hash = password_hash('12345678', PASSWORD_BCRYPT);
+        $user->role          = $role;
+        $user->hospital_id   = $hospital_id;
+        $user->active        = 1;
+
+        $user_model->save($user);
+
+        $db->transComplete();
+        return $db->transStatus() !== false;
+    }
+
+    /**
+     * Updates an existing hospital-scoped user.
+     *
+     * @param int $user_id
+     * @param int $hospital_id
+     * @param string $name
+     * @param string $email
+     * @param string $role
+     * @param int $active
+     * @param string|null $new_password
+     * @return bool
+     */
+    public function updateHospitalUser(int $user_id, int $hospital_id, string $name, string $email, string $role, int $active, ?string $new_password = null): bool
+    {
+        $user_model = new UserModel();
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $data = [
+            'name'  => $name,
+            'email' => $email,
+            'role'  => $role,
+            'active' => $active,
+        ];
+
+        if (!empty($new_password)) {
+            $data['password_hash'] = password_hash($new_password, PASSWORD_BCRYPT);
+        }
+
+        $user_model->where('id', $user_id)->where('hospital_id', $hospital_id)->set($data)->update();
+
+        $db->transComplete();
+        return $db->transStatus() !== false;
+    }
+
+    /**
+     * Deactivates a hospital-scoped user (soft delete).
+     *
+     * @param int $user_id
+     * @param int $hospital_id
+     * @return bool
+     */
+    public function deleteHospitalUser(int $user_id, int $hospital_id): bool
+    {
+        $user_model = new UserModel();
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $user_model->where('id', $user_id)->where('hospital_id', $hospital_id)->set(['active' => 0])->update();
 
         $db->transComplete();
         return $db->transStatus() !== false;
