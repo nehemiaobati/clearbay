@@ -1,6 +1,5 @@
 # Environment
-.env*
-!.env.example
+.env
 
 # CodeIgniter writable directory
 writable/
@@ -14,6 +13,7 @@ public/assets/
 
 # Composer
 vendor/
+composer.lock
 
 # OS files
 .DS_Store
