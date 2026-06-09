@@ -7,52 +7,70 @@ namespace App\Filters;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Config\Services;
 
 /**
- * Class ThrottleFilter
+ * Throttle Filter
  *
- * Implements rate limiting on specific endpoints using the native Throttler service.
+ * Implements rate limiting for routes to prevent brute-force attacks
+ * and resource abuse. Uses cache to track request counts per IP.
  *
- * @package App\Filters
- * @author Senior Developer
- * @since 1.0.0
+ * Usage: 'filter' => 'throttle:5,60' (5 requests per 60 seconds)
  */
 class ThrottleFilter implements FilterInterface
 {
     /**
-     * Check rate limit before executing the request.
+     * Execute the filter before the controller.
      *
-     * @param RequestInterface $request
-     * @param array|null       $arguments
-     * @return ResponseInterface|null
+     * @param RequestInterface $request The incoming request
+     * @param array|null       $arguments Arguments passed to filter (limit, seconds)
+     *
+     * @return RequestInterface|ResponseInterface|string|void
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        $throttler = Services::throttler();
+        $throttler = \Config\Services::throttler();
 
-        // Rate limit: 60 requests per minute per IP address
-        $key = 'throttle_' . md5($request->getIPAddress());
+        // Default: 60 requests per minute
+        $limit   = isset($arguments[0]) ? (int) $arguments[0] : 60;
+        $seconds = isset($arguments[1]) ? (int) $arguments[1] : 60;
 
-        if ($throttler->check($key, 60, MINUTE, 1) === false) {
-            return Services::response()
-                ->setStatusCode(429)
-                ->setBody('Too Many Requests');
+        $ip = $request->getIPAddress();
+        // Create a unique key for the IP + Route
+        $key = 'throttle_' . md5($ip . $request->getUri()->getPath());
+
+        // Use the native Throttler service (Token Bucket algorithm)
+        // check() returns false if the limit is reached
+        if ($throttler->check($key, $limit, $seconds) === false) {
+            // Check if it's an AJAX request via headers
+            $isAjax = $request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest';
+            $isJson = str_contains($request->getHeaderLine('Accept'), 'application/json');
+
+            if ($isAjax || $isJson) {
+                return service('response')
+                    ->setStatusCode(429)
+                    ->setJSON([
+                        'status' => 'error',
+                        'message' => 'Too many requests. Please try again later.',
+                        'csrf_token' => csrf_hash()
+                    ]);
+            }
+
+            // Otherwise, redirect back with a flash error message
+            return redirect()->back()->with('error', 'Too many requests. Please wait a moment before trying again.');
         }
-
-        return null;
     }
 
     /**
-     * No action required after execution.
+     * Execute the filter after the controller.
      *
-     * @param RequestInterface  $request
-     * @param ResponseInterface $response
-     * @param array|null        $arguments
-     * @return void
+     * @param RequestInterface  $request  The incoming request
+     * @param ResponseInterface $response The outgoing response
+     * @param array|null        $arguments Arguments passed to filter
+     *
+     * @return ResponseInterface|void
      */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        // No post-action required
+        // No action needed after request
     }
 }

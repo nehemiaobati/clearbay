@@ -11,6 +11,6 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->group('/', ['namespace' => 'App\Modules\Auth\Controllers'], static function ($routes) {
     $routes->get('login', 'AuthController::loginView', ['as' => 'auth.login']);
-    $routes->post('login', 'AuthController::login', ['as' => 'auth.login.submit']);
+    $routes->post('login', 'AuthController::login', ['as' => 'auth.login.submit', 'filter' => 'throttle:1,60']);
     $routes->get('logout', 'AuthController::logout', ['as' => 'auth.logout']);
 });

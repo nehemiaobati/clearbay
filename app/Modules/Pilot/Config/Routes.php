@@ -11,5 +11,5 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->group('pilot', ['namespace' => 'App\Modules\Pilot\Controllers'], static function ($routes) {
     $routes->get('/', 'PilotController::index', ['as' => 'pilot.index']);
-    $routes->post('signup', 'PilotController::signup', ['as' => 'pilot.signup']);
+    $routes->post('signup', 'PilotController::signup', ['as' => 'pilot.signup', 'filter' => 'throttle:5,60']);
 });

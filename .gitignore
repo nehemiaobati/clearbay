@@ -6,6 +6,7 @@
 writable/cache/FileLocatorCache
 writable/cache/FactoriesCache_config
 writable/logs/*.log
+writable/cache/throttler_*
 
 
 # Node dependencies
