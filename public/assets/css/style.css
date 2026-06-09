@@ -1,0 +1,1295 @@
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  ClearBay — Variable-Driven Design Token Architecture      ║
+   ║  Bootstrap 5.3 handles layout utilities.                    ║
+   ║  This file owns: tokens, theme, custom components, landing. ║
+   ╚══════════════════════════════════════════════════════════════╝ */
+
+/* ════════════════ 1. DESIGN TOKENS (60-30-10) ════════════════ */
+:root {
+  color-scheme: dark;
+
+  /* 60% Base / Backgrounds (Dark Ink Aesthetic) */
+  --color-bg-main: hsl(120, 20%, 5%);
+  --color-bg-card: hsl(120, 15%, 10%);
+  --color-bg-accent: hsl(120, 10%, 15%);
+  --color-border: hsla(0, 0%, 100%, 0.08);
+
+  /* 30% Typography / Support (Soft Cream & Muted Tones) */
+  --color-text-main: hsl(40, 30%, 95%);
+  --color-text-muted: hsl(40, 15%, 70%);
+  --color-text-dim: hsl(40, 10%, 50%);
+
+  /* 10% Brand / Interactive (Sage Accent, Urgency Tones) */
+  --color-brand-primary: hsl(143, 27%, 45%);
+  --color-brand-hover: hsl(143, 27%, 55%);
+
+  --color-accent-amber: hsl(28, 78%, 47%);
+  --color-accent-red: hsl(9, 71%, 45%);
+  --color-accent-blue: hsl(190, 90%, 45%);
+
+  /* Fonts */
+  --font-sans: 'Outfit', sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* JS-Referenced Legacy Variables (used by Mapbox/Chart.js scripts) */
+  --sage: #3D6B4F;
+  --sage-l: #4E8A63;
+  --sage-ll: #7AB890;
+  --red: #C23B22;
+  --amber: #D4711A;
+  --cream: #EDE9E0;
+}
+
+/* Light Theme Override Scope */
+[data-bs-theme="light"], .section--light {
+  color-scheme: light;
+  --color-bg-main: hsl(40, 30%, 95%);
+  --color-bg-card: hsl(40, 20%, 90%);
+  --color-bg-accent: hsl(40, 15%, 85%);
+  --color-border: hsla(0, 0%, 0%, 0.1);
+  --color-text-main: hsl(120, 20%, 5%);
+  --color-text-muted: hsl(120, 10%, 30%);
+  --color-text-dim: hsl(120, 5%, 50%);
+}
+
+
+/* ════════════════ 2. GLOBAL RESETS ════════════════ */
+body {
+  font-family: var(--font-sans) !important;
+  background-color: var(--color-bg-main) !important;
+  color: var(--color-text-main) !important;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+main { flex: 1 0 auto; }
+
+/* Form autofill overrides */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--color-text-main);
+  -webkit-box-shadow: 0 0 0 1000px var(--color-bg-accent) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+
+/* ════════════════ 3. NAV ════════════════ */
+#nav {
+  background: var(--color-bg-main);
+  border-bottom: 1px solid var(--color-border);
+  padding: 1rem 6%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+
+.logo-mark {
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid var(--color-brand-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.logo-mark::before {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--color-brand-primary);
+  transform: rotate(45deg);
+}
+
+.logo-name {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-main);
+}
+
+.nav-pills {
+  display: flex;
+  list-style: none;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+}
+.nav-pills li a {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-pills li a:hover { color: var(--color-text-main); }
+
+.nav-btn {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Mobile hamburger */
+.menu-toggle {
+  display: none;
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-main);
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@media (max-width: 991px) {
+  .nav-pills, .nav-btn { display: none; }
+  .menu-toggle { display: block; }
+
+  .nav-pills.show {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-bg-main);
+    border-bottom: 1px solid var(--color-border);
+    padding: 1rem 6%;
+    gap: 0.8rem;
+    z-index: 999;
+  }
+}
+
+
+/* ════════════════ 4. FOOTER ════════════════ */
+footer {
+  background: var(--color-bg-main);
+  border-top: 1px solid var(--color-border);
+  padding: 3rem 6%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 3rem;
+  margin-top: auto;
+}
+
+.footer-tagline {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--color-text-dim);
+  font-size: 0.9rem;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  margin-left: auto;
+}
+.footer-links a {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-dim);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--color-text-main); }
+
+
+/* ════════════════ 5. COMPONENT BLUEPRINTS ════════════════ */
+.blueprint-card {
+  background: var(--color-bg-card) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 0 !important;
+  color: var(--color-text-main) !important;
+  transition: all 0.2s ease-in-out;
+}
+.blueprint-card:hover {
+  background: var(--color-bg-accent) !important;
+  border-color: var(--color-brand-primary) !important;
+}
+
+.blueprint-header {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+/* Buttons Blueprint */
+.btn {
+  border-radius: 0 !important;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary {
+  background-color: var(--color-brand-primary) !important;
+  border-color: var(--color-brand-primary) !important;
+  color: hsl(120, 20%, 5%) !important;
+}
+.btn-primary:hover {
+  background-color: var(--color-brand-hover) !important;
+  border-color: var(--color-brand-hover) !important;
+}
+
+.btn-xs {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+}
+
+/* Tables Blueprint */
+.queue-table th {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  border-bottom: 2px solid var(--color-border);
+}
+.queue-table td {
+  color: var(--color-text-main);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.form-dark .form-control {
+  background-color: var(--color-bg-accent) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-main) !important;
+  border-radius: 0 !important;
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+  text-align: left !important;
+}
+.form-dark .form-select {
+  background-color: var(--color-bg-accent) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-main) !important;
+  border-radius: 0 !important;
+  padding-left: 0.75rem !important;
+  padding-right: 2.25rem !important;
+  text-align: left !important;
+}
+.form-dark .form-control:focus,
+.form-dark .form-select:focus {
+  border-color: var(--color-brand-primary) !important;
+  box-shadow: 0 0 0 0.25rem hsla(143, 27%, 45%, 0.25) !important;
+}
+.form-dark label {
+  color: var(--color-text-muted) !important;
+}
+
+/* Floating labels theme override inside dark forms */
+.form-dark .form-floating > label {
+  color: var(--color-text-muted) !important;
+  transition: transform 0.15s ease-in-out, color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+.form-dark .form-floating > .form-control:focus ~ label,
+.form-dark .form-floating > .form-control:not(:placeholder-shown) ~ label,
+.form-dark .form-floating > .form-control-plaintext ~ label,
+.form-dark .form-floating > .form-select ~ label {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-brand-primary) !important;
+  opacity: 1 !important;
+}
+
+
+/* ════════════════ 6. SECTION LABEL SYSTEM ════════════════ */
+.s-label {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+.s-label-line {
+  width: 40px;
+  height: 1px;
+  background: var(--color-brand-primary);
+}
+.s-label-text {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-dim);
+}
+
+.s-title {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.1;
+  color: var(--color-text-main);
+}
+
+.s-body {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+}
+
+
+/* ════════════════ 7. LANDING PAGE — HERO ════════════════ */
+.hero {
+  position: relative;
+  padding: 8rem 0 4rem;
+  overflow: hidden;
+}
+
+.hero-bg-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-serif);
+  font-size: clamp(15rem, 30vw, 40rem);
+  font-weight: 900;
+  color: hsla(0, 0%, 100%, 0.015);
+  letter-spacing: -0.05em;
+  pointer-events: none;
+  user-select: none;
+}
+
+.hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.eyebrow-line {
+  width: 50px;
+  height: 1px;
+  background: var(--color-brand-primary);
+}
+.eyebrow-text {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-dim);
+}
+
+.hero-headline {
+  font-family: var(--font-serif);
+  font-weight: 900;
+  font-size: clamp(3rem, 7vw, 7rem);
+  line-height: 0.95;
+  color: var(--color-text-main);
+  margin: 0;
+}
+.hero-headline .italic { font-style: italic; }
+.hero-headline .stroke {
+  -webkit-text-stroke: 1.5px var(--color-text-main);
+  color: transparent;
+}
+
+.hero-bottom { margin-top: 2.5rem; }
+
+.hero-sub {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+  max-width: 540px;
+}
+
+.hero-cta-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.arrow { transition: transform 0.2s; }
+.btn:hover .arrow { transform: translateX(4px); display: inline-block; }
+
+.scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  right: 6%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-dim);
+}
+.scroll-line {
+  width: 1px;
+  height: 40px;
+  background: var(--color-brand-primary);
+  animation: scroll-pulse 2s ease-in-out infinite;
+}
+@keyframes scroll-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+
+/* ════════════════ 8. LANDING PAGE — TICKER ════════════════ */
+.ticker-wrap {
+  overflow: hidden;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  padding: 1rem 0;
+  background: var(--color-bg-card);
+}
+.ticker-track {
+  display: flex;
+  gap: 3rem;
+  animation: ticker-scroll 40s linear infinite;
+  width: max-content;
+}
+.ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.ticker-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--color-accent-red);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+
+/* ════════════════ 9. LANDING PAGE — SECTIONS ════════════════ */
+.section {
+  padding: 6rem 0;
+}
+
+/* Problem Section */
+.problem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-top: 2rem;
+}
+@media (max-width: 991px) {
+  .problem-grid { grid-template-columns: 1fr; }
+}
+
+.stat-monument { padding: 2.5rem; }
+
+.monument-num {
+  font-family: var(--font-serif);
+  font-weight: 900;
+  font-size: clamp(3.5rem, 7vw, 6rem);
+  line-height: 1;
+  color: var(--color-text-main);
+}
+.monument-unit {
+  font-size: 0.4em;
+  color: var(--color-text-dim);
+  margin-left: 0.2em;
+}
+.monument-label {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+  margin-top: 1rem;
+}
+
+.problem-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.problem-item {
+  display: flex;
+  gap: 1.2rem;
+  align-items: flex-start;
+}
+.problem-index {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--color-text-dim);
+  flex-shrink: 0;
+  margin-top: 0.3rem;
+}
+.problem-item h4 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-text-main);
+  margin: 0 0 0.3rem;
+}
+.problem-item p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* How / Steps Section */
+.steps-flow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 2.5rem;
+}
+@media (max-width: 991px) {
+  .steps-flow { grid-template-columns: 1fr; }
+}
+
+.step-block { padding: 2rem; }
+
+.step-counter {
+  margin-bottom: 1.5rem;
+}
+.step-counter-num {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--color-text-dim);
+}
+
+.step-block h3 {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--color-text-main);
+  margin: 0 0 1rem;
+}
+.step-block p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  margin: 0 0 1.5rem;
+}
+
+.step-tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-brand-primary);
+  border: 1px solid var(--color-brand-primary);
+  padding: 0.3rem 0.8rem;
+  display: inline-block;
+}
+
+/* Serve Section */
+.serve-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 2.5rem;
+}
+@media (max-width: 991px) {
+  .serve-grid { grid-template-columns: 1fr; }
+}
+
+.serve-cell { padding: 2rem; }
+
+.serve-num {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-text-dim);
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.serve-cell h3 {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--color-text-main);
+  margin: 0 0 0.8rem;
+}
+.serve-cell p {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin: 0 0 1.2rem;
+}
+
+.serve-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.serve-features li {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-text-dim);
+  padding: 0.4rem 0;
+  border-top: 1px solid var(--color-border);
+}
+.serve-features li::before {
+  content: '→ ';
+  color: var(--color-brand-primary);
+}
+
+/* Evidence Section */
+.evidence-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+@media (max-width: 991px) {
+  .evidence-grid { grid-template-columns: 1fr; }
+}
+
+.doc-block { padding: 2rem; }
+
+.doc-title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--color-text-main);
+  line-height: 1.5;
+  margin: 0 0 1.5rem;
+}
+
+.chapter-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.chapter-row {
+  display: flex;
+  gap: 1rem;
+  padding: 0.8rem 0;
+  border-top: 1px solid var(--color-border);
+}
+.ch-num {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-text-dim);
+  flex-shrink: 0;
+  width: 40px;
+}
+.ch-text {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.doc-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+.doc-stat {
+  display: flex;
+  flex-direction: column;
+}
+.doc-stat .val {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: var(--color-brand-primary);
+  line-height: 1;
+}
+.doc-stat .key {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-dim);
+  margin-top: 0.3rem;
+}
+
+/* Hospital Tiles Section */
+.hospital-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.hospital-tile {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.h-code {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-dim);
+}
+.h-name {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  color: var(--color-text-main);
+  font-size: 0.95rem;
+}
+.h-cat {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+.h-status {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-brand-primary);
+  margin-top: 0.5rem;
+}
+
+.ems-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+.ems-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-dim);
+}
+.ems-tag {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  padding: 0.3rem 0.8rem;
+}
+
+/* Preview / Dashboard Preview Section */
+.preview-frame { padding: 2rem; }
+
+.dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.dash-title {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  color: var(--color-text-main);
+  font-size: 1.1rem;
+}
+.dash-live {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--color-brand-primary);
+}
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-brand-primary);
+  border-radius: 50%;
+  animation: blinker 1.2s ease-in-out infinite;
+}
+
+.dash-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+@media (max-width: 767px) {
+  .dash-metrics { grid-template-columns: repeat(2, 1fr); }
+}
+
+.metric-box { text-align: center; }
+
+.metric-val {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--color-brand-primary);
+  line-height: 1;
+}
+.metric-key {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-dim);
+  margin-top: 0.3rem;
+  display: block;
+}
+
+/* Signup Section */
+.form-wrap {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 3rem;
+  margin-top: 2rem;
+}
+@media (max-width: 991px) {
+  .form-wrap { grid-template-columns: 1fr; }
+}
+
+.submit-btn {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  width: 100%;
+  padding: 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.form-note {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-text-dim);
+  margin-top: 1rem;
+}
+
+.success-card {
+  display: none;
+  text-align: center;
+  padding: 3rem 1rem;
+}
+.success-card h3 {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--color-brand-primary);
+}
+.success-card p {
+  color: var(--color-text-muted);
+  max-width: 400px;
+  margin: 1rem auto 0;
+}
+
+.signup-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.aside-block h4 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-text-main);
+  margin: 0 0 0.3rem;
+}
+.aside-block p {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+
+/* ════════════════ 10. MODULE BLUEPRINTS ════════════════ */
+
+/* Page Container */
+.admin-page {
+  margin-top: 120px;
+  margin-bottom: 80px;
+}
+
+/* Mono Label (Shared) */
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-dim);
+}
+
+/* Admin Text Styles */
+.admin-heading {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  color: var(--color-text-main);
+  font-size: 2.2rem;
+}
+
+.admin-card-heading {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.admin-subtitle {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  max-width: 600px;
+}
+
+.admin-stat-val {
+  font-family: var(--font-serif);
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--color-brand-primary);
+  line-height: 1;
+}
+
+/* Admin Navigation */
+.admin-back {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--color-brand-primary) !important;
+}
+.admin-back:hover {
+  color: var(--color-brand-hover) !important;
+  text-decoration: underline !important;
+}
+
+/* Admin Buttons */
+.admin-dash-btn,
+.admin-quick-btn {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.admin-btn-action { font-size: 0.85rem; }
+.admin-btn-edit { font-size: 0.85rem; }
+.admin-btn-delete { font-size: 0.85rem; }
+.admin-btn-submit { font-size: 0.85rem; }
+
+/* Admin Table Cell Helpers */
+.admin-td-id {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--color-text-dim);
+}
+.admin-td-code {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+.admin-td-name { font-weight: 600; }
+.admin-td-mono {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+.admin-td-mono-sm {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+.admin-td-sm { font-size: 0.85rem; }
+
+/* Admin Status Pill */
+.admin-status-pill {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Admin Error Page */
+.admin-error-heading {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 2rem;
+}
+.admin-error-list {
+  list-style: none;
+  padding: 0;
+}
+
+/* Admin Form Helpers */
+.admin-form-note {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-text-dim);
+}
+.admin-form-select {
+  border-radius: 0 !important;
+}
+
+/* Admin Pager */
+.admin-pager .pagination {
+  margin: 0;
+  display: flex;
+  list-style: none;
+  padding: 0;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+}
+.admin-pager .page-link {
+  display: block;
+  padding: 0.5rem 0.8rem !important;
+  border: 1px solid var(--color-border) !important;
+  background-color: transparent !important;
+  color: var(--color-text-main) !important;
+  text-decoration: none !important;
+}
+.admin-pager .page-item.active .page-link {
+  background-color: var(--color-brand-primary) !important;
+  color: var(--color-bg-main) !important;
+  border-color: var(--color-brand-primary) !important;
+}
+
+
+/* ════════════════ 11. HIGH-PERFORMANCE WORKFLOWS ════════════════ */
+
+/* Paramedic Mobile Split Map */
+.paramedic-layout {
+  height: calc(100vh - 56px);
+}
+.paramedic-map {
+  min-height: 50vh;
+  position: relative;
+}
+.paramedic-quick-stats {
+  z-index: 10;
+  max-width: 250px;
+}
+.paramedic-hospital-panel {
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+/* Dispatcher Split Console */
+.dispatcher-layout {
+  height: calc(100vh - 56px);
+  overflow: hidden;
+}
+.map-container {
+  flex-grow: 1;
+  height: 100%;
+  position: relative;
+}
+.sidebar-container {
+  width: 380px;
+  height: 100%;
+  border-left: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* Dispatcher sidebar: responsive width with no min-width on mobile */
+.dispatcher-sidebar {
+  min-width: 320px;
+  width: 100%;
+}
+
+/* Dispatcher search overlay: responsive width that doesn't overflow */
+.dispatcher-search-overlay {
+  width: min(280px, calc(100vw - 24px));
+}
+
+@media (max-width: 991.98px) {
+  .dispatcher-sidebar {
+    min-width: unset;
+    width: 100%;
+  }
+  .dispatcher-search-overlay {
+    width: min(200px, calc(100vw - 24px));
+  }
+}
+
+
+/* ════════════════ 12. MAPBOX POPUP OVERRIDES ════════════════ */
+
+/* Popup text contrast — override dark-theme cascade on Mapbox white backgrounds */
+.mapboxgl-popup-content h6,
+.mapboxgl-popup-content p {
+  color: #1a1a1a;
+}
+
+/* Close button — dark color on white background, crisp hover state */
+.mapboxgl-popup-close-button {
+  color: #1a1a1a !important;
+  font-size: 1.25rem;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.mapboxgl-popup-close-button:hover {
+  opacity: 1;
+}
+
+
+/* ════════════════ 13. UTILITY CLASSES ════════════════ */
+
+/* Text Helpers */
+.text-cream { color: var(--cream) !important; }
+.ital { font-style: italic; }
+.dim { color: var(--color-text-dim) !important; }
+
+/* Cursor */
+.pointer-event { cursor: pointer; }
+
+/* Max Width */
+.max-width-600 { max-width: 600px; margin-left: auto; margin-right: auto; }
+
+/* Chart Container */
+.chart-container {
+  position: relative;
+  height: 300px;
+}
+
+/* Touch Targets (Mobile-first) */
+.touch-target-btn { min-height: 48px; }
+.touch-target-btn-lg { min-height: 56px; }
+.touch-target-card { min-height: 56px; cursor: pointer; }
+
+/* Active Run Radar */
+.active-run-radar {
+  width: 5rem !important;
+  height: 5rem !important;
+}
+
+/* Login Card */
+.style-login-card {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* Password Toggle */
+.toggle-password-btn {
+  z-index: 5;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.3rem 0.6rem !important;
+}
+
+/* Hospital Dashboard Status Buttons */
+.status-select-btn.active {
+  font-weight: 700;
+  box-shadow: inset 0 0 0 2px currentColor;
+}
+
+/* Wait Time Pill */
+.wait-pill {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+/* Acuity Button */
+.acuity-btn {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+/* Clear Bay Action Button */
+.clear-bay-btn {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Hover Glow Effect */
+.hover-glow {
+  transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+.hover-glow:hover {
+  box-shadow: 0 0 16px hsla(143, 27%, 45%, 0.15);
+  border-color: var(--color-brand-primary) !important;
+}
+
+/* Wait Pill Color Variants (Handovers Admin) */
+.wait-green {
+  background: hsla(143, 60%, 40%, 0.15);
+  color: hsl(143, 60%, 50%);
+  padding: 0.2rem 0.6rem;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.wait-amber {
+  background: hsla(28, 78%, 47%, 0.15);
+  color: var(--color-accent-amber);
+  padding: 0.2rem 0.6rem;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.wait-red {
+  background: hsla(9, 71%, 45%, 0.15);
+  color: var(--color-accent-red);
+  padding: 0.2rem 0.6rem;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Acknowledge Alert Button (Dispatcher) */
+.ack-alert-btn {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+
+/* ════════════════ 14. ANIMATIONS ════════════════ */
+.reveal {
+  opacity: 0;
+  transform: translateY(15px);
+  animation: reveal-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes reveal-fade {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.blink-dot {
+  animation: blinker 1.2s cubic-bezier(0.5, 0, 1, 1) infinite;
+}
+
+@keyframes blinker {
+  50% { opacity: 0; }
+}
