@@ -1,5 +1,6 @@
 # Environment
-.env
+.env*
+!.env.example
 
 # CodeIgniter writable directory
 writable/
