@@ -20,7 +20,7 @@ node_modules/
 public/assets/
 
 # Composer
-vendor/
+vendor
 composer.lock
 
 # OS files
