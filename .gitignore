@@ -2,8 +2,16 @@
 .env
 
 # CodeIgniter writable directory
-writable/
+
 writable/cache
+writable/logs
+writable/uploads
+writable/sessions
+writable/tests
+writable/temp
+writable/vendor
+writable/debugbar
+
 
 # Node dependencies
 node_modules/
