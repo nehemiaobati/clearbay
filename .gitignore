@@ -16,11 +16,9 @@ writable/debugbar
 # Node dependencies
 node_modules/
 
-# Build assets (compiled)
-public/assets/
 
 # Composer
-vendor
+vendor/
 composer.lock
 
 # OS files
@@ -41,4 +39,6 @@ Thumbs.db
 *.swp
 
 # Coverage
-build/logs/
+build/
+tests/
+docs/
