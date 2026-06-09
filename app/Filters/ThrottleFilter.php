@@ -15,6 +15,10 @@ use CodeIgniter\HTTP\ResponseInterface;
  * and resource abuse. Uses cache to track request counts per IP.
  *
  * Usage: 'filter' => 'throttle:5,60' (5 requests per 60 seconds)
+ *
+ * @package App\Filters
+ * @author Senior Developer
+ * @since 1.0.0
  */
 class ThrottleFilter implements FilterInterface
 {
@@ -24,7 +28,7 @@ class ThrottleFilter implements FilterInterface
      * @param RequestInterface $request The incoming request
      * @param array|null       $arguments Arguments passed to filter (limit, seconds)
      *
-     * @return RequestInterface|ResponseInterface|string|void
+     * @return RequestInterface|ResponseInterface|string|null
      */
     public function before(RequestInterface $request, $arguments = null)
     {
@@ -42,10 +46,10 @@ class ThrottleFilter implements FilterInterface
         // check() returns false if the limit is reached
         if ($throttler->check($key, $limit, $seconds) === false) {
             // Check if it's an AJAX request via headers
-            $isAjax = $request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest';
-            $isJson = str_contains($request->getHeaderLine('Accept'), 'application/json');
+            $is_ajax = $request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest';
+            $is_json = str_contains($request->getHeaderLine('Accept'), 'application/json');
 
-            if ($isAjax || $isJson) {
+            if ($is_ajax || $is_json) {
                 return service('response')
                     ->setStatusCode(429)
                     ->setJSON([
@@ -58,6 +62,8 @@ class ThrottleFilter implements FilterInterface
             // Otherwise, redirect back with a flash error message
             return redirect()->back()->with('error', 'Too many requests. Please wait a moment before trying again.');
         }
+
+        return null;
     }
 
     /**
@@ -67,10 +73,10 @@ class ThrottleFilter implements FilterInterface
      * @param ResponseInterface $response The outgoing response
      * @param array|null        $arguments Arguments passed to filter
      *
-     * @return ResponseInterface|void
+     * @return ResponseInterface|null
      */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        // No action needed after request
+        return null;
     }
 }

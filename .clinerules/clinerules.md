@@ -395,15 +395,53 @@ return $this->response->setJSON([
 - Access secrets via `env('KEY_NAME')` or `service('settings')` ONLY.
 - Custom config files for secrets are FORBIDDEN.
 
-### 8.4 Rate Limiting
+### 8.4 Rate Limiting & Throttling
 
-The native `Throttler` service MUST be active on:
+The application MUST implement rate limiting to protect routes against brute-force attacks and resource abuse using `App\Filters\ThrottleFilter` mapped to the `throttle` filter alias in `app/Config/Filters.php`.
 
-- All authentication endpoints (login, register, password reset)
-- All authorization endpoints (2FA, API token generation)
-- High-cost computational routes (AI generation, cryptocurrency operations, bulk exports)
+#### 8.4.1 Filter Architecture (`app/Filters/ThrottleFilter.php`)
 
-Configure in `app/Config/Filters.php` using the `throttle` filter alias.
+- **Class & Namespace**: The filter class MUST reside under the `App\Filters` namespace and implement `CodeIgniter\Filters\FilterInterface`.
+- **Throttler Injection**: The filter MUST invoke CodeIgniter's native token bucket throttler service via `\Config\Services::throttler()`.
+- **Parameter Parsing**: Dynamic route arguments (limit and seconds bucket window) MUST be supported inside the `before()` hook:
+  - **Default Limit**: `60` requests.
+  - **Default Window**: `60` seconds.
+  - Limits MUST fall back to defaults if parameters are omitted.
+- **Key Isolation**: To prevent cross-route collisions, tracking cache keys MUST be uniquely isolated per IP address and specific URI request path using MD5 hashing:
+  ```php
+  $ip = $request->getIPAddress();
+  $key = 'throttle_' . md5($ip . $request->getUri()->getPath());
+  ```
+- **Lifecycle Interruption Responses**:
+  - **AJAX and JSON Clients**: If the request contains the `X-Requested-With: XMLHttpRequest` header OR an `Accept` header containing `application/json`, the filter MUST bypass redirect logic, set the HTTP response status code strictly to `429` (Too Many Requests), and return a JSON payload providing the fresh synchronized CSRF token:
+    ```php
+    return service('response')
+        ->setStatusCode(429)
+        ->setJSON([
+            'status'     => 'error',
+            'message'    => 'Too many requests. Please try again later.',
+            'csrf_token' => csrf_hash()
+        ]);
+    ```
+  - **Standard Web Clients**: For standard web rendering requests, the filter MUST issue a redirect back (`redirect()->back()`) alongside a session flash error message:
+    ```php
+    return redirect()->back()->with('error', 'Too many requests. Please wait a moment before trying again.');
+    ```
+- **Filter Cleanup**: No operations are required in the `after()` method.
+
+#### 8.4.2 Route Definition Rules
+
+- **Mandatory Application**: Throttling parameters MUST be explicitly defined at the route level for:
+  - All authentication actions (e.g., login submissions, registrations, password resets).
+  - All authorization endpoints (e.g., 2FA verify steps, API token requests).
+  - High-resource consumption routes (e.g., AI generations, massive data exports).
+- **Route Options Formatting**: Limit parameters MUST be mapped inside the route configuration using colon-separated parameters within the `filter` option:
+  ```php
+  $routes->post('login/authenticate', 'AuthController::authenticate', [
+      'as'     => 'login.authenticate', 
+      'filter' => 'throttle:5,60' // Max 5 requests per 60 seconds per IP
+  ]);
+  ```
 
 ### 8.5 XSS Prevention
 
