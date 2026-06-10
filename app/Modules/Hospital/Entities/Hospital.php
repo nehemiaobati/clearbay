@@ -15,6 +15,7 @@ use CodeIgniter\Entity\Entity;
  * @property string $category
  * @property string $status
  * @property int $bays_available
+ * @property int $baseline_avg
  * @property float|null $lat
  * @property float|null $lng
  * @property string|null $address
@@ -34,6 +35,7 @@ class Hospital extends Entity
         'category'       => 'string',
         'status'         => 'string',
         'bays_available' => 'integer',
+        'baseline_avg'   => 'integer',
         'lat'            => 'float',
         'lng'            => 'float',
         'address'        => 'string',

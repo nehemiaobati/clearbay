@@ -30,6 +30,7 @@ class HospitalModel extends Model
         'category',
         'status',
         'bays_available',
+        'baseline_avg',
         'lat',
         'lng',
         'address',

@@ -113,8 +113,11 @@ class HospitalService
         $total_wait = (int) ($stats->total_wait ?? 0);
         $avg_wait_today = $completed_count > 0 ? (int) round($total_wait / $completed_count) : 0;
 
-        // Baseline comparison (baseline average = 60 minutes)
-        $baseline_difference = $avg_wait_today > 0 ? ($avg_wait_today - 60) : 0;
+        // Baseline comparison (use per-hospital configured baseline)
+        /** @var Hospital|null $hospital_entity */
+        $hospital_entity = $this->hospital_model->select('id, baseline_avg')->find($hospital_id);
+        $baseline = $hospital_entity !== null ? (int) $hospital_entity->baseline_avg : 60;
+        $baseline_difference = $avg_wait_today > 0 ? ($avg_wait_today - $baseline) : 0;
 
         // Count of ambulances currently in queue (status == 'Arrived' or 'Preparing' or 'Acknowledged')
         $in_queue_count = 0;

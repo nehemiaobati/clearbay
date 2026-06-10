@@ -478,6 +478,7 @@ class AdminController extends BaseController
             'category'      => 'required|min_length[3]|max_length[255]',
             'status'        => 'required|in_list[Green,Amber,Red,Recruiting]',
             'bays_available' => 'permit_empty|integer|greater_than_equal_to[0]',
+            'baseline_avg'  => 'permit_empty|integer|greater_than_equal_to[0]',
             'lat'           => 'permit_empty|decimal',
             'lng'           => 'permit_empty|decimal',
             'address'       => 'permit_empty|max_length[500]',
@@ -495,6 +496,7 @@ class AdminController extends BaseController
         $hospital->category      = (string) $this->request->getPost('category');
         $hospital->status        = (string) $this->request->getPost('status');
         $hospital->bays_available = (int) ($this->request->getPost('bays_available') ?? 0);
+        $hospital->baseline_avg  = (int) ($this->request->getPost('baseline_avg') ?? 60);
         $hospital->lat           = $this->request->getPost('lat') !== null ? (float) $this->request->getPost('lat') : null;
         $hospital->lng           = $this->request->getPost('lng') !== null ? (float) $this->request->getPost('lng') : null;
         $hospital->address       = $this->request->getPost('address') ? (string) $this->request->getPost('address') : null;
@@ -557,6 +559,7 @@ class AdminController extends BaseController
             'category'      => 'required|min_length[3]|max_length[255]',
             'status'        => 'required|in_list[Green,Amber,Red,Recruiting]',
             'bays_available' => 'permit_empty|integer|greater_than_equal_to[0]',
+            'baseline_avg'  => 'permit_empty|integer|greater_than_equal_to[0]',
             'lat'           => 'permit_empty|decimal',
             'lng'           => 'permit_empty|decimal',
             'address'       => 'permit_empty|max_length[500]',
@@ -573,6 +576,7 @@ class AdminController extends BaseController
         $hospital->category      = (string) $this->request->getPost('category');
         $hospital->status        = (string) $this->request->getPost('status');
         $hospital->bays_available = (int) ($this->request->getPost('bays_available') ?? 0);
+        $hospital->baseline_avg  = (int) ($this->request->getPost('baseline_avg') ?? 60);
         $hospital->lat           = $this->request->getPost('lat') !== null ? (float) $this->request->getPost('lat') : null;
         $hospital->lng           = $this->request->getPost('lng') !== null ? (float) $this->request->getPost('lng') : null;
         $hospital->address       = $this->request->getPost('address') ? (string) $this->request->getPost('address') : null;

@@ -125,6 +125,17 @@ $isEdit = isset($hospital) && $hospital->id;
                 </div>
                 <div class="col-md-4 mb-4">
                   <div class="form-floating">
+                    <input type="number" id="baseline_avg" name="baseline_avg" class="form-control <?= session('errors.baseline_avg') ? 'is-invalid' : '' ?>" min="0" placeholder="60"
+                      value="<?= esc(old('baseline_avg', $hospital->baseline_avg ?? 60)) ?>">
+                    <label for="baseline_avg">Baseline Avg Wait (min)</label>
+                    <?php if (session('errors.baseline_avg')) : ?>
+                      <div class="invalid-feedback"><?= esc(session('errors.baseline_avg')) ?></div>
+                    <?php endif; ?>
+                  </div>
+                  <div class="form-note mt-1 text-muted admin-form-note">Target off-load time · default 60</div>
+                </div>
+                <div class="col-md-4 mb-4">
+                  <div class="form-floating">
                     <input type="text" id="lat" name="lat" class="form-control <?= session('errors.lat') ? 'is-invalid' : '' ?>" placeholder="-1.2921"
                       value="<?= esc(old('lat', $hospital->lat ?? '')) ?>">
                     <label for="lat">Latitude</label>
