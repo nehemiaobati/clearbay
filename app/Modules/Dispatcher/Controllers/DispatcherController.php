@@ -113,38 +113,45 @@ class DispatcherController extends BaseController
      */
     public function sseStream(): void
     {
-        // 1. Establish SSE streaming headers
-        header('Content-Type: text/event-stream');
-        header('Cache-Control: no-cache');
-        header('Connection: keep-alive');
-        header('X-Accel-Buffering: no'); // Disable buffering on Nginx for live flush
+        try {
+            // 1. Establish SSE streaming headers
+            header('Content-Type: text/event-stream');
+            header('Cache-Control: no-cache');
+            header('Connection: keep-alive');
+            header('X-Accel-Buffering: no'); // Disable buffering on Nginx for live flush
 
-        // 2. Prevent session locking during the loop
-        session_write_close();
+            // 2. Prevent session locking during the loop
+            session_write_close();
 
-        // 3. Send initial token connection packet
-        $init_packet = [
-            'status'     => 'connected',
-            'csrf_token' => csrf_hash()
-        ];
-        echo "data: " . json_encode($init_packet) . "\n\n";
-        ob_flush();
-        flush();
-
-        // 4. Run loop streaming updates every 5 seconds
-        $loop_count = 0;
-        while ($loop_count < 10) { // Limit to 10 cycles to avoid thread exhaust, browser reconnects automatically
-            $telemetry = $this->dispatcher_service->getTelemetry();
-
-            echo "data: " . json_encode([
-                'status' => 'update',
-                'result' => $telemetry
-            ]) . "\n\n";
-
+            // 3. Send initial token connection packet
+            $init_packet = [
+                'status'     => 'connected',
+                'csrf_token' => csrf_hash()
+            ];
+            echo "data: " . json_encode($init_packet) . "\n\n";
             ob_flush();
             flush();
-            sleep(5);
-            $loop_count++;
+
+            // 4. Run loop streaming updates every 3 seconds
+            $loop_count = 0;
+            while ($loop_count < 10) { // Limit to 10 cycles to avoid thread exhaust, browser reconnects automatically
+                $telemetry = $this->dispatcher_service->getTelemetry();
+
+                echo "data: " . json_encode([
+                    'status' => 'update',
+                    'result' => $telemetry
+                ]) . "\n\n";
+
+                ob_flush();
+                flush();
+                sleep(3);
+                $loop_count++;
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'Exception in DispatcherController::sseStream', [
+                'exception' => $e->getMessage(),
+                'trace'     => $e->getTraceAsString(),
+            ]);
         }
     }
 }

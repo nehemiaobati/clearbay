@@ -120,24 +120,26 @@
 
         const wait = telemetry.waits[a.id];
         const waitText = (wait && wait.wait_time_minutes >= 30) ?
-          `<span class="badge bg-danger d-block mt-1 text-wrap text-end" style="font-size: 0.7rem; white-space: normal; line-height: 1.3;">${wait.wait_time_minutes}m waiting at ${wait.hospital_name}</span>` :
+          `<div class="badge bg-danger bg-opacity-25 border border-danger border-opacity-25 w-100 text-wrap text-start mt-2" style="font-size: 0.75rem; white-space: normal; line-height: 1.4; display: block; padding: 6px 10px; color: var(--color-accent-red); font-weight: normal;">⚠ ${wait.wait_time_minutes}m waiting at ${wait.hospital_name}</div>` :
           '';
 
         return `
           <button type="button"
-                  class="p-2 border border-secondary border-opacity-10 rounded d-flex justify-content-between align-items-start hover-glow text-start bg-transparent text-reset focus-ring w-100"
+                  class="p-2 border border-secondary border-opacity-10 rounded d-flex flex-column gap-1 hover-glow text-start bg-transparent text-reset focus-ring w-100"
                   style="min-height: 48px;"
                   aria-label="Focus on ${a.unit_id} (${a.status})"
                   onclick="focusAmbulance(${a.current_lat}, ${a.current_lng}, '${a.unit_id}')">
-            <div class="d-flex align-items-center gap-2 flex-shrink-1" style="min-width: 0; margin-top: 2px;">
-              <span class="badge ${statusDot} rounded-circle p-1" aria-hidden="true" style="width: 8px; height: 8px;"></span>
-              <strong class="mono-label text-cream">${a.unit_id}</strong>
-              <small class="text-muted text-truncate">(${a.provider})</small>
+            <div class="d-flex justify-content-between align-items-center w-100">
+              <div class="d-flex align-items-center gap-2 flex-shrink-1" style="min-width: 0;">
+                <span class="badge ${statusDot} rounded-circle p-1" aria-hidden="true" style="width: 8px; height: 8px;"></span>
+                <strong class="mono-label text-cream">${a.unit_id}</strong>
+                <small class="text-muted text-truncate">(${a.provider})</small>
+              </div>
+              <div class="text-end flex-shrink-0 ps-2">
+                <span class="small text-muted">${a.status}</span>
+              </div>
             </div>
-            <div class="text-end flex-shrink-0 ps-2" style="max-width: 180px;">
-              <span class="small text-muted">${a.status}</span>
-              ${waitText}
-            </div>
+            ${waitText}
           </button>
         `;
       }).join('');
