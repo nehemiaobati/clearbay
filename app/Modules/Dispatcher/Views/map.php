@@ -46,7 +46,7 @@
         Active Off-Load Alerts (>30m)
       </h3>
       <div id="alertsPanelList" class="d-flex flex-column gap-2" style="max-height: 200px; overflow-y: auto;">
-        <span class="text-muted small text-center py-3">No active timeout alerts.</span>
+        <span class="text-muted small text-center py-3">Loading active alerts...</span>
       </div>
     </section>
 
@@ -118,22 +118,23 @@
         else if (a.status === 'On Scene') statusDot = 'bg-warning';
         else if (a.status === 'Off Duty') statusDot = 'bg-secondary';
 
-        const waitText = telemetry.waits[a.id] ?
-          `<span class="badge bg-danger ms-2">${telemetry.waits[a.id].wait_time_minutes}m waiting at ${telemetry.waits[a.id].hospital_name}</span>` :
+        const wait = telemetry.waits[a.id];
+        const waitText = (wait && wait.wait_time_minutes >= 30) ?
+          `<span class="badge bg-danger d-block mt-1" style="font-size: 0.7rem;">${wait.wait_time_minutes}m — ${wait.hospital_name}</span>` :
           '';
 
         return `
           <button type="button"
-                  class="p-2 border border-secondary border-opacity-10 rounded d-flex justify-content-between align-items-center hover-glow text-start bg-transparent text-reset focus-ring"
+                  class="p-2 border border-secondary border-opacity-10 rounded d-flex justify-content-between align-items-start hover-glow text-start bg-transparent text-reset focus-ring"
                   style="min-height: 48px;"
                   aria-label="Focus on ${a.unit_id} (${a.status})"
                   onclick="focusAmbulance(${a.current_lat}, ${a.current_lng}, '${a.unit_id}')">
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2 flex-shrink-1" style="min-width: 0;">
               <span class="badge ${statusDot} rounded-circle p-1" aria-hidden="true" style="width: 8px; height: 8px;"></span>
               <strong class="mono-label text-cream">${a.unit_id}</strong>
-              <small class="text-muted">(${a.provider})</small>
+              <small class="text-muted text-truncate">(${a.provider})</small>
             </div>
-            <div class="text-end">
+            <div class="text-end flex-shrink-0 ps-2" style="min-width: 80px;">
               <span class="small text-muted">${a.status}</span>
               ${waitText}
             </div>

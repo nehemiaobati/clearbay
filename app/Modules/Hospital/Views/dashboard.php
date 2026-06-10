@@ -289,7 +289,7 @@
         if (wait >= 30) waitClass = 'bg-danger text-white';
         else if (wait >= 15) waitClass = 'bg-warning text-dark';
 
-        const rowHighlight = wait >= 30 ? 'table-danger border-danger border-opacity-10' : '';
+        const rowHighlight = wait >= 30 ? 'row-urgent' : '';
         const patientStr = `${h.patient_gender}, ${h.patient_age}`;
         const etaStr = h.status === 'En route' ? `${h.eta_minutes} min` : 'Arrived';
         const complaintStr = h.chief_complaint || 'Walk-in / Direct';
@@ -339,8 +339,10 @@
             `<button class="btn btn-sm btn-success mark-arrived-btn flex-fill" style="min-height: 48px;" data-id="${h.id}">Mark Arrived</button>` :
             `<button class="btn btn-sm btn-primary clear-bay-btn flex-fill" style="min-height: 48px;" data-id="${h.id}" data-unit="${h.unit_id}" data-details="${patientStr} (${complaintStr})" data-bs-toggle="modal" data-bs-target="#handoverModal">Clear Bay</button>`;
 
+          const urgentCard = wait >= 30 ? 'row-urgent' : '';
+
           return `
-            <div class="list-card-item flex-column align-items-start gap-2 py-3">
+            <div class="list-card-item flex-column align-items-start gap-2 py-3 ${urgentCard}">
               <div class="d-flex justify-content-between align-items-center w-100">
                 <span class="td-name fw-bold">${h.unit_id}</span>
                 <span class="badge ${h.acuity === 'Critical' ? 'bg-danger' : (h.acuity === 'Serious' ? 'bg-warning text-dark' : 'bg-success')}">${h.acuity}</span>

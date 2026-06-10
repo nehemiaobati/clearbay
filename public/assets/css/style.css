@@ -297,6 +297,13 @@ select:-webkit-autofill {
 }
 
 /* ════════════════ 5. TABLES ════════════════ */
+
+/* Urgent row highlight (dark-theme safe) */
+.row-urgent {
+  background-color: hsla(9, 71%, 45%, 0.08) !important;
+  border-left: 3px solid var(--color-accent-red) !important;
+}
+
 .queue-table th {
   font-family: var(--font-mono);
   font-size: 0.8rem;
@@ -747,6 +754,7 @@ select:-webkit-autofill {
 
 .dispatcher-layout { height: calc(100vh - 56px); overflow: hidden; }
 .map-container { flex-grow: 1; height: 100%; position: relative; }
+.dispatcher-sidebar button { word-break: break-word; }
 .sidebar-container {
   width: 380px;
   height: 100%;

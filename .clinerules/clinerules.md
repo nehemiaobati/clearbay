@@ -529,7 +529,7 @@ Hardcoding colors is FORBIDDEN. Priority order:
 
 ### 11.3 UI Components
 
-- **Inputs**: All text inputs MUST use Bootstrap 5 "Floating labels".
+- **Inputs**: All text inputs MUST use Bootstrap 5 "Floating labels". ux/ui always use and or refer public/bootstrap-5.3.8-examples. 
 - **Buttons**:
   - Primary Action: `btn-primary`
   - Secondary Action: `btn-outline-secondary`

@@ -7,6 +7,7 @@ namespace App\Modules\Dispatcher\Libraries;
 use App\Modules\Ambulance\Models\AmbulanceModel;
 use App\Modules\Hospital\Models\HospitalModel;
 use App\Modules\Hospital\Models\HandoverModel;
+use App\Modules\Hospital\Entities\Handover;
 use App\Modules\Dispatcher\Models\AlertModel;
 use App\Modules\Dispatcher\Entities\Alert;
 
@@ -79,7 +80,7 @@ class DispatcherService
         // Find handovers that are en-route/arrived and have been waiting > 30 minutes
         // Wait time increases automatically. If arrived_at is set, compute wait.
         // For simplicity, we can query handovers with status != 'Cleared'
-        /** @var \App\Modules\Queue\Entities\Handover[] $handovers */
+        /** @var Handover[] $handovers */
         $handovers = $this->handover_model
             ->where('status !=', 'Cleared')
             ->findAll();
@@ -184,7 +185,7 @@ class DispatcherService
             ->findAll();
 
         // 5. Fetch wait times for queued ambulances
-        /** @var \App\Modules\Queue\Entities\Handover[] $active_handovers */
+        /** @var Handover[] $active_handovers */
         $active_handovers = $this->handover_model
             ->select('id, ambulance_id, hospital_id, wait_time_minutes')
             ->where('status !=', 'Cleared')
