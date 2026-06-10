@@ -288,14 +288,12 @@ select:-webkit-autofill {
 .form-dark .form-floating > .form-control:not(:placeholder-shown) ~ label,
 .form-dark .form-floating > .form-control-plaintext ~ label,
 .form-dark .form-floating > .form-select ~ label {
-  background-color: var(--color-bg-accent) !important;
+  background-color: transparent !important;
   color: var(--color-brand-primary) !important;
   opacity: 1 !important;
   padding: 0.5rem 0.5rem !important;
   height: auto !important;
   transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem) !important;
-  border-color: var(--color-border) !important;
-  border-top-color: transparent !important;
 }
 
 /* ════════════════ 5. TABLES ════════════════ */
