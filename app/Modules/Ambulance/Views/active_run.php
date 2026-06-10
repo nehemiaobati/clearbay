@@ -12,8 +12,8 @@
 <?= $this->extend('layouts/default') ?>
 <?= $this->section('content') ?>
 
-<div class="container admin-page max-width-600">
-  <div class="card blueprint-card p-4 p-md-5 text-center reveal" id="runCard">
+<div class="container admin-page px-2 px-md-3" style="max-width: 600px; margin-left: auto; margin-right: auto;">
+  <div class="card blueprint-card p-3 p-md-5 text-center reveal" id="runCard">
     <!-- Live Status Icon -->
     <div id="statusIconContainer" class="mb-4">
       <!-- Pulsing radar ring for en-route state -->
@@ -43,7 +43,7 @@
 
     <!-- Action Group -->
     <div id="actionBox" class="d-none">
-      <a href="<?= url_to('ambulance.home') ?>" class="btn btn-primary w-100 py-3 fw-bold fs-6 touch-target-btn">
+      <a href="<?= url_to('ambulance.home') ?>" class="btn btn-primary w-100 py-3 fw-bold fs-6" style="min-height: 56px;">
         Start New Run
       </a>
     </div>

@@ -38,54 +38,77 @@
     </div>
   </div>
 
-  <!-- Responsive Table -->
+  <!-- Responsive Table with Mobile Card Fallback -->
   <div class="card blueprint-card p-4">
     <?php if (empty($pilots)) : ?>
       <p class="text-center my-4 text-muted">No pilot signup records registered in the system.</p>
     <?php else : ?>
-      <div class="table-responsive">
-        <table class="table queue-table align-middle">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Full Name</th>
-              <th>Email</th>
-              <th>Organisation</th>
-              <th>Role</th>
-              <th>Phone</th>
-              <th>Date</th>
-              <th class="text-end">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php foreach ($pilots as $pilot) : ?>
+
+      <!-- Mobile Card List (<768px) -->
+      <div class="d-md-none">
+        <?php foreach ($pilots as $pilot) : ?>
+          <div class="list-card-item flex-column align-items-start gap-2 py-3">
+            <div class="d-flex justify-content-between align-items-center w-100">
+              <span class="td-name fw-bold"><?= esc($pilot->full_name) ?></span>
+              <span class="badge bg-secondary admin-status-pill"><?= esc($pilot->user_role) ?></span>
+            </div>
+            <div class="w-100">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="text-muted small"><?= esc($pilot->email_address) ?></span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="mono-label small"><?= esc($pilot->organisation) ?></span>
+                <span class="mono-label small"><?= esc($pilot->phone_number ?? '—') ?></span>
+              </div>
+              <div class="d-flex justify-content-end mb-2">
+                <span class="mono-label small"><?= esc($pilot->created_at ? $pilot->created_at->format('Y-m-d H:i') : '—') ?></span>
+              </div>
+            </div>
+            <div class="d-flex gap-2 w-100">
+              <a href="<?= url_to('admin.pilots.edit', $pilot->id) ?>" class="btn btn-outline-secondary btn-sm flex-fill" style="min-height: 48px;">Edit</a>
+              <a href="<?= url_to('admin.pilots.delete', $pilot->id) ?>" class="btn btn-danger btn-sm flex-fill" style="min-height: 48px;" onclick="return confirm('Are you sure you want to delete this pilot application?');">Delete</a>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      </div>
+
+      <!-- Desktop Table (≥768px) -->
+      <div class="d-none d-md-block">
+        <div class="table-responsive">
+          <table class="table queue-table align-middle">
+            <thead>
               <tr>
-                <td class="td-code"><?= esc($pilot->id) ?></td>
-                <td class="td-name"><?= esc($pilot->full_name) ?></td>
-                <td><?= esc($pilot->email_address) ?></td>
-                <td><?= esc($pilot->organisation) ?></td>
-                <td class="td-mono-sm"><?= esc($pilot->user_role) ?></td>
-                <td class="td-mono"><?= esc($pilot->phone_number ?? '—') ?></td>
-                <td class="td-mono-sm">
-                  <?= esc($pilot->created_at ? $pilot->created_at->format('Y-m-d H:i') : '—') ?>
-                </td>
-                <td class="text-end">
-                  <div class="d-inline-flex gap-2">
-                    <a href="<?= url_to('admin.pilots.edit', $pilot->id) ?>" class="btn btn-outline-secondary btn-sm px-3 py-2 d-inline-block admin-btn-edit" style="min-height: 48px; min-width: 48px;">
-                      Edit
-                    </a>
-                    <a href="<?= url_to('admin.pilots.delete', $pilot->id) ?>"
-                      class="btn btn-danger btn-sm px-3 py-2 d-inline-block admin-btn-delete"
-                      style="min-height: 48px; min-width: 48px;"
-                      onclick="return confirm('Are you sure you want to delete this pilot application?');">
-                      Delete
-                    </a>
-                  </div>
-                </td>
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Organisation</th>
+                <th>Role</th>
+                <th>Phone</th>
+                <th>Date</th>
+                <th class="text-end">Actions</th>
               </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <?php foreach ($pilots as $pilot) : ?>
+                <tr>
+                  <td class="td-code"><?= esc($pilot->id) ?></td>
+                  <td class="td-name"><?= esc($pilot->full_name) ?></td>
+                  <td><?= esc($pilot->email_address) ?></td>
+                  <td><?= esc($pilot->organisation) ?></td>
+                  <td class="td-mono-sm"><?= esc($pilot->user_role) ?></td>
+                  <td class="td-mono"><?= esc($pilot->phone_number ?? '—') ?></td>
+                  <td class="td-mono-sm"><?= esc($pilot->created_at ? $pilot->created_at->format('Y-m-d H:i') : '—') ?></td>
+                  <td class="text-end">
+                    <div class="d-inline-flex gap-2">
+                      <a href="<?= url_to('admin.pilots.edit', $pilot->id) ?>" class="btn btn-outline-secondary btn-sm px-3 py-2 d-inline-block admin-btn-edit" style="min-height: 48px; min-width: 48px;">Edit</a>
+                      <a href="<?= url_to('admin.pilots.delete', $pilot->id) ?>" class="btn btn-danger btn-sm px-3 py-2 d-inline-block admin-btn-delete" style="min-height: 48px; min-width: 48px;" onclick="return confirm('Are you sure you want to delete this pilot application?');">Delete</a>
+                    </div>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Pagination -->

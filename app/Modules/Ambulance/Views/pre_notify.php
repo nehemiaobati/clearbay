@@ -12,13 +12,13 @@
 <?= $this->extend('layouts/default') ?>
 <?= $this->section('content') ?>
 
-<div class="container admin-page max-width-600">
+<div class="container admin-page px-2 px-md-3" style="max-width: 600px; margin-left: auto; margin-right: auto;">
   <!-- Inner Back navigation -->
   <div class="mb-4 reveal">
     <a href="<?= url_to('ambulance.hospital.detail', $hospital->id) ?>" class="mono-label text-decoration-none admin-back">← Back to Detail</a>
   </div>
 
-  <div class="card blueprint-card p-4 p-md-5 reveal">
+  <div class="card blueprint-card p-3 p-md-5 reveal">
     <div class="mb-4 border-bottom border-secondary border-opacity-10 pb-3">
       <span class="mono-label text-muted d-block mb-1">Destination</span>
       <h2 class="h4 fw-bold text-cream"><?= esc($hospital->name) ?></h2>
@@ -32,28 +32,27 @@
       <div id="formFeedback" class="alert alert-danger d-none mb-3" role="alert"></div>
 
       <!-- Patient Age -->
-      <div class="mb-3">
-        <label for="patientAgeInput" class="form-label">Patient Age (Years) *</label>
-        <input type="number" name="patient_age" id="patientAgeInput" class="form-control" placeholder="Age" min="0" max="120" required>
+      <div class="mb-3 form-floating">
+        <input type="number" name="patient_age" id="patientAgeInput" class="form-control" placeholder="Age" min="0" max="120" required style="min-height: 56px;">
+        <label for="patientAgeInput">Patient Age (Years) *</label>
         <div class="invalid-feedback" id="error_patient_age">Please enter a valid age.</div>
       </div>
 
       <!-- Patient Sex -->
-      <div class="mb-3">
-        <label for="patientSexInput" class="form-label">Patient Sex *</label>
-        <select name="patient_sex" id="patientSexInput" class="form-select" required>
+      <div class="mb-3 form-floating">
+        <select name="patient_sex" id="patientSexInput" class="form-select" required style="min-height: 56px;">
           <option value="" disabled selected>Select patient sex</option>
           <option value="Male">Male</option>
           <option value="Female">Female</option>
           <option value="Not Specified">Not Specified</option>
         </select>
+        <label for="patientSexInput">Patient Sex *</label>
         <div class="invalid-feedback" id="error_patient_sex">Please select patient sex.</div>
       </div>
 
       <!-- Chief Complaint -->
-      <div class="mb-3">
-        <label for="chiefComplaintInput" class="form-label">Chief Complaint *</label>
-        <select name="chief_complaint" id="chiefComplaintInput" class="form-select" required>
+      <div class="mb-3 form-floating">
+        <select name="chief_complaint" id="chiefComplaintInput" class="form-select" required style="min-height: 56px;">
           <option value="" disabled selected>Select chief complaint</option>
           <option value="Cardiac Arrest">Cardiac Arrest</option>
           <option value="Acute Coronary Syndrome">Acute Coronary Syndrome</option>
@@ -65,6 +64,7 @@
           <option value="Sepsis">Sepsis</option>
           <option value="Other">Other</option>
         </select>
+        <label for="chiefComplaintInput">Chief Complaint *</label>
         <div class="invalid-feedback" id="error_chief_complaint">Please select a chief complaint.</div>
       </div>
 
@@ -81,15 +81,15 @@
       </div>
 
       <!-- Notes -->
-      <div class="mb-3">
-        <label for="notesInput" class="form-label">En-route Notes (Optional, max 150 chars)</label>
-        <textarea name="notes" id="notesInput" class="form-control" placeholder="Notes" style="height: 80px;" maxlength="150"></textarea>
+      <div class="mb-3 form-floating">
+        <textarea name="notes" id="notesInput" class="form-control" placeholder="Notes" style="height: 100px;" maxlength="150"></textarea>
+        <label for="notesInput">En-route Notes (Optional, max 150 chars)</label>
       </div>
 
       <!-- ETA (Read Only) -->
-      <div class="mb-4">
-        <label for="etaInput" class="form-label">Calculated ETA (Minutes)</label>
-        <input type="number" name="eta_minutes" id="etaInput" class="form-control" value="<?= $eta ?>" readonly>
+      <div class="mb-4 form-floating">
+        <input type="number" name="eta_minutes" id="etaInput" class="form-control" value="<?= $eta ?>" readonly style="min-height: 56px;">
+        <label for="etaInput">Calculated ETA (Minutes)</label>
       </div>
 
       <!-- Submit Button -->

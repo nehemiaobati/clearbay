@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var string $pageTitle
  * @var string $metaDescription
@@ -32,12 +33,12 @@
         <h1 class="s-title"><?= esc($hospital->name) ?></h1>
       </div>
     </div>
-    <div class="col-md-6 text-md-end d-flex gap-2 justify-content-md-end align-items-center">
-      <a href="<?= url_to('hospital.analytics.export') ?>" class="btn btn-primary px-3">Export Report (PDF)</a>
+    <div class="col-md-6 text-md-end d-flex flex-column flex-sm-row gap-2 justify-content-md-end align-items-stretch align-items-md-center">
+      <a href="<?= url_to('hospital.analytics.export') ?>" class="btn btn-primary px-3" style="min-height: 48px;">Export Report (PDF)</a>
       <form action="<?= url_to('hospital.analytics') ?>" method="GET" id="rangeForm" class="m-0">
         <div class="input-group">
           <span class="input-group-text bg-dark border-secondary border-opacity-20 text-muted mono-label">Range:</span>
-          <select name="range" class="form-select bg-dark text-cream border-secondary border-opacity-20" onchange="document.getElementById('rangeForm').submit();">
+          <select name="range" class="form-select bg-dark text-cream border-secondary border-opacity-20" onchange="document.getElementById('rangeForm').submit();" style="min-height: 48px;">
             <option value="7" <?= $range === '7' ? 'selected' : '' ?>>Past 7 Days</option>
             <option value="30" <?= $range === '30' ? 'selected' : '' ?>>Past 30 Days</option>
             <option value="90" <?= $range === '90' ? 'selected' : '' ?>>Past 90 Days</option>
@@ -73,35 +74,58 @@
   <!-- Table: EMS Provider performance summary -->
   <div class="card blueprint-card p-4 reveal">
     <h3 class="admin-card-heading mb-4">Performance summary by EMS Provider</h3>
-    <div class="table-responsive">
-      <table class="table queue-table align-middle">
-        <thead>
-          <tr class="mono-label text-muted">
-            <th>EMS Provider</th>
-            <th>Total Handovers Completed</th>
-            <th>Average Wait Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php if (empty($analytics['provider_performance'])) : ?>
-            <tr>
-              <td colspan="3" class="text-center text-muted py-4">No completed handover logs found in selected range.</td>
+
+    <!-- Mobile Card List (<768px) -->
+    <div class="d-md-none">
+      <?php if (empty($analytics['provider_performance'])) : ?>
+        <p class="text-center text-muted py-4">No completed handover logs found in selected range.</p>
+      <?php else : ?>
+        <?php foreach ($analytics['provider_performance'] as $row) : ?>
+          <div class="list-card-item flex-column align-items-start gap-2 py-3">
+            <div class="d-flex justify-content-between align-items-center w-100">
+              <span class="fw-bold"><?= esc($row['provider']) ?></span>
+              <span class="badge <?= (int)$row['avg_wait'] >= 30 ? 'bg-danger' : ((int)$row['avg_wait'] >= 15 ? 'bg-warning text-dark' : 'bg-success') ?>">
+                <?= esc($row['avg_wait']) ?> min
+              </span>
+            </div>
+            <span class="mono-label small"><?= esc($row['total_handovers']) ?> handovers completed</span>
+          </div>
+        <?php endforeach; ?>
+      <?php endif; ?>
+    </div>
+
+    <!-- Desktop Table (≥768px) -->
+    <div class="d-none d-md-block">
+      <div class="table-responsive">
+        <table class="table queue-table align-middle">
+          <thead>
+            <tr class="mono-label text-muted">
+              <th>EMS Provider</th>
+              <th>Total Handovers Completed</th>
+              <th>Average Wait Time</th>
             </tr>
-          <?php else : ?>
-            <?php foreach ($analytics['provider_performance'] as $row) : ?>
+          </thead>
+          <tbody>
+            <?php if (empty($analytics['provider_performance'])) : ?>
               <tr>
-                <td class="fw-bold"><?= esc($row['provider']) ?></td>
-                <td><?= esc($row['total_handovers']) ?></td>
-                <td>
-                  <span class="badge <?= (int)$row['avg_wait'] >= 30 ? 'bg-danger' : ((int)$row['avg_wait'] >= 15 ? 'bg-warning text-dark' : 'bg-success') ?>">
-                    <?= esc($row['avg_wait']) ?> min
-                  </span>
-                </td>
+                <td colspan="3" class="text-center text-muted py-4">No completed handover logs found in selected range.</td>
               </tr>
-            <?php endforeach; ?>
-          <?php endif; ?>
-        </tbody>
-      </table>
+            <?php else : ?>
+              <?php foreach ($analytics['provider_performance'] as $row) : ?>
+                <tr>
+                  <td class="fw-bold"><?= esc($row['provider']) ?></td>
+                  <td><?= esc($row['total_handovers']) ?></td>
+                  <td>
+                    <span class="badge <?= (int)$row['avg_wait'] >= 30 ? 'bg-danger' : ((int)$row['avg_wait'] >= 15 ? 'bg-warning text-dark' : 'bg-success') ?>">
+                      <?= esc($row['avg_wait']) ?> min
+                    </span>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
@@ -115,7 +139,7 @@
     const colorSageLL = style.getPropertyValue('--sage-ll').trim() || '#7AB890';
     const colorRed = style.getPropertyValue('--red').trim() || '#C23B22';
     const colorCream = style.getPropertyValue('--cream').trim() || '#EDE9E0';
-    
+
     // Analytics payload
     const waitsData = <?= json_encode($analytics['daily_waits']) ?>;
     const countsData = <?= json_encode($analytics['daily_counts']) ?>;
@@ -153,16 +177,28 @@
         scales: {
           y: {
             beginAtZero: true,
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: { color: colorCream }
+            grid: {
+              color: 'rgba(255, 255, 255, 0.05)'
+            },
+            ticks: {
+              color: colorCream
+            }
           },
           x: {
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: { color: colorCream }
+            grid: {
+              color: 'rgba(255, 255, 255, 0.05)'
+            },
+            ticks: {
+              color: colorCream
+            }
           }
         },
         plugins: {
-          legend: { labels: { color: colorCream } }
+          legend: {
+            labels: {
+              color: colorCream
+            }
+          }
         }
       }
     });
@@ -190,16 +226,28 @@
         scales: {
           y: {
             beginAtZero: true,
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: { color: colorCream }
+            grid: {
+              color: 'rgba(255, 255, 255, 0.05)'
+            },
+            ticks: {
+              color: colorCream
+            }
           },
           x: {
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: { color: colorCream }
+            grid: {
+              color: 'rgba(255, 255, 255, 0.05)'
+            },
+            ticks: {
+              color: colorCream
+            }
           }
         },
         plugins: {
-          legend: { labels: { color: colorCream } }
+          legend: {
+            labels: {
+              color: colorCream
+            }
+          }
         }
       }
     });

@@ -16,13 +16,13 @@ elseif ($status === 'AMBER') $status_color = 'bg-warning text-dark';
 <?= $this->extend('layouts/default') ?>
 <?= $this->section('content') ?>
 
-<div class="container admin-page max-width-600">
+<div class="container admin-page px-2 px-md-3" style="max-width: 600px; margin-left: auto; margin-right: auto;">
   <!-- Inner Back navigation -->
   <div class="mb-4 reveal">
     <a href="<?= url_to('ambulance.home') ?>" class="mono-label text-decoration-none admin-back">← Back to Map</a>
   </div>
 
-  <div class="card blueprint-card p-4 p-md-5 reveal">
+  <div class="card blueprint-card p-3 p-md-5 reveal">
     <!-- Hospital Header -->
     <div class="text-center mb-4">
       <span class="mono-label text-muted d-block mb-1"><?= esc($h->category) ?></span>
@@ -55,11 +55,11 @@ elseif ($status === 'AMBER') $status_color = 'bg-warning text-dark';
     <!-- Action buttons -->
     <div class="d-grid gap-3">
       <?php if ($status === 'RED') : ?>
-        <button class="btn btn-secondary py-3 fw-bold fs-6 touch-target-btn" disabled>
+        <button class="btn btn-secondary py-3 fw-bold fs-6" style="min-height: 56px;" disabled>
           Hospital is currently full — please select another.
         </button>
       <?php else : ?>
-        <a href="<?= url_to('ambulance.pre_notify', $h->id) ?>" class="btn btn-primary py-3 fw-bold fs-6 d-flex align-items-center justify-content-center touch-target-btn">
+        <a href="<?= url_to('ambulance.pre_notify', $h->id) ?>" class="btn btn-primary py-3 fw-bold fs-6 d-flex align-items-center justify-content-center" style="min-height: 56px;">
           Send Pre-Notification →
         </a>
       <?php endif; ?>
@@ -67,7 +67,7 @@ elseif ($status === 'AMBER') $status_color = 'bg-warning text-dark';
       <a href="https://www.google.com/maps/dir/?api=1&destination=<?= $h->lat ?>,<?= $h->lng ?>"
         target="_blank"
         rel="noopener noreferrer"
-        class="btn btn-outline-secondary py-3 fw-bold fs-6 d-flex align-items-center justify-content-center touch-target-btn">
+        class="btn btn-outline-secondary py-3 fw-bold fs-6 d-flex align-items-center justify-content-center" style="min-height: 56px;">
         Get Directions (GPS)
       </a>
     </div>

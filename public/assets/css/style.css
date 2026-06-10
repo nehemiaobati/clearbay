@@ -666,21 +666,7 @@ select:-webkit-autofill {
 
 /* Dashboard Preview */
 .preview-frame { padding: 2rem; }
-.dash-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
 .dash-title {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  color: var(--color-text-main);
-  font-size: 1.1rem;
-}
-.dash-live {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -695,15 +681,6 @@ select:-webkit-autofill {
   border-radius: 50%;
   animation: blinker 1.2s ease-in-out infinite;
 }
-.dash-metrics {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 1rem;
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--color-border);
-}
-.metric-box { text-align: center; }
 .metric-val {
   font-family: var(--font-serif);
   font-weight: 700;
@@ -722,15 +699,6 @@ select:-webkit-autofill {
 }
 
 /* Signup section */
-.form-wrap {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 3rem;
-  margin-top: 2rem;
-}
-@media (min-width: 992px) {
-  .form-wrap { grid-template-columns: 2fr 1fr; }
-}
 .submit-btn {
   font-family: var(--font-mono);
   text-transform: uppercase;
@@ -810,6 +778,16 @@ select:-webkit-autofill {
 .mapboxgl-popup-close-button:hover { opacity: 1; }
 
 /* ════════════════ 9. UTILITY CLASSES ════════════════ */
+
+/* Responsive image lazy loading */
+img[loading="lazy"] {
+  opacity: 0;
+  transition: opacity 0.3s ease-in;
+}
+img[loading="lazy"].loaded,
+img:not([loading="lazy"]) {
+  opacity: 1;
+}
 .text-cream { color: var(--cream) !important; }
 .ital { font-style: italic; }
 .dim { color: var(--color-text-dim) !important; }

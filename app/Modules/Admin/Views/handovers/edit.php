@@ -40,9 +40,9 @@ $isEdit = isset($handover) && $handover->id;
 
         <!-- Flash validation errors -->
         <?php if (session()->has('errors')) : ?>
-          <div class="alert alert-danger card blueprint-card border-danger mb-4 p-3" role="alert">
-            <h5 class="alert-heading font-family-sans fw-bold mb-2 text-danger admin-error-heading">Please correct the following errors:</h5>
-            <ul class="mb-0 ps-3 admin-error-list">
+          <div class="alert alert-danger mb-4 p-3" role="alert">
+            <h5 class="alert-heading fw-bold mb-2 text-danger">Please correct the following errors:</h5>
+            <ul class="mb-0 ps-3">
               <?php foreach (session()->get('errors') as $error) : ?>
                 <li><?= esc($error) ?></li>
               <?php endforeach; ?>
@@ -53,12 +53,11 @@ $isEdit = isset($handover) && $handover->id;
         <form action="<?= $isEdit ? url_to('admin.handovers.update', $handover->id) : url_to('admin.handovers.create') ?>" method="POST" class="form-dark">
           <?= csrf_field() ?>
 
+          <!-- Required: Ambulance + Hospital -->
           <div class="row">
-            <!-- Ambulance unit lookup -->
-            <div class="col-md-6 mb-4">
-              <div>
-                <label for="ambulanceId" class="form-label">Ambulance Unit *</label>
-                <select id="ambulanceId" name="ambulanceId" class="form-select admin-form-select <?= session('errors.ambulanceId') ? 'is-invalid' : '' ?>" required>
+            <div class="col-md-6 mb-3">
+              <div class="form-floating">
+                <select id="ambulanceId" name="ambulanceId" class="form-select <?= session('errors.ambulanceId') ? 'is-invalid' : '' ?>" required>
                   <option value="" disabled <?= !$isEdit ? 'selected' : '' ?>>Select Ambulance</option>
                   <?php
                   $currentAmbulance = old('ambulanceId', $handover->ambulance_id ?? '');
@@ -69,17 +68,15 @@ $isEdit = isset($handover) && $handover->id;
                     </option>
                   <?php endforeach; ?>
                 </select>
+                <label for="ambulanceId">Ambulance Unit *</label>
                 <?php if (session('errors.ambulanceId')) : ?>
                   <div class="invalid-feedback"><?= esc(session('errors.ambulanceId')) ?></div>
                 <?php endif; ?>
               </div>
             </div>
-
-            <!-- Hospital destination lookup -->
-            <div class="col-md-6 mb-4">
-              <div>
-                <label for="hospitalId" class="form-label">Destination Hospital *</label>
-                <select id="hospitalId" name="hospitalId" class="form-select admin-form-select <?= session('errors.hospitalId') ? 'is-invalid' : '' ?>" required>
+            <div class="col-md-6 mb-3">
+              <div class="form-floating">
+                <select id="hospitalId" name="hospitalId" class="form-select <?= session('errors.hospitalId') ? 'is-invalid' : '' ?>" required>
                   <option value="" disabled <?= !$isEdit ? 'selected' : '' ?>>Select Destination Hospital</option>
                   <?php
                   $currentHospital = old('hospitalId', $handover->hospital_id ?? '');
@@ -90,6 +87,7 @@ $isEdit = isset($handover) && $handover->id;
                     </option>
                   <?php endforeach; ?>
                 </select>
+                <label for="hospitalId">Destination Hospital *</label>
                 <?php if (session('errors.hospitalId')) : ?>
                   <div class="invalid-feedback"><?= esc(session('errors.hospitalId')) ?></div>
                 <?php endif; ?>
@@ -97,24 +95,21 @@ $isEdit = isset($handover) && $handover->id;
             </div>
           </div>
 
+          <!-- Required: Patient Info + Acuity -->
           <div class="row">
-            <!-- Patient Age -->
-            <div class="col-md-4 mb-4">
-              <div>
-                <label for="patientAge" class="form-label">Patient Age *</label>
+            <div class="col-md-4 mb-3">
+              <div class="form-floating">
                 <input type="number" id="patientAge" name="patientAge" class="form-control <?= session('errors.patientAge') ? 'is-invalid' : '' ?>" placeholder="Age" min="0" required
                   value="<?= esc(old('patientAge', $handover->patient_age ?? '')) ?>">
+                <label for="patientAge">Patient Age *</label>
                 <?php if (session('errors.patientAge')) : ?>
                   <div class="invalid-feedback"><?= esc(session('errors.patientAge')) ?></div>
                 <?php endif; ?>
               </div>
             </div>
-
-            <!-- Patient Gender -->
-            <div class="col-md-4 mb-4">
-              <div>
-                <label for="patientGender" class="form-label">Patient Gender *</label>
-                <select id="patientGender" name="patientGender" class="form-select admin-form-select <?= session('errors.patientGender') ? 'is-invalid' : '' ?>" required>
+            <div class="col-md-4 mb-3">
+              <div class="form-floating">
+                <select id="patientGender" name="patientGender" class="form-select <?= session('errors.patientGender') ? 'is-invalid' : '' ?>" required>
                   <option value="" disabled <?= !$isEdit ? 'selected' : '' ?>>Select Gender</option>
                   <?php
                   $genders = ['M' => 'Male', 'F' => 'Female'];
@@ -124,17 +119,15 @@ $isEdit = isset($handover) && $handover->id;
                     <option value="<?= esc($val) ?>" <?= $currentGender === $val ? 'selected' : '' ?>><?= esc($lbl) ?></option>
                   <?php endforeach; ?>
                 </select>
+                <label for="patientGender">Patient Gender *</label>
                 <?php if (session('errors.patientGender')) : ?>
                   <div class="invalid-feedback"><?= esc(session('errors.patientGender')) ?></div>
                 <?php endif; ?>
               </div>
             </div>
-
-            <!-- Acuity Level -->
-            <div class="col-md-4 mb-4">
-              <div>
-                <label for="acuity" class="form-label">Acuity Level *</label>
-                <select id="acuity" name="acuity" class="form-select admin-form-select <?= session('errors.acuity') ? 'is-invalid' : '' ?>" required>
+            <div class="col-md-4 mb-3">
+              <div class="form-floating">
+                <select id="acuity" name="acuity" class="form-select <?= session('errors.acuity') ? 'is-invalid' : '' ?>" required>
                   <option value="" disabled <?= !$isEdit ? 'selected' : '' ?>>Select Acuity</option>
                   <?php
                   $acuities = ['Critical', 'Serious', 'Stable'];
@@ -144,6 +137,7 @@ $isEdit = isset($handover) && $handover->id;
                     <option value="<?= esc($acuityOption) ?>" <?= $currentAcuity === $acuityOption ? 'selected' : '' ?>><?= esc($acuityOption) ?></option>
                   <?php endforeach; ?>
                 </select>
+                <label for="acuity">Acuity Level *</label>
                 <?php if (session('errors.acuity')) : ?>
                   <div class="invalid-feedback"><?= esc(session('errors.acuity')) ?></div>
                 <?php endif; ?>
@@ -151,37 +145,32 @@ $isEdit = isset($handover) && $handover->id;
             </div>
           </div>
 
+          <!-- Required: ETA, Wait Time, Status -->
           <div class="row">
-            <!-- ETA Minutes -->
-            <div class="col-md-4 mb-4">
-              <div>
-                <label for="etaMinutes" class="form-label">ETA (Minutes) *</label>
+            <div class="col-md-4 mb-3">
+              <div class="form-floating">
                 <input type="number" id="etaMinutes" name="etaMinutes" class="form-control <?= session('errors.etaMinutes') ? 'is-invalid' : '' ?>" placeholder="ETA Minutes" min="0" required
                   value="<?= esc(old('etaMinutes', $handover->eta_minutes ?? '')) ?>">
-                <div class="form-note mt-1 text-muted admin-form-note">Set to 0 if already arrived</div>
+                <label for="etaMinutes">ETA (Minutes) *</label>
+                <div class="form-note mt-1 admin-form-note">Set to 0 if already arrived</div>
                 <?php if (session('errors.etaMinutes')) : ?>
                   <div class="invalid-feedback"><?= esc(session('errors.etaMinutes')) ?></div>
                 <?php endif; ?>
               </div>
             </div>
-
-            <!-- Wait Time Minutes -->
-            <div class="col-md-4 mb-4">
-              <div>
-                <label for="waitTimeMinutes" class="form-label">Off-Load Wait Time (Mins) *</label>
+            <div class="col-md-4 mb-3">
+              <div class="form-floating">
                 <input type="number" id="waitTimeMinutes" name="waitTimeMinutes" class="form-control <?= session('errors.waitTimeMinutes') ? 'is-invalid' : '' ?>" placeholder="Wait Time" min="0" required
                   value="<?= esc(old('waitTimeMinutes', $handover->wait_time_minutes ?? '0')) ?>">
+                <label for="waitTimeMinutes">Off-Load Wait Time (Mins) *</label>
                 <?php if (session('errors.waitTimeMinutes')) : ?>
                   <div class="invalid-feedback"><?= esc(session('errors.waitTimeMinutes')) ?></div>
                 <?php endif; ?>
               </div>
             </div>
-
-            <!-- Status -->
-            <div class="col-md-4 mb-4">
-              <div>
-                <label for="status" class="form-label">Dispatch / Queue Status *</label>
-                <select id="status" name="status" class="form-select admin-form-select <?= session('errors.status') ? 'is-invalid' : '' ?>" required>
+            <div class="col-md-4 mb-3">
+              <div class="form-floating">
+                <select id="status" name="status" class="form-select <?= session('errors.status') ? 'is-invalid' : '' ?>" required>
                   <option value="" disabled <?= !$isEdit ? 'selected' : '' ?>>Select Status</option>
                   <?php
                   $statuses = ['En route', 'Arrived', 'Acknowledged', 'Preparing', 'Cleared'];
@@ -191,6 +180,7 @@ $isEdit = isset($handover) && $handover->id;
                     <option value="<?= esc($statusOption) ?>" <?= $currentStatus === $statusOption ? 'selected' : '' ?>><?= esc($statusOption) ?></option>
                   <?php endforeach; ?>
                 </select>
+                <label for="status">Dispatch / Queue Status *</label>
                 <?php if (session('errors.status')) : ?>
                   <div class="invalid-feedback"><?= esc(session('errors.status')) ?></div>
                 <?php endif; ?>
@@ -198,37 +188,37 @@ $isEdit = isset($handover) && $handover->id;
             </div>
           </div>
 
-          <!-- Section: Completion Details -->
-          <h5 class="mono-label text-muted mt-4 mb-3 border-bottom border-secondary border-opacity-10 pb-2">Completion Details</h5>
-
-          <div class="row">
-            <div class="col-md-6 mb-4">
-              <div>
-                <label for="bayNumber" class="form-label">Bay Number</label>
-                <input type="text" id="bayNumber" name="bayNumber" class="form-control <?= session('errors.bayNumber') ? 'is-invalid' : '' ?>" placeholder="e.g. Bay 3"
-                  value="<?= esc(old('bayNumber', $handover->bay_number ?? '')) ?>">
-                <?php if (session('errors.bayNumber')) : ?>
-                  <div class="invalid-feedback"><?= esc(session('errors.bayNumber')) ?></div>
+          <!-- Optional: Completion Details (collapsible) -->
+          <details class="mb-3">
+            <summary class="mono-label text-muted border-bottom border-secondary border-opacity-10 pb-2 mb-3" style="cursor: pointer;">Completion Details</summary>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <div class="form-floating">
+                  <input type="text" id="bayNumber" name="bayNumber" class="form-control <?= session('errors.bayNumber') ? 'is-invalid' : '' ?>" placeholder="e.g. Bay 3"
+                    value="<?= esc(old('bayNumber', $handover->bay_number ?? '')) ?>">
+                  <label for="bayNumber">Bay Number</label>
+                  <?php if (session('errors.bayNumber')) : ?>
+                    <div class="invalid-feedback"><?= esc(session('errors.bayNumber')) ?></div>
+                  <?php endif; ?>
+                </div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="form-floating">
+                <textarea id="notes" name="notes" class="form-control <?= session('errors.notes') ? 'is-invalid' : '' ?>" placeholder="Notes" style="height: 100px;" maxlength="200"><?= esc(old('notes', $handover->notes ?? '')) ?></textarea>
+                <label for="notes">Handover Notes</label>
+                <?php if (session('errors.notes')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.notes')) ?></div>
                 <?php endif; ?>
               </div>
             </div>
-          </div>
-
-          <div class="mb-4">
-            <div>
-              <label for="notes" class="form-label">Handover Notes</label>
-              <textarea id="notes" name="notes" class="form-control <?= session('errors.notes') ? 'is-invalid' : '' ?>" rows="3" maxlength="200" placeholder="Optional notes (max 200 chars)"><?= esc(old('notes', $handover->notes ?? '')) ?></textarea>
-              <?php if (session('errors.notes')) : ?>
-                <div class="invalid-feedback"><?= esc(session('errors.notes')) ?></div>
-              <?php endif; ?>
-            </div>
-          </div>
+          </details>
 
           <div class="d-flex align-items-center gap-3 mt-4">
-            <button type="submit" class="btn btn-primary admin-btn-submit" style="min-height: 48px;">
+            <button type="submit" class="btn btn-primary" style="min-height: 48px;">
               <?= $isEdit ? 'Save Changes' : 'Dispatch Handover' ?>
             </button>
-            <a href="<?= url_to('admin.handovers.list') ?>" class="btn btn-outline-secondary admin-btn-submit" style="min-height: 48px;">
+            <a href="<?= url_to('admin.handovers.list') ?>" class="btn btn-outline-secondary" style="min-height: 48px;">
               Cancel
             </a>
           </div>

@@ -23,7 +23,7 @@
     </noscript>
 
     <!-- Floating Quick Stats -->
-    <div class="position-absolute top-0 start-0 m-3 p-3 card blueprint-card shadow paramedic-quick-stats">
+    <div class="position-absolute top-0 start-0 m-2 m-md-3 p-2 p-md-3 card blueprint-card shadow paramedic-quick-stats" style="z-index: 10;">
       <span class="mono-label text-muted d-block mb-1">Ambulance Unit</span>
       <span class="fw-bold fs-5 text-primary"><?= esc($ambulance->unit_id) ?></span>
       <span class="mono-label text-muted d-block mt-2 mb-1">Current Status</span>
@@ -31,14 +31,14 @@
     </div>
 
     <!-- GPS Status Indicator -->
-    <div id="gps-status" class="position-absolute top-0 end-0 m-3 p-2 card blueprint-card shadow-sm"
-      style="font-size: 0.75rem; display: none;">
+    <div id="gps-status" class="position-absolute top-0 end-0 m-2 m-md-3 p-2 card blueprint-card shadow-sm"
+      style="font-size: 0.75rem; display: none; z-index: 10;">
       <span id="gps-text" class="text-muted">Acquiring GPS...</span>
     </div>
   </div>
 
   <!-- Section 2: Hospital List (lower third) -->
-  <div class="border-top border-secondary border-opacity-20 p-3 paramedic-hospital-panel">
+  <div class="border-top border-secondary border-opacity-20 p-2 p-md-3 paramedic-hospital-panel">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h3 class="mono-label text-muted m-0">Hospitals Sorted by Distance</h3>
     </div>
@@ -60,7 +60,7 @@
           data-bays="<?= (int) $h->bays_available ?>">
           <a href="<?= url_to('ambulance.hospital.detail', $h->id) ?>"
             class="card blueprint-card p-3 d-flex flex-row justify-content-between align-items-center hover-glow text-decoration-none text-reset focus-ring"
-            style="min-height: 48px; gap: 0.75rem;">
+            style="min-height: 56px; gap: 0.75rem;">
             <div class="d-flex align-items-center gap-3">
               <span class="badge <?= $status_class ?> rounded-circle p-1" aria-hidden="true" style="width: 12px; height: 12px;"></span>
               <div>

@@ -38,9 +38,9 @@ $isEdit = isset($pilot) && $pilot->id;
 
         <!-- Flash validation errors -->
         <?php if (session()->has('errors')) : ?>
-          <div class="alert alert-danger card blueprint-card border-danger mb-4 p-3" role="alert">
-            <h5 class="alert-heading font-family-sans fw-bold mb-2 text-danger admin-error-heading">Please correct the following errors:</h5>
-            <ul class="mb-0 ps-3 admin-error-list">
+          <div class="alert alert-danger mb-4 p-3" role="alert">
+            <h5 class="alert-heading fw-bold mb-2 text-danger">Please correct the following errors:</h5>
+            <ul class="mb-0 ps-3">
               <?php foreach (session()->get('errors') as $error) : ?>
                 <li><?= esc($error) ?></li>
               <?php endforeach; ?>
@@ -51,22 +51,23 @@ $isEdit = isset($pilot) && $pilot->id;
         <form action="<?= $isEdit ? url_to('admin.pilots.update', $pilot->id) : url_to('admin.pilots.create') ?>" method="POST" class="form-dark">
           <?= csrf_field() ?>
 
+          <!-- Required Fields -->
           <div class="row">
-            <div class="col-md-6 mb-4">
-              <div>
-                <label for="fullName" class="form-label">Full Name *</label>
+            <div class="col-md-6 mb-3">
+              <div class="form-floating">
                 <input type="text" id="fullName" name="fullName" class="form-control <?= session('errors.fullName') ? 'is-invalid' : '' ?>" placeholder="Full Name" required
                   value="<?= esc(old('fullName', $pilot->full_name ?? '')) ?>">
+                <label for="fullName">Full Name *</label>
                 <?php if (session('errors.fullName')) : ?>
                   <div class="invalid-feedback"><?= esc(session('errors.fullName')) ?></div>
                 <?php endif; ?>
               </div>
             </div>
-            <div class="col-md-6 mb-4">
-              <div>
-                <label for="emailAddress" class="form-label">Email Address *</label>
+            <div class="col-md-6 mb-3">
+              <div class="form-floating">
                 <input type="email" id="emailAddress" name="emailAddress" class="form-control <?= session('errors.emailAddress') ? 'is-invalid' : '' ?>" placeholder="Email Address" required
                   value="<?= esc(old('emailAddress', $pilot->email_address ?? '')) ?>">
+                <label for="emailAddress">Email Address *</label>
                 <?php if (session('errors.emailAddress')) : ?>
                   <div class="invalid-feedback"><?= esc(session('errors.emailAddress')) ?></div>
                 <?php endif; ?>
@@ -74,22 +75,22 @@ $isEdit = isset($pilot) && $pilot->id;
             </div>
           </div>
 
-          <div class="mb-4">
-            <div>
-              <label for="organisation" class="form-label">Organisation / Hospital / EMS *</label>
+          <div class="mb-3">
+            <div class="form-floating">
               <input type="text" id="organisation" name="organisation" class="form-control <?= session('errors.organisation') ? 'is-invalid' : '' ?>" placeholder="Organisation" required
                 value="<?= esc(old('organisation', $pilot->organisation ?? '')) ?>">
+              <label for="organisation">Organisation / Hospital / EMS *</label>
               <?php if (session('errors.organisation')) : ?>
                 <div class="invalid-feedback"><?= esc(session('errors.organisation')) ?></div>
               <?php endif; ?>
             </div>
           </div>
 
+          <!-- Role + Phone -->
           <div class="row">
-            <div class="col-md-6 mb-4">
-              <div>
-                <label for="userRole" class="form-label">Your Role *</label>
-                <select id="userRole" name="userRole" class="form-select admin-form-select <?= session('errors.userRole') ? 'is-invalid' : '' ?>" required>
+            <div class="col-md-6 mb-3">
+              <div class="form-floating">
+                <select id="userRole" name="userRole" class="form-select <?= session('errors.userRole') ? 'is-invalid' : '' ?>" required>
                   <option value="" disabled <?= !$isEdit ? 'selected' : '' ?>>Select Role</option>
                   <?php
                   $roles = [
@@ -108,16 +109,17 @@ $isEdit = isset($pilot) && $pilot->id;
                     <option value="<?= esc($roleOption) ?>" <?= $currentRole === $roleOption ? 'selected' : '' ?>><?= esc($roleOption) ?></option>
                   <?php endforeach; ?>
                 </select>
+                <label for="userRole">Your Role *</label>
                 <?php if (session('errors.userRole')) : ?>
                   <div class="invalid-feedback"><?= esc(session('errors.userRole')) ?></div>
                 <?php endif; ?>
               </div>
             </div>
-            <div class="col-md-6 mb-4">
-              <div>
-                <label for="phoneNumber" class="form-label">Phone Number (optional)</label>
+            <div class="col-md-6 mb-3">
+              <div class="form-floating">
                 <input type="tel" id="phoneNumber" name="phoneNumber" class="form-control <?= session('errors.phoneNumber') ? 'is-invalid' : '' ?>" placeholder="Phone Number"
                   value="<?= esc(old('phoneNumber', $pilot->phone_number ?? '')) ?>">
+                <label for="phoneNumber">Phone Number (optional)</label>
                 <?php if (session('errors.phoneNumber')) : ?>
                   <div class="invalid-feedback"><?= esc(session('errors.phoneNumber')) ?></div>
                 <?php endif; ?>
@@ -125,21 +127,25 @@ $isEdit = isset($pilot) && $pilot->id;
             </div>
           </div>
 
-          <div class="mb-4">
-            <div>
-              <label for="message" class="form-label">Message / Note (optional)</label>
-              <textarea id="message" name="message" class="form-control <?= session('errors.message') ? 'is-invalid' : '' ?>" placeholder="Message" style="height: 120px;"><?= esc(old('message', $pilot->message ?? '')) ?></textarea>
-              <?php if (session('errors.message')) : ?>
-                <div class="invalid-feedback"><?= esc(session('errors.message')) ?></div>
-              <?php endif; ?>
+          <!-- Optional: Message (collapsible) -->
+          <details class="mb-3">
+            <summary class="mono-label text-muted border-bottom border-secondary border-opacity-10 pb-2 mb-3" style="cursor: pointer;">Message / Note (Optional)</summary>
+            <div class="mb-3">
+              <div class="form-floating">
+                <textarea id="message" name="message" class="form-control <?= session('errors.message') ? 'is-invalid' : '' ?>" placeholder="Message" style="height: 120px;"><?= esc(old('message', $pilot->message ?? '')) ?></textarea>
+                <label for="message">Message</label>
+                <?php if (session('errors.message')) : ?>
+                  <div class="invalid-feedback"><?= esc(session('errors.message')) ?></div>
+                <?php endif; ?>
+              </div>
             </div>
-          </div>
+          </details>
 
           <div class="d-flex align-items-center gap-3 mt-4">
-            <button type="submit" class="btn btn-primary admin-btn-submit" style="min-height: 48px;">
+            <button type="submit" class="btn btn-primary" style="min-height: 48px;">
               <?= $isEdit ? 'Save Changes' : 'Create Application' ?>
             </button>
-            <a href="<?= url_to('admin.pilots.list') ?>" class="btn btn-outline-secondary admin-btn-submit" style="min-height: 48px;">
+            <a href="<?= url_to('admin.pilots.list') ?>" class="btn btn-outline-secondary" style="min-height: 48px;">
               Cancel
             </a>
           </div>
