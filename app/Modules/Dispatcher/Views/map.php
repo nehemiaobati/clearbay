@@ -40,28 +40,28 @@
     </div>
 
     <!-- Panel SC-14: Active Alerts Panel -->
-    <section class="card blueprint-card p-3" aria-labelledby="alertsHeading">
-      <h3 id="alertsHeading" class="mono-label text-danger mb-3 d-flex align-items-center gap-2">
+    <section class="card blueprint-card p-0" aria-labelledby="alertsHeading">
+      <h3 id="alertsHeading" class="mono-label text-danger mb-0 p-3 d-flex align-items-center gap-2 border-bottom border-secondary border-opacity-10">
         <span class="spinner-grow spinner-grow-sm text-danger blink-dot" role="status" aria-hidden="true"></span>
         Active Off-Load Alerts (>30m)
       </h3>
-      <div id="alertsPanelList" class="d-flex flex-column gap-2" style="max-height: 200px; overflow-y: auto;">
+      <div id="alertsPanelList" class="list-group list-group-flush scrollarea" style="max-height: 200px; overflow-y: auto;">
         <span class="text-muted small text-center py-3">Loading active alerts...</span>
       </div>
     </section>
 
     <!-- Panel SC-13: Fleet Status Panel -->
-    <section class="card blueprint-card p-3 flex-grow-1" style="min-height: 250px;" aria-labelledby="fleetHeading">
-      <h3 id="fleetHeading" class="mono-label text-primary mb-3">Ambulance Fleet Status</h3>
-      <div id="fleetPanelList" class="d-flex flex-column gap-2" style="overflow-y: auto;">
+    <section class="card blueprint-card p-0 flex-grow-1" style="min-height: 250px;" aria-labelledby="fleetHeading">
+      <h3 id="fleetHeading" class="mono-label text-primary mb-0 p-3 border-bottom border-secondary border-opacity-10">Ambulance Fleet Status</h3>
+      <div id="fleetPanelList" class="list-group list-group-flush scrollarea" style="overflow-y: auto;">
         <span class="text-muted small text-center py-3">Loading active fleet...</span>
       </div>
     </section>
 
     <!-- Panel SC-15: Hospital Capacity Panel -->
-    <section class="card blueprint-card p-3" aria-labelledby="capacityHeading">
-      <h3 id="capacityHeading" class="mono-label text-success mb-3">Facility Capacities</h3>
-      <div id="capacityPanelList" class="d-flex flex-column gap-2" style="max-height: 200px; overflow-y: auto;">
+    <section class="card blueprint-card p-0" aria-labelledby="capacityHeading">
+      <h3 id="capacityHeading" class="mono-label text-success mb-0 p-3 border-bottom border-secondary border-opacity-10">Facility Capacities</h3>
+      <div id="capacityPanelList" class="list-group list-group-flush scrollarea" style="max-height: 200px; overflow-y: auto;">
         <span class="text-muted small text-center py-3">Loading capacities...</span>
       </div>
     </section>
@@ -124,23 +124,22 @@
           '';
 
         return `
-          <button type="button"
-                  class="p-2 border border-secondary border-opacity-10 rounded d-flex flex-column gap-1 hover-glow text-start bg-transparent text-reset focus-ring w-100"
-                  style="min-height: 48px;"
-                  aria-label="Focus on ${a.unit_id} (${a.status})"
-                  onclick="focusAmbulance(${a.current_lat}, ${a.current_lng}, '${a.unit_id}')">
-            <div class="d-flex justify-content-between align-items-center w-100">
+          <div role="button"
+               tabindex="0"
+               class="list-group-item list-group-item-action py-3 lh-sm hover-glow text-start bg-transparent text-reset border-secondary border-opacity-10"
+               style="cursor: pointer;"
+               aria-label="Focus on ${a.unit_id} (${a.status})"
+               onclick="focusAmbulance(${a.current_lat}, ${a.current_lng}, '${a.unit_id}')">
+            <div class="d-flex w-100 align-items-center justify-content-between">
               <div class="d-flex align-items-center gap-2 flex-shrink-1" style="min-width: 0;">
                 <span class="badge ${statusDot} rounded-circle p-1" aria-hidden="true" style="width: 8px; height: 8px;"></span>
-                <strong class="mono-label text-cream">${a.unit_id}</strong>
+                <strong class="mono-label text-cream mb-0">${a.unit_id}</strong>
                 <small class="text-muted text-truncate">(${a.provider})</small>
               </div>
-              <div class="text-end flex-shrink-0 ps-2">
-                <span class="small text-muted">${a.status}</span>
-              </div>
+              <span class="small text-muted flex-shrink-0">${a.status}</span>
             </div>
             ${waitText}
-          </button>
+          </div>
         `;
       }).join('');
     };
@@ -155,9 +154,9 @@
 
       list.innerHTML = telemetry.alerts.map(al => {
         return `
-          <div class="p-2 border border-danger border-opacity-20 rounded bg-danger bg-opacity-10 d-flex justify-content-between align-items-center">
+          <div class="list-group-item py-3 lh-sm bg-danger bg-opacity-10 border-danger border-opacity-20 d-flex justify-content-between align-items-center">
             <div>
-              <strong class="text-danger mono-label d-block">${al.ambulance_unit}</strong>
+              <strong class="text-danger mono-label d-block mb-1">${al.ambulance_unit}</strong>
               <small class="text-muted d-block">Detained at ${al.hospital_name}</small>
             </div>
             <button class="btn btn-sm btn-outline-danger ack-alert-btn" data-id="${al.id}" style="min-height: 36px;">Ack</button>
@@ -191,17 +190,17 @@
         }
 
         return `
-              <div class="p-2 border ${borderClass} rounded d-flex justify-content-between align-items-center ${bgClass}">
-                <div>
-                  <span class="small text-cream fw-bold d-block">${h.name}</span>
-                  <small class="text-muted mono-label">${h.code}</small>
-                </div>
-                <div class="text-end">
-                  <span class="small fw-bold ${statusColor} d-block">${h.status}</span>
-                  <small class="text-muted mono-label">${h.bays_available} bays</small>
-                </div>
-              </div>
-            `;
+          <div class="list-group-item py-3 lh-sm border-secondary border-opacity-10 d-flex justify-content-between align-items-center ${bgClass} ${borderClass}">
+            <div>
+              <span class="small text-cream fw-bold d-block mb-1">${h.name}</span>
+              <small class="text-muted mono-label">${h.code}</small>
+            </div>
+            <div class="text-end">
+              <span class="small fw-bold ${statusColor} d-block">${h.status}</span>
+              <small class="text-muted mono-label">${h.bays_available} bays</small>
+            </div>
+          </div>
+        `;
       }).join('');
     };
 

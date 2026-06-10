@@ -754,7 +754,7 @@ select:-webkit-autofill {
 
 .dispatcher-layout { height: calc(100vh - 56px); overflow: hidden; }
 .map-container { flex-grow: 1; height: 100%; position: relative; }
-.dispatcher-sidebar button { word-break: break-word; }
+.dispatcher-sidebar button, .dispatcher-sidebar div[role="button"] { word-break: break-word; }
 .sidebar-container {
   width: 380px;
   height: 100%;
