@@ -530,4 +530,29 @@ class AmbulanceService
             'bay_preparation'   => ($status === 'Preparing' || $status === 'Arrived' || $status === 'Acknowledged') ? true : false,
         ];
     }
+
+    /**
+     * Declares the paramedic's arrival at the destination hospital ED.
+     *
+     * @param int $pre_id
+     * @return bool
+     */
+    public function declareArrived(int $pre_id): bool
+    {
+        /** @var Handover|null $handover */
+        $handover = $this->handover_model->where('pre_notification_id', $pre_id)->first();
+        if ($handover === null) {
+            return false;
+        }
+
+        // Only allow transition from 'En route'
+        if ($handover->status !== 'En route') {
+            return false;
+        }
+
+        $handover->status     = 'Arrived';
+        $handover->arrived_at = date('Y-m-d H:i:s');
+
+        return $this->handover_model->save($handover);
+    }
 }

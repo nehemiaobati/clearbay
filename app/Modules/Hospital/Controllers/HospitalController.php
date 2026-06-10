@@ -272,6 +272,12 @@ class HospitalController extends BaseController
             return redirect()->to(url_to('auth.logout'))->with('error', 'Your account is not mapped to a hospital facility. Please contact an administrator.');
         }
 
+        // Restrict access to hospital_admin/admin only
+        $user_role = session()->get('user_role');
+        if ($user_role === 'nurse') {
+            return redirect()->to(url_to('hospital.dashboard'))->with('error', 'Access denied to analytics dashboard.');
+        }
+
         $range = (string) ($this->request->getGet('range') ?? '7');
         $days  = in_array($range, ['7', '30', '90'], true) ? (int) $range : 7;
 

@@ -41,6 +41,14 @@
       <span class="d-block" id="feedMessage">ED notified. Patient details transmitted en route.</span>
     </div>
 
+    <!-- Arrived Action Group -->
+    <div id="arrivedActionBox" class="<?= $status['status'] === 'En route' ? '' : 'd-none' ?> mb-4">
+      <?= csrf_field() ?>
+      <button id="btnArrived" class="btn btn-success w-100 py-3 fw-bold fs-6" style="min-height: 56px;">
+        I Have Arrived at ED
+      </button>
+    </div>
+
     <!-- Action Group -->
     <div id="actionBox" class="d-none">
       <a href="<?= url_to('ambulance.home') ?>" class="btn btn-primary w-100 py-3 fw-bold fs-6" style="min-height: 56px;">
@@ -56,6 +64,46 @@
     let gpsWatchId = null;
     let isRunComplete = false;
 
+    // Helper to rotate CSRF tokens
+    const updateCsrfTokens = (token) => {
+      if (!token) return;
+      const csrfInputs = document.querySelectorAll('input[name="csrf_test_name"]');
+      csrfInputs.forEach(i => i.value = token);
+    };
+
+    // --- Paramedic Self-Arrival Action ---
+    const btnArrived = document.getElementById('btnArrived');
+    if (btnArrived) {
+      btnArrived.addEventListener('click', async () => {
+        try {
+          btnArrived.disabled = true;
+          const arrivedUrl = '<?= url_to('ambulance.run.arrived', $pre_id) ?>';
+          const formData = new FormData();
+          const csrfInput = document.querySelector('input[name="csrf_test_name"]');
+          if (csrfInput) {
+            formData.append(csrfInput.name, csrfInput.value);
+          }
+
+          const response = await fetch(arrivedUrl, {
+            method: 'POST',
+            body: formData
+          });
+          const data = await response.json();
+          updateCsrfTokens(data.csrf_token);
+
+          if (data.status === 'success') {
+            pollStatus();
+          } else {
+            alert(data.message || 'Failed to update arrival status.');
+            btnArrived.disabled = false;
+          }
+        } catch (err) {
+          alert('Network error when declaring arrival.');
+          btnArrived.disabled = false;
+        }
+      });
+    }
+
     // --- GPS Tracking (Event-Driven: starts on page load, clears on completion) ---
     if (navigator.geolocation) {
       gpsWatchId = navigator.geolocation.watchPosition(
@@ -66,13 +114,22 @@
           } = position.coords;
 
           const formData = new FormData();
+          const csrfInput = document.querySelector('input[name="csrf_test_name"]');
+          if (csrfInput) {
+            formData.append(csrfInput.name, csrfInput.value);
+          }
           formData.append('lat', latitude.toFixed(6));
           formData.append('lng', longitude.toFixed(6));
 
           fetch('<?= url_to('ambulance.location.update') ?>', {
             method: 'POST',
             body: formData
-          }).catch(err => console.error('Telemetry push failed:', err));
+          })
+          .then(res => res.json())
+          .then(data => {
+            updateCsrfTokens(data.csrf_token);
+          })
+          .catch(err => console.error('Telemetry push failed:', err));
         },
         (error) => {
           console.error('GPS Error:', error.message);
@@ -94,6 +151,8 @@
         if (!apiResponse.ok) return;
 
         const data = await apiResponse.json();
+        updateCsrfTokens(data.csrf_token);
+
         if (data.status === 'success') {
           updateUI(data.result);
         }
@@ -109,10 +168,11 @@
       const etaDisplay = document.getElementById('etaDisplay');
       const feed = document.getElementById('feedMessage');
       const actionBox = document.getElementById('actionBox');
+      const arrivedActionBox = document.getElementById('arrivedActionBox');
       const countdownBox = document.getElementById('countdownBox');
 
       // Update ETA
-      if (run.eta_minutes > 0) {
+      if (run.eta_minutes > 0 && run.status === 'En route') {
         etaDisplay.textContent = `${run.eta_minutes} min`;
       } else {
         etaDisplay.textContent = 'Arrived';
@@ -121,11 +181,13 @@
       if (run.status === 'En route') {
         mainText.textContent = 'En Route to Facility';
         feed.textContent = 'ED notified. Patient details transmitted en route.';
+        if (arrivedActionBox) arrivedActionBox.classList.remove('d-none');
       } else if (run.status === 'Preparing' || run.status === 'Acknowledged' || run.status === 'Arrived') {
         mainText.textContent = 'Bay Preparation Underway';
         mainText.className = 'h3 fw-bold text-success mb-2';
         feed.innerHTML = '<strong class="text-success">✔ Bay is being prepared for your arrival.</strong> ED clinicians are standing by.';
         radar.className = 'spinner-grow text-success active-run-radar';
+        if (arrivedActionBox) arrivedActionBox.classList.add('d-none');
       } else if (run.status === 'Cleared') {
         // Confirmed clear — kill GPS and polling
         isRunComplete = true;
@@ -143,6 +205,7 @@
         radar.classList.add('d-none');
         success.classList.remove('d-none');
         countdownBox.classList.add('d-none');
+        if (arrivedActionBox) arrivedActionBox.classList.add('d-none');
         actionBox.classList.remove('d-none');
       }
     };

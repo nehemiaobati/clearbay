@@ -15,5 +15,6 @@ $routes->group('ambulance', ['namespace' => 'App\Modules\Ambulance\Controllers',
     $routes->get('pre-notify/(:num)', 'AmbulanceController::preNotifyForm/$1', ['as' => 'ambulance.pre_notify']);
     $routes->post('pre-notify', 'AmbulanceController::sendPreNotification', ['as' => 'ambulance.pre_notify.submit']);
     $routes->get('run/(:num)', 'AmbulanceController::activeRun/$1', ['as' => 'ambulance.active_run']);
+    $routes->post('run/(:num)/arrived', 'AmbulanceController::declareArrived/$1', ['as' => 'ambulance.run.arrived']);
     $routes->post('location', 'AmbulanceController::updateLocation', ['as' => 'ambulance.location.update']);
 });

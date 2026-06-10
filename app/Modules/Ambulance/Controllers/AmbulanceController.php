@@ -391,4 +391,37 @@ class AmbulanceController extends BaseController
             'csrf_token' => csrf_hash()
         ]);
     }
+
+    /**
+     * POST Endpoint allowing paramedic user to self-declare arrived at ED.
+     *
+     * @param string $id Pre-notification ID
+     * @return ResponseInterface
+     */
+    public function declareArrived(string $id): ResponseInterface
+    {
+        $pre_id = (int) $id;
+        if ($pre_id <= 0) {
+            return $this->response->setJSON([
+                'status'     => 'error',
+                'message'    => 'Invalid run identifier.',
+                'csrf_token' => csrf_hash()
+            ]);
+        }
+
+        $success = $this->ambulance_service->declareArrived($pre_id);
+        if (!$success) {
+            return $this->response->setJSON([
+                'status'     => 'error',
+                'message'    => 'Failed to update arrival status. Run may already have arrived or been cleared.',
+                'csrf_token' => csrf_hash()
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'     => 'success',
+            'message'    => 'Arrival declared successfully.',
+            'csrf_token' => csrf_hash()
+        ]);
+    }
 }

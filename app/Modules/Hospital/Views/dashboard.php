@@ -25,7 +25,9 @@
         <?php if ($user_role === 'hospital_admin') : ?>
           <a href="<?= url_to('hospital.users.list') ?>" class="btn btn-sm btn-outline-secondary" style="min-height: 36px;">Manage Users</a>
         <?php endif; ?>
-        <a href="<?= url_to('hospital.analytics') ?>" class="btn btn-sm btn-outline-secondary" style="min-height: 36px;">View Analytics</a>
+        <?php if ($user_role !== 'nurse') : ?>
+          <a href="<?= url_to('hospital.analytics') ?>" class="btn btn-sm btn-outline-secondary" style="min-height: 36px;">View Analytics</a>
+        <?php endif; ?>
       </div>
     </div>
   </div>

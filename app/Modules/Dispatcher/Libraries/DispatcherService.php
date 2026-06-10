@@ -85,14 +85,13 @@ class DispatcherService
             ->findAll();
 
         foreach ($handovers as $h) {
-            // Calculate current wait time in minutes
-            $start_time = $h->arrived_at ?? $h->created_at;
-            if ($start_time === null) {
-                continue;
+            // Wait time starts only from arrived_at. If not arrived yet, wait time is 0.
+            if ($h->arrived_at === null) {
+                $diff_minutes = 0;
+            } else {
+                $diff_seconds = time() - strtotime($h->arrived_at->toDateTimeString());
+                $diff_minutes = (int) max(0, round($diff_seconds / 60));
             }
-
-            $diff_seconds = time() - strtotime($start_time->toDateTimeString());
-            $diff_minutes = (int) round($diff_seconds / 60);
 
             // Update wait_time_minutes in db for this handover so it's accurate
             $this->handover_model->update($h->id, ['wait_time_minutes' => $diff_minutes]);
