@@ -11,6 +11,8 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->group('admin', ['namespace' => 'App\Modules\Admin\Controllers', 'filter' => ['auth', 'role:admin']], static function ($routes) {
     $routes->get('/', 'AdminController::dashboard', ['as' => 'admin.dashboard']);
+    $routes->get('analytics', 'AdminController::analytics', ['as' => 'admin.analytics']);
+    $routes->get('analytics/export', 'AdminController::exportPdf', ['as' => 'admin.analytics.export']);
 
     // Pilots CRUD
     $routes->group('pilots', static function ($routes) {

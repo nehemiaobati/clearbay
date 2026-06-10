@@ -1036,4 +1036,103 @@ class AdminController extends BaseController
         $row = $builder->get()->getRow();
         return $row ? $row->name : null;
     }
+
+    /**
+     * Renders the Global Analytics Dashboard (SC-06) for Sysadmin.
+     *
+     * @return RedirectResponse|string
+     */
+    public function analytics(): string|RedirectResponse
+    {
+        try {
+            $hospital_service = service('hospitalService');
+
+            $range = (string) ($this->request->getGet('range') ?? '7');
+            $days  = in_array($range, ['7', '30', '90'], true) ? (int) $range : 7;
+
+            // Fetch global analytics (hospital_id = null)
+            $analytics = $hospital_service->getAnalytics(null, $days);
+
+            $data = [
+                'pageTitle'       => 'System Analytics | ClearBay',
+                'metaDescription' => 'System-wide ambulance handover statistics and facility performance.',
+                'canonicalUrl'    => url_to('admin.analytics'),
+                'robotsTag'       => 'noindex, nofollow',
+                'analytics'        => $analytics,
+                'range'            => $range,
+            ];
+
+            return view('App\Modules\Admin\Views\analytics', $data);
+        } catch (\Throwable $e) {
+            log_message('error', 'Exception in AdminController::analytics', [
+                'exception' => $e->getMessage(),
+                'trace'     => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->to(url_to('admin.dashboard'))->with('error', 'An internal server error occurred while rendering analytics.');
+        }
+    }
+
+    /**
+     * Generates a plain-text downloadable CSV report matching global metrics.
+     *
+     * @return \CodeIgniter\HTTP\ResponseInterface
+     */
+    public function exportPdf(): \CodeIgniter\HTTP\ResponseInterface
+    {
+        $hospital_service = service('hospitalService');
+        $analytics = $hospital_service->getAnalytics(null, 30);
+
+        // Build CSV with proper escaping for spreadsheet compatibility
+        $lines   = [];
+        $lines[] = "ClearBay Global Off-Load Performance Report";
+        $lines[] = "Facility,All Facilities";
+        $lines[] = "Date Range,Past 30 Days";
+        $lines[] = "Report Date," . date('Y-m-d H:i:s') . " EAT";
+        $lines[] = "";
+        
+        // Hospital Breakdown
+        $lines[] = "Facility Summary";
+        $lines[] = "Hospital Name,Handovers Completed,Average Wait Time (Minutes)";
+        foreach ($analytics['facility_performance'] as $row) {
+            $lines[] = sprintf(
+                "%s,%d,%s",
+                $this->_csvEscape((string) $row['hospital_name']),
+                (int) $row['total_handovers'],
+                (string) $row['avg_wait']
+            );
+        }
+        $lines[] = "";
+
+        // Provider Breakdown
+        $lines[] = "EMS Provider Summary";
+        $lines[] = "Provider,Handovers Completed,Average Wait Time (Minutes)";
+        foreach ($analytics['provider_performance'] as $row) {
+            $lines[] = sprintf(
+                "%s,%d,%s",
+                $this->_csvEscape((string) $row['provider']),
+                (int) $row['total_handovers'],
+                (string) $row['avg_wait']
+            );
+        }
+
+        $content = implode("\n", $lines) . "\n";
+
+        return $this->response
+            ->setHeader('Content-Type', 'text/csv')
+            ->setHeader('Content-Disposition', 'attachment; filename="clearbay_global_report.csv"')
+            ->setBody($content);
+    }
+
+    /**
+     * CSV cell escaping utility.
+     */
+    private function _csvEscape(string $val): string
+    {
+        $val = str_replace('"', '""', $val);
+        if (str_contains($val, ',') || str_contains($val, '"') || str_contains($val, "\n") || str_contains($val, "\r")) {
+            return '"' . $val . '"';
+        }
+        return $val;
+    }
 }

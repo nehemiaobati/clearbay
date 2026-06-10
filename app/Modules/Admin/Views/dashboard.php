@@ -126,6 +126,25 @@
         </div>
       </div>
     </div>
+
+    <!-- System Performance Analytics -->
+    <div class="col-6 col-lg-3">
+      <div class="card blueprint-card p-4 h-100 border border-primary border-opacity-20" style="background: rgba(var(--color-primary-rgb), 0.03);">
+        <div class="d-flex flex-column justify-content-between h-100">
+          <div>
+            <span class="mono-label d-block mb-2 text-primary">System Performance</span>
+            <span class="d-block admin-stat-val">
+              Analytics
+            </span>
+          </div>
+          <div class="mt-4">
+            <a href="<?= url_to('admin.analytics') ?>" class="btn btn-primary btn-sm w-100 admin-dash-btn">
+              View Analytics
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Operational Shortcuts Panel -->

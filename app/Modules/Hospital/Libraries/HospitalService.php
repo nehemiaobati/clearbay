@@ -396,53 +396,80 @@ class HospitalService
     /**
      * Fetches analytics data.
      *
-     * @param int $hospital_id
-     * @param int $days
+     * @param int|null $hospital_id Pass null to retrieve global analytics across all facilities
+     * @param int      $days
      * @return array
      */
-    public function getAnalytics(int $hospital_id, int $days): array
+    public function getAnalytics(?int $hospital_id, int $days): array
     {
         $db = \Config\Database::connect();
         $start_date = date('Y-m-d 00:00:00', strtotime("-{$days} days"));
 
         // A. Daily wait time averages
-        $daily_waits = $db->table('handovers')
+        $daily_waits_builder = $db->table('handovers')
             ->select("DATE(handover_complete_at) as day, ROUND(AVG(wait_time_minutes)) as avg_wait")
-            ->where('hospital_id', $hospital_id)
             ->where('status', 'Cleared')
-            ->where('handover_complete_at >=', $start_date)
-            ->groupBy('day')
+            ->where('handover_complete_at >=', $start_date);
+
+        if ($hospital_id !== null) {
+            $daily_waits_builder->where('hospital_id', $hospital_id);
+        }
+
+        $daily_waits = $daily_waits_builder->groupBy('day')
             ->orderBy('day', 'ASC')
             ->get()
             ->getResultArray();
 
         // B. Daily handover totals
-        $daily_counts = $db->table('handovers')
+        $daily_counts_builder = $db->table('handovers')
             ->select("DATE(handover_complete_at) as day, COUNT(id) as count")
-            ->where('hospital_id', $hospital_id)
             ->where('status', 'Cleared')
-            ->where('handover_complete_at >=', $start_date)
-            ->groupBy('day')
+            ->where('handover_complete_at >=', $start_date);
+
+        if ($hospital_id !== null) {
+            $daily_counts_builder->where('hospital_id', $hospital_id);
+        }
+
+        $daily_counts = $daily_counts_builder->groupBy('day')
             ->orderBy('day', 'ASC')
             ->get()
             ->getResultArray();
 
         // C. Provider performance summary
-        $provider_performance = $db->table('handovers')
+        $provider_performance_builder = $db->table('handovers')
             ->select("ambulances.provider, COUNT(handovers.id) as total_handovers, ROUND(AVG(handovers.wait_time_minutes)) as avg_wait")
             ->join('ambulances', 'ambulances.id = handovers.ambulance_id')
-            ->where('handovers.hospital_id', $hospital_id)
             ->where('handovers.status', 'Cleared')
-            ->where('handovers.handover_complete_at >=', $start_date)
-            ->groupBy('ambulances.provider')
+            ->where('handovers.handover_complete_at >=', $start_date);
+
+        if ($hospital_id !== null) {
+            $provider_performance_builder->where('handovers.hospital_id', $hospital_id);
+        }
+
+        $provider_performance = $provider_performance_builder->groupBy('ambulances.provider')
             ->orderBy('total_handovers', 'DESC')
             ->get()
             ->getResultArray();
+
+        // D. Facility performance breakdown (only for global analytics)
+        $facility_performance = [];
+        if ($hospital_id === null) {
+            $facility_performance = $db->table('handovers')
+                ->select("hospitals.name as hospital_name, COUNT(handovers.id) as total_handovers, ROUND(AVG(handovers.wait_time_minutes)) as avg_wait")
+                ->join('hospitals', 'hospitals.id = handovers.hospital_id')
+                ->where('handovers.status', 'Cleared')
+                ->where('handovers.handover_complete_at >=', $start_date)
+                ->groupBy('hospitals.name')
+                ->orderBy('total_handovers', 'DESC')
+                ->get()
+                ->getResultArray();
+        }
 
         return [
             'daily_waits'          => $daily_waits,
             'daily_counts'         => $daily_counts,
             'provider_performance' => $provider_performance,
+            'facility_performance' => $facility_performance,
         ];
     }
 }
