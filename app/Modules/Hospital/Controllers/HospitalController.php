@@ -267,33 +267,42 @@ class HospitalController extends BaseController
      */
     public function analytics(): string|RedirectResponse
     {
-        $hospital = $this->_getMappedHospital();
-        if ($hospital === null) {
-            return redirect()->to(url_to('auth.logout'))->with('error', 'Your account is not mapped to a hospital facility. Please contact an administrator.');
+        try {
+            $hospital = $this->_getMappedHospital();
+            if ($hospital === null) {
+                return redirect()->to(url_to('auth.logout'))->with('error', 'Your account is not mapped to a hospital facility. Please contact an administrator.');
+            }
+
+            // Restrict access to hospital_admin/admin only
+            $user_role = session()->get('user_role');
+            if ($user_role === 'nurse') {
+                return redirect()->to(url_to('hospital.dashboard'))->with('error', 'Access denied to analytics dashboard.');
+            }
+
+            $range = (string) ($this->request->getGet('range') ?? '7');
+            $days  = in_array($range, ['7', '30', '90'], true) ? (int) $range : 7;
+
+            $analytics = $this->hospital_service->getAnalytics((int) $hospital->id, $days);
+
+            $data = [
+                'page_title'       => 'ED Analytics | ' . $hospital->name,
+                'meta_description' => 'Emergency Department ambulance handover statistics and performance.',
+                'canonical_url'    => url_to('hospital.analytics'),
+                'robots_tag'       => 'noindex, nofollow',
+                'hospital'         => $hospital,
+                'analytics'        => $analytics,
+                'range'            => $range,
+            ];
+
+            return view('App\Modules\Hospital\Views\analytics', $data);
+        } catch (\Throwable $e) {
+            log_message('error', 'Exception in HospitalController::analytics', [
+                'exception' => $e->getMessage(),
+                'trace'     => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->to(url_to('hospital.dashboard'))->with('error', 'An internal server error occurred while rendering analytics.');
         }
-
-        // Restrict access to hospital_admin/admin only
-        $user_role = session()->get('user_role');
-        if ($user_role === 'nurse') {
-            return redirect()->to(url_to('hospital.dashboard'))->with('error', 'Access denied to analytics dashboard.');
-        }
-
-        $range = (string) ($this->request->getGet('range') ?? '7');
-        $days  = in_array($range, ['7', '30', '90'], true) ? (int) $range : 7;
-
-        $analytics = $this->hospital_service->getAnalytics((int) $hospital->id, $days);
-
-        $data = [
-            'page_title'       => 'ED Analytics | ' . $hospital->name,
-            'meta_description' => 'Emergency Department ambulance handover statistics and performance.',
-            'canonical_url'    => url_to('hospital.analytics'),
-            'robots_tag'       => 'noindex, nofollow',
-            'hospital'         => $hospital,
-            'analytics'        => $analytics,
-            'range'            => $range,
-        ];
-
-        return view('App\Modules\Hospital\Views\analytics', $data);
     }
 
     /**

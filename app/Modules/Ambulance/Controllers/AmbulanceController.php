@@ -400,28 +400,41 @@ class AmbulanceController extends BaseController
      */
     public function declareArrived(string $id): ResponseInterface
     {
-        $pre_id = (int) $id;
-        if ($pre_id <= 0) {
+        try {
+            $pre_id = (int) $id;
+            if ($pre_id <= 0) {
+                return $this->response->setJSON([
+                    'status'     => 'error',
+                    'message'    => 'Invalid run identifier.',
+                    'csrf_token' => csrf_hash()
+                ]);
+            }
+
+            $success = $this->ambulance_service->declareArrived($pre_id);
+            if (!$success) {
+                return $this->response->setJSON([
+                    'status'     => 'error',
+                    'message'    => 'Failed to update arrival status. Run may already have arrived or been cleared.',
+                    'csrf_token' => csrf_hash()
+                ]);
+            }
+
+            return $this->response->setJSON([
+                'status'     => 'success',
+                'message'    => 'Arrival declared successfully.',
+                'csrf_token' => csrf_hash()
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'Exception in AmbulanceController::declareArrived', [
+                'exception' => $e->getMessage(),
+                'trace'     => $e->getTraceAsString(),
+            ]);
+
             return $this->response->setJSON([
                 'status'     => 'error',
-                'message'    => 'Invalid run identifier.',
+                'message'    => 'An internal error occurred while declaring arrival.',
                 'csrf_token' => csrf_hash()
             ]);
         }
-
-        $success = $this->ambulance_service->declareArrived($pre_id);
-        if (!$success) {
-            return $this->response->setJSON([
-                'status'     => 'error',
-                'message'    => 'Failed to update arrival status. Run may already have arrived or been cleared.',
-                'csrf_token' => csrf_hash()
-            ]);
-        }
-
-        return $this->response->setJSON([
-            'status'     => 'success',
-            'message'    => 'Arrival declared successfully.',
-            'csrf_token' => csrf_hash()
-        ]);
     }
 }
