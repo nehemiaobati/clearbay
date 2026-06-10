@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @var string $page_title
- * @var string $meta_description
- * @var string $canonical_url
- * @var string $robots_tag
+ * @var string $pageTitle
+ * @var string $metaDescription
+ * @var string $canonicalUrl
+ * @var string $robotsTag
  * @var \App\Modules\Hospital\Entities\Hospital $hospital
  * @var int $eta
  */

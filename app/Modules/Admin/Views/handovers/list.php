@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @var string $page_title
- * @var string $meta_description
- * @var string $canonical_url
- * @var string $robots_tag
+ * @var string $pageTitle
+ * @var string $metaDescription
+ * @var string $canonicalUrl
+ * @var string $robotsTag
  * @var array $handovers
  * @var \CodeIgniter\Pager\Pager $pager
  */
@@ -32,7 +32,7 @@
       </h1>
     </div>
     <div class="mt-3 mt-md-0">
-      <a href="<?= url_to('admin.handovers.new') ?>" class="btn btn-primary admin-btn-action" style="min-height: 48px;">
+      <a href="<?= url_to('admin.handovers.new') ?>" class="btn btn-primary admin-btn-submit" style="min-height: 48px;">
         Dispatch Handover +
       </a>
     </div>
@@ -83,11 +83,11 @@
               }
               ?>
               <tr>
-                <td class="admin-td-id"><?= esc($handover->id) ?></td>
-                <td class="admin-td-code">
+                <td class="td-id"><?= esc($handover->id) ?></td>
+                <td class="td-code">
                   <?= esc($handover->ambulance_unit ?? '—') ?>
                 </td>
-                <td class="admin-td-name"><?= esc($handover->hospital_name ?? '—') ?></td>
+                <td class="td-name"><?= esc($handover->hospital_name ?? '—') ?></td>
                 <td>
                   <?= esc($handover->patient_age) ?> y/o (<?= esc($handover->patient_gender) ?>)
                 </td>
@@ -96,14 +96,14 @@
                     <?= esc($handover->acuity) ?>
                   </span>
                 </td>
-                <td class="admin-td-mono"><?= esc($handover->eta_minutes) ?> min</td>
-                <td class="admin-td-mono"><?= esc($handover->wait_time_minutes) ?> min</td>
+                <td class="td-mono"><?= esc($handover->eta_minutes) ?> min</td>
+                <td class="td-mono"><?= esc($handover->wait_time_minutes) ?> min</td>
                 <td>
                   <span class="<?= $statusClass ?> admin-status-pill">
                     <?= esc($handover->status) ?>
                   </span>
                 </td>
-                <td class="admin-td-mono-sm">
+                <td class="td-mono-sm">
                   <?= esc($handover->created_at ? $handover->created_at->format('Y-m-d H:i') : '—') ?>
                 </td>
                 <td class="text-end">

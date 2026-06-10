@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @var string $page_title
- * @var string $meta_description
- * @var string $canonical_url
- * @var string $robots_tag
+ * @var string $pageTitle
+ * @var string $metaDescription
+ * @var string $canonicalUrl
+ * @var string $robotsTag
  * @var array $pilots
  * @var \CodeIgniter\Pager\Pager $pager
  */
@@ -32,7 +32,7 @@
       </h1>
     </div>
     <div class="mt-3 mt-md-0">
-      <a href="<?= url_to('admin.pilots.new') ?>" class="btn btn-primary admin-btn-action" style="min-height: 48px;">
+      <a href="<?= url_to('admin.pilots.new') ?>" class="btn btn-primary admin-btn-submit" style="min-height: 48px;">
         Add Manual Entry +
       </a>
     </div>
@@ -60,13 +60,13 @@
           <tbody>
             <?php foreach ($pilots as $pilot) : ?>
               <tr>
-                <td class="admin-td-code"><?= esc($pilot->id) ?></td>
-                <td class="admin-td-name"><?= esc($pilot->full_name) ?></td>
+                <td class="td-code"><?= esc($pilot->id) ?></td>
+                <td class="td-name"><?= esc($pilot->full_name) ?></td>
                 <td><?= esc($pilot->email_address) ?></td>
                 <td><?= esc($pilot->organisation) ?></td>
-                <td class="admin-td-sm"><?= esc($pilot->user_role) ?></td>
-                <td class="admin-td-mono"><?= esc($pilot->phone_number ?? '—') ?></td>
-                <td class="admin-td-mono-sm">
+                <td class="td-mono-sm"><?= esc($pilot->user_role) ?></td>
+                <td class="td-mono"><?= esc($pilot->phone_number ?? '—') ?></td>
+                <td class="td-mono-sm">
                   <?= esc($pilot->created_at ? $pilot->created_at->format('Y-m-d H:i') : '—') ?>
                 </td>
                 <td class="text-end">

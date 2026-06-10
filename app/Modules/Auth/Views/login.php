@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @var string $page_title
- * @var string $meta_description
- * @var string $canonical_url
- * @var string $robots_tag
+ * @var string $pageTitle
+ * @var string $metaDescription
+ * @var string $canonicalUrl
+ * @var string $robotsTag
  */
 ?>
 <?= $this->extend('layouts/default') ?>
@@ -14,11 +14,11 @@
   <div class="card blueprint-card p-4 p-md-5 w-100 style-login-card">
     <!-- Logo/Branding Header -->
     <div class="text-center mb-4">
-      <div class="logo d-inline-flex align-items-center gap-2 mb-3 justify-content-center">
-        <div class="logo-mark"></div>
-        <span class="logo-name fs-5">ClearBay</span>
+      <div class="d-inline-flex align-items-center gap-2 mb-3 justify-content-center">
+        <span class="logo-mark d-inline-block align-middle"></span>
+        <span class="d-inline-block align-middle" style="font-family: var(--font-mono); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-main); font-size: 1.25rem;">ClearBay</span>
       </div>
-      <h2 class="h5 text-muted">Clear the Bay. Free the Crew.</h2>
+      <p class="text-muted mb-0">Clear the Bay. Free the Crew.</p>
     </div>
 
     <!-- Login Form -->
@@ -27,21 +27,23 @@
 
       <!-- Error Alert -->
       <?php if (session()->has('error')) : ?>
-        <div class="alert alert-danger mb-3" role="alert">
+        <div class="alert alert-danger mb-4" role="alert">
           <?= (string) esc(session()->get('error')) ?>
         </div>
       <?php endif; ?>
 
-      <!-- Email Input -->
-      <div class="mb-3">
-        <label for="email" class="form-label">Email Address *</label>
+      <!-- Email Input (Floating Label) -->
+      <div class="form-floating mb-4">
         <input type="email"
           name="email"
           id="email"
           class="form-control <?= session('errors.email') ? 'is-invalid' : '' ?>"
           placeholder="name@clearbay.com"
           value="<?= (string) esc(old('email')) ?>"
+          autocomplete="email"
+          inputmode="email"
           required>
+        <label for="email">Email Address *</label>
         <?php if (session('errors.email')) : ?>
           <div class="invalid-feedback">
             <?= (string) esc(session('errors.email')) ?>
@@ -49,22 +51,21 @@
         <?php endif; ?>
       </div>
 
-      <!-- Password Input -->
-      <div class="mb-4">
-        <label for="password" class="form-label">Password *</label>
-        <div class="position-relative">
-          <input type="password"
-            name="password"
-            id="password"
-            class="form-control pe-5 <?= session('errors.password') ? 'is-invalid' : '' ?>"
-            placeholder="Password"
-            required>
-          <button type="button"
-            id="togglePassword"
-            class="btn btn-sm btn-outline-secondary position-absolute end-0 top-50 translate-middle-y me-2"
-            aria-label="Toggle password visibility"
-            style="min-height: 36px; min-width: 48px; z-index: 5;">Show</button>
-        </div>
+      <!-- Password Input (Floating Label) -->
+      <div class="form-floating mb-4 position-relative">
+        <input type="password"
+          name="password"
+          id="password"
+          class="form-control pe-5 <?= session('errors.password') ? 'is-invalid' : '' ?>"
+          placeholder="Password"
+          autocomplete="current-password"
+          required>
+        <label for="password">Password *</label>
+        <button type="button"
+          id="togglePassword"
+          class="btn btn-sm btn-outline-secondary position-absolute end-0 top-50 translate-middle-y me-2 toggle-password-btn"
+          aria-label="Toggle password visibility"
+          style="min-height: 44px; min-width: 44px; z-index: 5; font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.3rem 0.6rem;">Show</button>
         <?php if (session('errors.password')) : ?>
           <div class="invalid-feedback">
             <?= (string) esc(session('errors.password')) ?>
@@ -73,7 +74,7 @@
       </div>
 
       <!-- Submit Button -->
-      <button type="submit" id="submitBtn" class="btn btn-primary w-100 py-3 d-flex align-items-center justify-content-center fs-6" style="min-height: 48px;">
+      <button type="submit" id="submitBtn" class="btn btn-primary w-100 py-3 d-flex align-items-center justify-content-center" style="min-height: 48px;">
         <span id="submitSpinner" class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
         <span id="submitText">Sign In</span>
       </button>
@@ -103,7 +104,6 @@
 
     if (form && btn && spinner && btnText) {
       form.addEventListener('submit', () => {
-        // Prevent multiple submissions
         btn.disabled = true;
         spinner.classList.remove('d-none');
         btnText.textContent = 'Signing In...';

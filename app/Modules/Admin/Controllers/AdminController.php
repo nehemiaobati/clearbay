@@ -52,10 +52,10 @@ class AdminController extends BaseController
     {
         $metrics = $this->admin_service->getDashboardMetrics();
         $data = [
-            'page_title'       => 'Admin Dashboard | ClearBay',
-            'meta_description' => 'ClearBay administrative management control panel.',
-            'canonical_url'    => url_to('admin.dashboard'),
-            'robots_tag'       => 'noindex, nofollow',
+            'pageTitle'       => 'Admin Dashboard | ClearBay',
+            'metaDescription' => 'ClearBay administrative management control panel.',
+            'canonicalUrl'    => url_to('admin.dashboard'),
+            'robotsTag'       => 'noindex, nofollow',
             'pilotCount'       => $metrics['pilotCount'],
             'handoverCount'    => $metrics['handoverCount'],
             'hospitalCount'    => $metrics['hospitalCount'],
@@ -79,12 +79,12 @@ class AdminController extends BaseController
     {
         $result = $this->admin_service->getPilotsList(15);
         $data = [
-            'page_title'       => 'Manage Pilot Signups | ClearBay',
-            'meta_description' => 'Review and manage incoming pilot onboarding request records.',
-            'canonical_url'    => url_to('admin.pilots.list'),
-            'robots_tag'       => 'noindex, nofollow',
-            'pilots'           => $result['pilots'],
-            'pager'            => $result['pager'],
+            'pageTitle'       => 'Manage Pilot Signups | ClearBay',
+            'metaDescription' => 'Review and manage incoming pilot onboarding request records.',
+            'canonicalUrl'    => url_to('admin.pilots.list'),
+            'robotsTag'       => 'noindex, nofollow',
+            'pilots'          => $result['pilots'],
+            'pager'           => $result['pager'],
         ];
 
         return view('App\Modules\Admin\Views\pilots\list', $data);
@@ -98,10 +98,10 @@ class AdminController extends BaseController
     public function pilotNew(): string
     {
         $data = [
-            'page_title'       => 'Add Pilot Signup | ClearBay',
-            'meta_description' => 'Manually register a new pilot program application.',
-            'canonical_url'    => url_to('admin.pilots.new'),
-            'robots_tag'       => 'noindex, nofollow',
+            'pageTitle'       => 'Add Pilot Signup | ClearBay',
+            'metaDescription' => 'Manually register a new pilot program application.',
+            'canonicalUrl'    => url_to('admin.pilots.new'),
+            'robotsTag'       => 'noindex, nofollow',
         ];
 
         return view('App\Modules\Admin\Views\pilots\edit', $data);
@@ -160,11 +160,11 @@ class AdminController extends BaseController
         }
 
         $data = [
-            'page_title'       => 'Edit Pilot Signup | ClearBay',
-            'meta_description' => 'Modify an existing pilot signup application.',
-            'canonical_url'    => url_to('admin.pilots.edit', $pilot_id),
-            'robots_tag'       => 'noindex, nofollow',
-            'pilot'            => $pilot,
+            'pageTitle'       => 'Edit Pilot Signup | ClearBay',
+            'metaDescription' => 'Modify an existing pilot signup application.',
+            'canonicalUrl'    => url_to('admin.pilots.edit', $pilot_id),
+            'robotsTag'       => 'noindex, nofollow',
+            'pilot'           => $pilot,
         ];
 
         return view('App\Modules\Admin\Views\pilots\edit', $data);
@@ -244,12 +244,12 @@ class AdminController extends BaseController
     {
         $result = $this->admin_service->getHandoversList(15);
         $data = [
-            'page_title'       => 'Manage Handovers | ClearBay',
-            'meta_description' => 'Review and manage ambulance queue handovers.',
-            'canonical_url'    => url_to('admin.handovers.list'),
-            'robots_tag'       => 'noindex, nofollow',
-            'handovers'        => $result['handovers'],
-            'pager'            => $result['pager'],
+            'pageTitle'       => 'Manage Handovers | ClearBay',
+            'metaDescription' => 'Review and manage ambulance queue handovers.',
+            'canonicalUrl'    => url_to('admin.handovers.list'),
+            'robotsTag'       => 'noindex, nofollow',
+            'handovers'       => $result['handovers'],
+            'pager'           => $result['pager'],
         ];
 
         return view('App\Modules\Admin\Views\handovers\list', $data);
@@ -263,12 +263,12 @@ class AdminController extends BaseController
     public function handoverNew(): string
     {
         $data = [
-            'page_title'       => 'Add Handover | ClearBay',
-            'meta_description' => 'Register a new active ambulance queue handover.',
-            'canonical_url'    => url_to('admin.handovers.new'),
-            'robots_tag'       => 'noindex, nofollow',
-            'hospitals'        => $this->admin_service->getAllHospitals(),
-            'ambulances'       => $this->admin_service->getAllAmbulances(),
+            'pageTitle'       => 'Add Handover | ClearBay',
+            'metaDescription' => 'Register a new active ambulance queue handover.',
+            'canonicalUrl'    => url_to('admin.handovers.new'),
+            'robotsTag'       => 'noindex, nofollow',
+            'hospitals'       => $this->admin_service->getAllHospitals(),
+            'ambulances'      => $this->admin_service->getAllAmbulances(),
         ];
 
         return view('App\Modules\Admin\Views\handovers\edit', $data);
@@ -335,13 +335,13 @@ class AdminController extends BaseController
         }
 
         $data = [
-            'page_title'       => 'Edit Handover | ClearBay',
-            'meta_description' => 'Modify an existing queue handover.',
-            'canonical_url'    => url_to('admin.handovers.edit', $handover_id),
-            'robots_tag'       => 'noindex, nofollow',
-            'handover'         => $handover,
-            'hospitals'        => $this->admin_service->getAllHospitals(),
-            'ambulances'       => $this->admin_service->getAllAmbulances(),
+            'pageTitle'       => 'Edit Handover | ClearBay',
+            'metaDescription' => 'Modify an existing queue handover.',
+            'canonicalUrl'    => url_to('admin.handovers.edit', $handover_id),
+            'robotsTag'       => 'noindex, nofollow',
+            'handover'        => $handover,
+            'hospitals'       => $this->admin_service->getAllHospitals(),
+            'ambulances'      => $this->admin_service->getAllAmbulances(),
         ];
 
         return view('App\Modules\Admin\Views\handovers\edit', $data);
@@ -437,12 +437,12 @@ class AdminController extends BaseController
     {
         $result = $this->admin_service->getHospitalsList(15);
         $data = [
-            'page_title'       => 'Manage Hospitals | ClearBay',
-            'meta_description' => 'Review and manage partner hospital records.',
-            'canonical_url'    => url_to('admin.hospitals.list'),
-            'robots_tag'       => 'noindex, nofollow',
-            'hospitals'        => $result['hospitals'],
-            'pager'            => $result['pager'],
+            'pageTitle'       => 'Manage Hospitals | ClearBay',
+            'metaDescription' => 'Review and manage partner hospital records.',
+            'canonicalUrl'    => url_to('admin.hospitals.list'),
+            'robotsTag'       => 'noindex, nofollow',
+            'hospitals'       => $result['hospitals'],
+            'pager'           => $result['pager'],
         ];
 
         return view('App\Modules\Admin\Views\hospitals\list', $data);
@@ -456,10 +456,10 @@ class AdminController extends BaseController
     public function hospitalNew(): string
     {
         $data = [
-            'page_title'       => 'Add Hospital | ClearBay',
-            'meta_description' => 'Add a new hospital facility profile.',
-            'canonical_url'    => url_to('admin.hospitals.new'),
-            'robots_tag'       => 'noindex, nofollow',
+            'pageTitle'       => 'Add Hospital | ClearBay',
+            'metaDescription' => 'Add a new hospital facility profile.',
+            'canonicalUrl'    => url_to('admin.hospitals.new'),
+            'robotsTag'       => 'noindex, nofollow',
         ];
 
         return view('App\Modules\Admin\Views\hospitals\edit', $data);
@@ -526,10 +526,10 @@ class AdminController extends BaseController
         }
 
         $data = [
-            'page_title'       => 'Edit Hospital | ClearBay',
-            'meta_description' => 'Modify hospital facility configuration and capacity status.',
-            'canonical_url'    => url_to('admin.hospitals.edit', $hospital_id),
-            'robots_tag'       => 'noindex, nofollow',
+            'pageTitle'       => 'Edit Hospital | ClearBay',
+            'metaDescription' => 'Modify hospital facility configuration and capacity status.',
+            'canonicalUrl'    => url_to('admin.hospitals.edit', $hospital_id),
+            'robotsTag'       => 'noindex, nofollow',
             'hospital'         => $hospital,
         ];
 
@@ -618,10 +618,10 @@ class AdminController extends BaseController
     {
         $result = $this->admin_service->getAmbulancesList(15);
         $data = [
-            'page_title'       => 'Manage Ambulances | ClearBay',
-            'meta_description' => 'Review and manage ambulance fleet units.',
-            'canonical_url'    => url_to('admin.ambulances.list'),
-            'robots_tag'       => 'noindex, nofollow',
+            'pageTitle'       => 'Manage Ambulances | ClearBay',
+            'metaDescription' => 'Review and manage ambulance fleet units.',
+            'canonicalUrl'    => url_to('admin.ambulances.list'),
+            'robotsTag'       => 'noindex, nofollow',
             'ambulances'       => $result['ambulances'],
             'pager'            => $result['pager'],
         ];
@@ -637,10 +637,10 @@ class AdminController extends BaseController
     public function ambulanceNew(): string
     {
         $data = [
-            'page_title'       => 'Add Ambulance | ClearBay',
-            'meta_description' => 'Register a new emergency vehicle fleet unit.',
-            'canonical_url'    => url_to('admin.ambulances.new'),
-            'robots_tag'       => 'noindex, nofollow',
+            'pageTitle'       => 'Add Ambulance | ClearBay',
+            'metaDescription' => 'Register a new emergency vehicle fleet unit.',
+            'canonicalUrl'    => url_to('admin.ambulances.new'),
+            'robotsTag'       => 'noindex, nofollow',
             'ems_providers'    => $this->admin_service->getAllEmsProviders(),
         ];
 
@@ -702,10 +702,10 @@ class AdminController extends BaseController
         }
 
         $data = [
-            'page_title'       => 'Edit Ambulance | ClearBay',
-            'meta_description' => 'Modify vehicle fleet configuration details.',
-            'canonical_url'    => url_to('admin.ambulances.edit', $ambulance_id),
-            'robots_tag'       => 'noindex, nofollow',
+            'pageTitle'       => 'Edit Ambulance | ClearBay',
+            'metaDescription' => 'Modify vehicle fleet configuration details.',
+            'canonicalUrl'    => url_to('admin.ambulances.edit', $ambulance_id),
+            'robotsTag'       => 'noindex, nofollow',
             'ambulance'        => $ambulance,
             'ems_providers'    => $this->admin_service->getAllEmsProviders(),
         ];
@@ -789,10 +789,10 @@ class AdminController extends BaseController
     {
         $result = $this->admin_service->getUsersList(15);
         $data = [
-            'page_title'       => 'Manage Users | ClearBay',
-            'meta_description' => 'Review and manage ClearBay operator and staff user accounts.',
-            'canonical_url'    => url_to('admin.users.list'),
-            'robots_tag'       => 'noindex, nofollow',
+            'pageTitle'       => 'Manage Users | ClearBay',
+            'metaDescription' => 'Review and manage ClearBay operator and staff user accounts.',
+            'canonicalUrl'    => url_to('admin.users.list'),
+            'robotsTag'       => 'noindex, nofollow',
             'users'            => $result['users'],
             'pager'            => $result['pager'],
         ];
@@ -808,10 +808,10 @@ class AdminController extends BaseController
     public function userNew(): string
     {
         $data = [
-            'page_title'       => 'Add User Account | ClearBay',
-            'meta_description' => 'Register a new user profile with specific authorization roles.',
-            'canonical_url'    => url_to('admin.users.new'),
-            'robots_tag'       => 'noindex, nofollow',
+            'pageTitle'       => 'Add User Account | ClearBay',
+            'metaDescription' => 'Register a new user profile with specific authorization roles.',
+            'canonicalUrl'    => url_to('admin.users.new'),
+            'robotsTag'       => 'noindex, nofollow',
             'hospitals'        => $this->admin_service->getAllHospitals(),
             'ems_providers'    => $this->admin_service->getAllEmsProviders(),
         ];
@@ -873,10 +873,10 @@ class AdminController extends BaseController
         }
 
         $data = [
-            'page_title'       => 'Edit User Account | ClearBay',
-            'meta_description' => 'Modify account credentials, role levels, and active states.',
-            'canonical_url'    => url_to('admin.users.edit', $user_id),
-            'robots_tag'       => 'noindex, nofollow',
+            'pageTitle'       => 'Edit User Account | ClearBay',
+            'metaDescription' => 'Modify account credentials, role levels, and active states.',
+            'canonicalUrl'    => url_to('admin.users.edit', $user_id),
+            'robotsTag'       => 'noindex, nofollow',
             'user'             => $user,
             'hospitals'        => $this->admin_service->getAllHospitals(),
             'ems_providers'    => $this->admin_service->getAllEmsProviders(),

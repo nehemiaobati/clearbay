@@ -1,11 +1,11 @@
 <?php
 
 /**
- * @var string $page_title
- * @var string $meta_description
- * @var string $canonical_url
- * @var string $robots_tag
- * @var string $meta_image
+ * @var string $pageTitle
+ * @var string $metaDescription
+ * @var string $canonicalUrl
+ * @var string $robotsTag
+ * @var string $metaImage
  */
 ?>
 <?= $this->extend('layouts/default') ?>
@@ -33,10 +33,10 @@
         Kenya's first <strong>real-time ambulance off-load management platform</strong> — giving hospital emergency departments and ambulance services the live visibility they need to hand over patients faster, reduce dangerous delays, and return crews to the community where they are needed most.
       </p>
       <div class="hero-cta-group">
-        <a href="#signup" class="btn-main btn btn-primary">
+        <a href="#signup" class="btn btn-primary">
           Request Pilot Access <span class="arrow">→</span>
         </a>
-        <a href="#how" class="btn-ghost btn btn-outline-secondary">
+        <a href="#how" class="btn btn-outline-secondary">
           See How It Works ↓
         </a>
       </div>
@@ -108,16 +108,20 @@
       </div>
     </div>
 
-    <div class="problem-grid">
-      <div class="stat-monument card blueprint-card reveal">
-        <div class="monument-num">90<span class="monument-unit">min</span></div>
-        <div class="monument-label">The average time an ambulance can spend waiting to hand over a patient at a Nairobi emergency department — time the crew cannot spend responding to the next emergency in the community.</div>
-        <br>
-        <div class="monument-num" style="font-size: clamp(2.5rem, 5vw, 4.5rem);">200<span class="monument-unit">%</span></div>
-        <div class="monument-label">Mbagathi County Hospital's reported daily bed occupancy — running at double capacity every single day. Two patients for every bed. No space for incoming ambulances.</div>
+    <div class="row g-4 reveal">
+      <!-- Stat Monument -->
+      <div class="col-lg-6">
+        <div class="stat-monument card blueprint-card h-100">
+          <div class="monument-num">90<span class="monument-unit">min</span></div>
+          <div class="monument-label">The average time an ambulance can spend waiting to hand over a patient at a Nairobi emergency department — time the crew cannot spend responding to the next emergency in the community.</div>
+          <br>
+          <div class="monument-num" style="font-size: clamp(2.5rem, 5vw, 4.5rem);">200<span class="monument-unit">%</span></div>
+          <div class="monument-label">Mbagathi County Hospital's reported daily bed occupancy — running at double capacity every single day. Two patients for every bed. No space for incoming ambulances.</div>
+        </div>
       </div>
 
-      <div class="problem-list reveal">
+      <!-- Problem List -->
+      <div class="col-lg-6">
         <div class="problem-item">
           <span class="problem-index">01</span>
           <div>
@@ -160,29 +164,33 @@
         <span class="s-label-text">02 — The Solution</span>
       </div>
       <h2 class="s-title">Three Steps.<br><span class="ital">One Cleared Bay.</span></h2>
-      <p class="s-body" style="margin-top: 1rem; max-width: 540px;">ClearBay connects ambulances and hospital EDs before the vehicle even arrives — so every handover is prepared, every bay is ready, and every crew is back on the road in minutes.</p>
+      <p class="s-body" style="margin-top: 1rem;">ClearBay connects ambulances and hospital EDs before the vehicle even arrives — so every handover is prepared, every bay is ready, and every crew is back on the road in minutes.</p>
     </div>
 
-    <div class="steps-flow">
-      <div class="step-block card blueprint-card reveal">
-        <div class="step-counter"><span class="step-counter-num">01</span></div>
-        <h3>Hospital Updates<br>Live Status</h3>
-        <p>Emergency department staff update their real-time capacity — green, amber, or red — with a single tap. Every ambulance crew in Nairobi sees it instantly on their mobile app.</p>
-        <span class="step-tag">Hospital Dashboard</span>
+    <div class="row g-4 reveal">
+      <div class="col-lg-4">
+        <div class="step-block card blueprint-card h-100">
+          <div class="step-counter"><span class="step-counter-num">01</span></div>
+          <h3>Hospital Updates<br>Live Status</h3>
+          <p>Emergency department staff update their real-time capacity — green, amber, or red — with a single tap. Every ambulance crew in Nairobi sees it instantly on their mobile app.</p>
+          <span class="step-tag">Hospital Dashboard</span>
+        </div>
       </div>
-
-      <div class="step-block card blueprint-card reveal">
-        <div class="step-counter"><span class="step-counter-num">02</span></div>
-        <h3>Paramedic Sends<br>Pre-Notification</h3>
-        <p>Before leaving the scene, the crew selects the best available hospital and sends a pre-alert — patient condition, acuity, and GPS-calculated ETA — giving the ED time to prepare.</p>
-        <span class="step-tag">Paramedic App</span>
+      <div class="col-lg-4">
+        <div class="step-block card blueprint-card h-100">
+          <div class="step-counter"><span class="step-counter-num">02</span></div>
+          <h3>Paramedic Sends<br>Pre-Notification</h3>
+          <p>Before leaving the scene, the crew selects the best available hospital and sends a pre-alert — patient condition, acuity, and GPS-calculated ETA — giving the ED time to prepare.</p>
+          <span class="step-tag">Paramedic App</span>
+        </div>
       </div>
-
-      <div class="step-block card blueprint-card reveal">
-        <div class="step-counter"><span class="step-counter-num">03</span></div>
-        <h3>Bay Cleared.<br>Crew Free.</h3>
-        <p>Handover happens in minutes, not hours. One tap marks the bay clear. The ambulance is instantly visible as available on the dispatcher map — ready for the next call.</p>
-        <span class="step-tag">Dispatch Command Centre</span>
+      <div class="col-lg-4">
+        <div class="step-block card blueprint-card h-100">
+          <div class="step-counter"><span class="step-counter-num">03</span></div>
+          <h3>Bay Cleared.<br>Crew Free.</h3>
+          <p>Handover happens in minutes, not hours. One tap marks the bay clear. The ambulance is instantly visible as available on the dispatcher map — ready for the next call.</p>
+          <span class="step-tag">Dispatch Command Centre</span>
+        </div>
       </div>
     </div>
   </div>
@@ -199,44 +207,48 @@
       <h2 class="s-title">Built for Every<br><span class="ital">Link in the Chain.</span></h2>
     </div>
 
-    <div class="serve-grid reveal">
-      <div class="serve-cell card blueprint-card">
-        <span class="serve-num">01 / 03</span>
-        <h3>Hospital Emergency Departments</h3>
-        <p>Real-time visibility of every incoming ambulance. Prepare bays, alert the right clinical staff, and close the communication gap before the doors open.</p>
-        <ul class="serve-features">
-          <li>Live ambulance queue dashboard</li>
-          <li>Pre-arrival patient condition alerts</li>
-          <li>Automatic delay flags (&gt;30 minutes)</li>
-          <li>Weekly off-load performance reports</li>
-          <li>County health reporting compliance</li>
-        </ul>
+    <div class="row g-4 reveal">
+      <div class="col-lg-4">
+        <div class="serve-cell card blueprint-card h-100">
+          <span class="serve-num">01 / 03</span>
+          <h3>Hospital Emergency Departments</h3>
+          <p>Real-time visibility of every incoming ambulance. Prepare bays, alert the right clinical staff, and close the communication gap before the doors open.</p>
+          <ul class="serve-features">
+            <li>Live ambulance queue dashboard</li>
+            <li>Pre-arrival patient condition alerts</li>
+            <li>Automatic delay flags (>30 minutes)</li>
+            <li>Weekly off-load performance reports</li>
+            <li>County health reporting compliance</li>
+          </ul>
+        </div>
       </div>
-
-      <div class="serve-cell card blueprint-card">
-        <span class="serve-num">02 / 03</span>
-        <h3>Paramedics &amp; Ambulance Crews</h3>
-        <p>Know which hospitals have capacity before you arrive. Send one-tap pre-notifications. Spend minutes at the bay, not hours — and get back to the community.</p>
-        <ul class="serve-features">
-          <li>Live hospital capacity map</li>
-          <li>GPS-powered ETA calculation</li>
-          <li>One-tap pre-notification send</li>
-          <li>Works on any Android phone</li>
-          <li>Offline-capable for low-signal areas</li>
-        </ul>
+      <div class="col-lg-4">
+        <div class="serve-cell card blueprint-card h-100">
+          <span class="serve-num">02 / 03</span>
+          <h3>Paramedics & Ambulance Crews</h3>
+          <p>Know which hospitals have capacity before you arrive. Send one-tap pre-notifications. Spend minutes at the bay, not hours — and get back to the community.</p>
+          <ul class="serve-features">
+            <li>Live hospital capacity map</li>
+            <li>GPS-powered ETA calculation</li>
+            <li>One-tap pre-notification send</li>
+            <li>Works on any Android phone</li>
+            <li>Offline-capable for low-signal areas</li>
+          </ul>
+        </div>
       </div>
-
-      <div class="serve-cell card blueprint-card">
-        <span class="serve-num">03 / 03</span>
-        <h3>EMS Dispatchers &amp; Operations</h3>
-        <p>Command-centre visibility across every active ambulance in Nairobi. Spot stuck crews instantly. Make smarter deployment decisions with real data.</p>
-        <ul class="serve-features">
-          <li>Fleet-wide live map view</li>
-          <li>Ambulance status tracking</li>
-          <li>Automatic stuck-crew alerts</li>
-          <li>Daily and weekly analytics</li>
-          <li>CAD system integration ready</li>
-        </ul>
+      <div class="col-lg-4">
+        <div class="serve-cell card blueprint-card h-100">
+          <span class="serve-num">03 / 03</span>
+          <h3>EMS Dispatchers & Operations</h3>
+          <p>Command-centre visibility across every active ambulance in Nairobi. Spot stuck crews instantly. Make smarter deployment decisions with real data.</p>
+          <ul class="serve-features">
+            <li>Fleet-wide live map view</li>
+            <li>Ambulance status tracking</li>
+            <li>Automatic stuck-crew alerts</li>
+            <li>Daily and weekly analytics</li>
+            <li>CAD system integration ready</li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -245,53 +257,55 @@
 <!-- ━━━━ EVIDENCE ━━━━ -->
 <section class="section evidence" id="evidence">
   <div class="container my-5">
-    <div class="evidence-grid">
-      <div>
-        <div class="blueprint-header reveal">
+    <div class="row g-4 reveal">
+      <div class="col-lg-6">
+        <div class="blueprint-header">
           <div class="s-label">
             <div class="s-label-line"></div>
             <span class="s-label-text">04 — Research Foundation</span>
           </div>
           <h2 class="s-title">Not an Idea.<br><span class="ital">A Proven Problem.</span></h2>
         </div>
-        <p class="s-body reveal" style="margin-top: 1.2rem; max-width: 460px;">ClearBay was not built on assumption. It was built on three chapters of peer-reviewed academic research on ambulance wait times in Kenya — with evidence drawn from 245 participants and international literature spanning four continents.</p>
-        <p class="s-body reveal" style="margin-top: 1rem; max-width: 460px;">No other health technology company in Kenya is launching with this depth of documented, structured evidence. When we walk into a hospital, we carry proof — not a pitch deck.</p>
+        <p class="s-body" style="margin-top: 1.2rem;">ClearBay was not built on assumption. It was built on three chapters of peer-reviewed academic research on ambulance wait times in Kenya — with evidence drawn from 245 participants and international literature spanning four continents.</p>
+        <p class="s-body" style="margin-top: 1rem;">No other health technology company in Kenya is launching with this depth of documented, structured evidence. When we walk into a hospital, we carry proof — not a pitch deck.</p>
       </div>
 
-      <div class="doc-block card blueprint-card reveal">
-        <p class="doc-title">"How Do Long Ambulance Wait Times at the Hospital Affect Patient Care and Community Emergency Response?"</p>
+      <div class="col-lg-6">
+        <div class="doc-block card blueprint-card">
+          <p class="doc-title">"How Do Long Ambulance Wait Times at the Hospital Affect Patient Care and Community Emergency Response?"</p>
 
-        <div class="chapter-rows">
-          <div class="chapter-row">
-            <span class="ch-num">CH.1</span>
-            <span class="ch-text"><strong>Introduction</strong> — Background, problem statement, 5 research questions, objectives, and 3 testable hypotheses grounded in Nairobi County.</span>
+          <div class="chapter-rows">
+            <div class="chapter-row">
+              <span class="ch-num">CH.1</span>
+              <span class="ch-text"><strong>Introduction</strong> — Background, problem statement, 5 research questions, objectives, and 3 testable hypotheses grounded in Nairobi County.</span>
+            </div>
+            <div class="chapter-row">
+              <span class="ch-num">CH.2</span>
+              <span class="ch-text"><strong>Literature Review</strong> — Systems Theory, Queuing Theory, Chain of Survival. Global evidence from Australia, UK, Canada, USA, and Africa.</span>
+            </div>
+            <div class="chapter-row">
+              <span class="ch-num">CH.3</span>
+              <span class="ch-text"><strong>Methodology</strong> — Convergent parallel mixed-methods design. 245-participant study across 6 stakeholder groups in Nairobi County.</span>
+            </div>
           </div>
-          <div class="chapter-row">
-            <span class="ch-num">CH.2</span>
-            <span class="ch-text"><strong>Literature Review</strong> — Systems Theory, Queuing Theory, Chain of Survival. Global evidence from Australia, UK, Canada, USA, and Africa.</span>
-          </div>
-          <div class="chapter-row">
-            <span class="ch-num">CH.3</span>
-            <span class="ch-text"><strong>Methodology</strong> — Convergent parallel mixed-methods design. 245-participant study across 6 stakeholder groups in Nairobi County.</span>
-          </div>
-        </div>
 
-        <div class="doc-stats">
-          <div class="doc-stat">
-            <span class="val">245</span>
-            <span class="key">Participants</span>
-          </div>
-          <div class="doc-stat">
-            <span class="val">6</span>
-            <span class="key">Stakeholder groups</span>
-          </div>
-          <div class="doc-stat">
-            <span class="val">3</span>
-            <span class="key">Research chapters</span>
-          </div>
-          <div class="doc-stat">
-            <span class="val">5</span>
-            <span class="key">Research questions</span>
+          <div class="doc-stats">
+            <div class="doc-stat">
+              <span class="val">245</span>
+              <span class="key">Participants</span>
+            </div>
+            <div class="doc-stat">
+              <span class="val">6</span>
+              <span class="key">Stakeholder groups</span>
+            </div>
+            <div class="doc-stat">
+              <span class="val">3</span>
+              <span class="key">Research chapters</span>
+            </div>
+            <div class="doc-stat">
+              <span class="val">5</span>
+              <span class="key">Research questions</span>
+            </div>
           </div>
         </div>
       </div>
@@ -300,7 +314,7 @@
 </section>
 
 <!-- ━━━━ HOSPITALS ━━━━ -->
-<section class="section hospitals section--light bg-cream-2" id="hospitals" data-bs-theme="light">
+<section class="section hospitals section--light" id="hospitals" data-bs-theme="light">
   <div class="container my-5">
     <div class="blueprint-header reveal">
       <div class="s-label">
@@ -308,7 +322,7 @@
         <span class="s-label-text">05 — Pilot Programme</span>
       </div>
       <h2 class="s-title">Launching Where<br><span class="ital">It Matters Most.</span></h2>
-      <p class="s-body" style="margin-top: 1rem; max-width: 540px;">We are actively recruiting pilot hospital and EMS partners across Nairobi County — the facilities serving millions of Kenyans who depend on public and private emergency care every day.</p>
+      <p class="s-body" style="margin-top: 1rem;">We are actively recruiting pilot hospital and EMS partners across Nairobi County — the facilities serving millions of Kenyans who depend on public and private emergency care every day.</p>
     </div>
 
     <div class="hospital-grid reveal">
@@ -387,7 +401,6 @@
             </tr>
           </thead>
           <tbody id="queueTableBody">
-            <!-- Dynamically populated via AJAX on page load -->
             <tr>
               <td colspan="7" class="text-center text-muted py-4">Loading live ambulance queue...</td>
             </tr>
@@ -395,22 +408,30 @@
         </table>
       </div>
 
-      <div class="dash-metrics">
-        <div class="metric-box">
-          <div class="metric-val" id="metricAvgWait">38</div>
-          <div class="metric-key">Avg wait today (min)</div>
+      <div class="row g-3 mt-4 pt-3 border-top border-secondary border-opacity-10">
+        <div class="col-6 col-md-3">
+          <div class="metric-box">
+            <div class="metric-val" id="metricAvgWait">38</div>
+            <div class="metric-key">Avg wait today (min)</div>
+          </div>
         </div>
-        <div class="metric-box">
-          <div class="metric-val" id="metricBaseline">-22</div>
-          <div class="metric-key">vs. pre-ClearBay baseline</div>
+        <div class="col-6 col-md-3">
+          <div class="metric-box">
+            <div class="metric-val" id="metricBaseline">-22</div>
+            <div class="metric-key">vs. pre-ClearBay baseline</div>
+          </div>
         </div>
-        <div class="metric-box">
-          <div class="metric-val" id="metricCompleted">14</div>
-          <div class="metric-key">Handovers completed today</div>
+        <div class="col-6 col-md-3">
+          <div class="metric-box">
+            <div class="metric-val" id="metricCompleted">14</div>
+            <div class="metric-key">Handovers completed today</div>
+          </div>
         </div>
-        <div class="metric-box">
-          <div class="metric-val" id="metricInQueue">4</div>
-          <div class="metric-key">Ambulances in queue</div>
+        <div class="col-6 col-md-3">
+          <div class="metric-box">
+            <div class="metric-val" id="metricInQueue">4</div>
+            <div class="metric-key">Ambulances in queue</div>
+          </div>
         </div>
       </div>
     </div>
@@ -428,101 +449,101 @@
       <h2 class="s-title">Be Part of the<br><span class="ital dim">First Pilot.</span></h2>
     </div>
 
-    <div class="form-wrap">
-      <div id="formContainer" class="card blueprint-card p-4 p-md-5 reveal">
-        <form class="form-block" id="signupForm" novalidate>
-          <?= csrf_field() ?>
-          <div id="formFeedback" class="alert alert-danger d-none mb-3" role="alert"></div>
+    <div class="row g-4 reveal">
+      <div class="col-lg-8">
+        <div class="card blueprint-card p-4 p-md-5" id="formContainer">
+          <form id="signupForm" novalidate>
+            <?= csrf_field() ?>
+            <div id="formFeedback" class="alert alert-danger d-none mb-4" role="alert"></div>
 
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <div>
-                <label for="fullName" class="form-label">Full Name *</label>
-                <input type="text" id="fullName" name="fullName" class="form-control" placeholder="Dr. Wanjiru Kamau" required>
-                <div class="invalid-feedback" id="error_fullName">Please enter a valid full name (minimum 3 characters).</div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input type="text" id="fullName" name="fullName" class="form-control" placeholder="Full Name" autocomplete="name" required>
+                  <label for="fullName">Full Name *</label>
+                  <div class="invalid-feedback" id="error_fullName">Please enter a valid full name (minimum 3 characters).</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input type="email" id="emailAddress" name="emailAddress" class="form-control" placeholder="Email Address" autocomplete="email" inputmode="email" required>
+                  <label for="emailAddress">Email Address *</label>
+                  <div class="invalid-feedback" id="error_emailAddress">Please enter a valid email address.</div>
+                </div>
               </div>
             </div>
-            <div class="col-md-6 mb-3">
-              <div>
-                <label for="emailAddress" class="form-label">Email Address *</label>
-                <input type="email" id="emailAddress" name="emailAddress" class="form-control" placeholder="you@hospital.ke" required>
-                <div class="invalid-feedback" id="error_emailAddress">Please enter a valid email address.</div>
-              </div>
-            </div>
-          </div>
 
-          <div class="mb-3">
-            <div>
-              <label for="organisation" class="form-label">Organisation / Hospital / EMS Service *</label>
-              <input type="text" id="organisation" name="organisation" class="form-control" placeholder="e.g. Kenyatta National Hospital" required>
+            <div class="mt-3 form-floating">
+              <input type="text" id="organisation" name="organisation" class="form-control" placeholder="Organisation" autocomplete="organization" required>
+              <label for="organisation">Organisation / Hospital / EMS Service *</label>
               <div class="invalid-feedback" id="error_organisation">Please specify your organisation (minimum 3 characters).</div>
             </div>
-          </div>
 
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <div>
-                <label for="userRole" class="form-label">Your Role *</label>
-                <select id="userRole" name="userRole" class="form-select" required>
-                  <option value="" disabled selected>Select your role</option>
-                  <option value="Hospital Administrator">Hospital Administrator</option>
-                  <option value="ED Manager / Charge Nurse">ED Manager / Charge Nurse</option>
-                  <option value="Emergency Physician">Emergency Physician</option>
-                  <option value="Paramedic / EMT">Paramedic / EMT</option>
-                  <option value="EMS Dispatcher / Operations Manager">EMS Dispatcher / Operations Manager</option>
-                  <option value="Investor / Funder">Investor / Funder</option>
-                  <option value="Researcher / Academic">Researcher / Academic</option>
-                  <option value="Other">Other</option>
-                </select>
-                <div class="invalid-feedback" id="error_userRole">Please select a valid role.</div>
+            <div class="row g-3 mt-3">
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <select id="userRole" name="userRole" class="form-select" required>
+                    <option value="" disabled selected>Select your role</option>
+                    <option value="Hospital Administrator">Hospital Administrator</option>
+                    <option value="ED Manager / Charge Nurse">ED Manager / Charge Nurse</option>
+                    <option value="Emergency Physician">Emergency Physician</option>
+                    <option value="Paramedic / EMT">Paramedic / EMT</option>
+                    <option value="EMS Dispatcher / Operations Manager">EMS Dispatcher / Operations Manager</option>
+                    <option value="Investor / Funder">Investor / Funder</option>
+                    <option value="Researcher / Academic">Researcher / Academic</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <label for="userRole">Your Role *</label>
+                  <div class="invalid-feedback" id="error_userRole">Please select a valid role.</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input type="tel" id="phoneNumber" name="phoneNumber" class="form-control" placeholder="Phone" autocomplete="tel" inputmode="tel">
+                  <label for="phoneNumber">Phone (optional)</label>
+                  <div class="invalid-feedback" id="error_phoneNumber">Please enter a valid phone number.</div>
+                </div>
               </div>
             </div>
-            <div class="col-md-6 mb-3">
-              <div>
-                <label for="phoneNumber" class="form-label">Phone (optional)</label>
-                <input type="tel" id="phoneNumber" name="phoneNumber" class="form-control" placeholder="+254 7XX XXX XXX">
-                <div class="invalid-feedback" id="error_phoneNumber">Please enter a valid phone number.</div>
-              </div>
-            </div>
-          </div>
 
-          <div class="mb-3">
-            <div>
-              <label for="message" class="form-label">Message (optional)</label>
-              <textarea id="message" name="message" class="form-control" placeholder="Tell us a bit about your interest in ClearBay" style="height: 120px;"></textarea>
+            <div class="mt-3 form-floating">
+              <textarea id="message" name="message" class="form-control" placeholder="Message" style="height: 120px;"></textarea>
+              <label for="message">Message (optional)</label>
               <div class="invalid-feedback" id="error_message">Message content cannot exceed 2000 characters.</div>
             </div>
+
+            <button type="submit" id="submitBtn" class="btn btn-primary w-100 py-3 mt-4 submit-btn" style="min-height: 48px;">
+              <span id="submitSpinner" class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+              <span id="submitText">Submit Request →</span>
+            </button>
+            <p class="form-note">The pilot is free. We will respond within 48 hours. Your information is held in strict confidence and is never shared with third parties.</p>
+          </form>
+
+          <div class="success-card" id="successCard">
+            <h3>You're In.</h3>
+            <p>Thank you for your interest in the ClearBay pilot. Our team will contact you within 48 hours to discuss next steps. You are part of something that matters.</p>
           </div>
-
-          <button type="submit" id="submitBtn" class="submit-btn btn btn-primary">
-            <span id="submitSpinner" class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
-            <span id="submitText">Submit Request →</span>
-          </button>
-          <p class="form-note">The pilot is free. We will respond within 48 hours. Your information is held in strict confidence and is never shared with third parties.</p>
-        </form>
-
-        <div class="success-card" id="successCard">
-          <h3>You're In.</h3>
-          <p>Thank you for your interest in the ClearBay pilot. Our team will contact you within 48 hours to discuss next steps. You are part of something that matters.</p>
         </div>
       </div>
 
-      <div class="signup-aside">
-        <div class="aside-block reveal">
-          <h4>Pilot is completely free</h4>
-          <p>The 12-week pilot programme costs you nothing. We provide the platform, the training, the weekly reports, and the data analysis. You give us your time and your honest feedback.</p>
-        </div>
-        <div class="aside-block reveal">
-          <h4>Results in 12 weeks</h4>
-          <p>At the end of the pilot, we produce a case study showing the before-and-after impact of ClearBay on your off-load times, ambulance throughput, and ED staff experience.</p>
-        </div>
-        <div class="aside-block reveal">
-          <h4>Evidence you can use</h4>
-          <p>Your pilot data belongs to you. The case study can support your annual reports, county government submissions, and quality improvement documentation.</p>
-        </div>
-        <div class="aside-block reveal">
-          <h4>Built on research</h4>
-          <p>ClearBay is grounded in three chapters of peer-reviewed academic research on ambulance wait times in Kenya. We know the problem. We built the solution.</p>
+      <div class="col-lg-4">
+        <div class="signup-aside">
+          <div class="aside-block reveal">
+            <h4>Pilot is completely free</h4>
+            <p>The 12-week pilot programme costs you nothing. We provide the platform, the training, the weekly reports, and the data analysis. You give us your time and your honest feedback.</p>
+          </div>
+          <div class="aside-block reveal">
+            <h4>Results in 12 weeks</h4>
+            <p>At the end of the pilot, we produce a case study showing the before-and-after impact of ClearBay on your off-load times, ambulance throughput, and ED staff experience.</p>
+          </div>
+          <div class="aside-block reveal">
+            <h4>Evidence you can use</h4>
+            <p>Your pilot data belongs to you. The case study can support your annual reports, county government submissions, and quality improvement documentation.</p>
+          </div>
+          <div class="aside-block reveal">
+            <h4>Built on research</h4>
+            <p>ClearBay is grounded in three chapters of peer-reviewed academic research on ambulance wait times in Kenya. We know the problem. We built the solution.</p>
+          </div>
         </div>
       </div>
     </div>

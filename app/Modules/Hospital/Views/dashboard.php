@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @var string $page_title
- * @var string $meta_description
- * @var string $canonical_url
- * @var string $robots_tag
+ * @var string $pageTitle
+ * @var string $metaDescription
+ * @var string $canonicalUrl
+ * @var string $robotsTag
  * @var \App\Modules\Hospital\Entities\Hospital $hospital
  * @var string $user_role
  */
@@ -65,29 +65,38 @@
     </div>
   </div>
 
-  <!-- Zone 4: Ambulance Queue Table -->
+  <!-- Zone 4: Ambulance Queue - Mobile Cards / Desktop Table -->
   <div class="card blueprint-card p-4 reveal">
     <h3 class="admin-card-heading mb-4">Active Ambulance Queue</h3>
-    <div class="table-responsive">
-      <table class="table queue-table align-middle">
-        <thead>
-          <tr class="mono-label text-muted">
-            <th>Unit ID</th>
-            <th>Provider</th>
-            <th>Patient</th>
-            <th>Complaint</th>
-            <th>Acuity</th>
-            <th>ETA / Status</th>
-            <th>Wait Time</th>
-            <th class="text-end">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="queueTableBody">
-          <tr>
-            <td colspan="8" class="text-center text-muted py-4">Loading active ambulance queue...</td>
-          </tr>
-        </tbody>
-      </table>
+
+    <!-- Mobile Queue Cards (visible <768px) -->
+    <div id="queueMobileContainer" class="d-md-none">
+      <div class="text-center text-muted py-4">Loading active ambulance queue...</div>
+    </div>
+
+    <!-- Desktop Table (visible md+) -->
+    <div class="d-none d-md-block">
+      <div class="table-responsive">
+        <table class="table queue-table align-middle">
+          <thead>
+            <tr class="mono-label text-muted">
+              <th>Unit ID</th>
+              <th>Provider</th>
+              <th>Patient</th>
+              <th>Complaint</th>
+              <th>Acuity</th>
+              <th>ETA / Status</th>
+              <th>Wait Time</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="queueTableBody">
+            <tr>
+              <td colspan="8" class="text-center text-muted py-4">Loading active ambulance queue...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
