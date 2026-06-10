@@ -267,24 +267,27 @@
       }
 
       const tbody = document.getElementById('queueTableBody');
-      if (!tbody) return;
+      const mobileContainer = document.getElementById('queueMobileContainer');
 
       if (result.queue.length === 0) {
-        const emptyHtml = `<tr><td colspan="8" class="text-center text-muted py-4">No active ambulances in queue. All clear.</td></tr>`;
-        if (tbody.innerHTML !== emptyHtml) {
-          tbody.innerHTML = emptyHtml;
+        const emptyTableHtml = `<tr><td colspan="8" class="text-center text-muted py-4">No active ambulances in queue. All clear.</td></tr>`;
+        if (tbody && tbody.innerHTML !== emptyTableHtml) {
+          tbody.innerHTML = emptyTableHtml;
+        }
+        if (mobileContainer) {
+          mobileContainer.innerHTML = `<div class="text-center text-muted py-4">No active ambulances in queue. All clear.</div>`;
         }
         return;
       }
 
-      const newHtml = result.queue.map(h => {
+      // --- Desktop Table Rows ---
+      const tableHtml = result.queue.map(h => {
         const wait = parseInt(h.wait_time_minutes, 10);
         let waitClass = 'bg-success text-white';
         if (wait >= 30) waitClass = 'bg-danger text-white';
         else if (wait >= 15) waitClass = 'bg-warning text-dark';
 
         const rowHighlight = wait >= 30 ? 'table-danger border-danger border-opacity-10' : '';
-
         const patientStr = `${h.patient_gender}, ${h.patient_age}`;
         const etaStr = h.status === 'En route' ? `${h.eta_minutes} min` : 'Arrived';
         const complaintStr = h.chief_complaint || 'Walk-in / Direct';
@@ -314,15 +317,58 @@
         `;
       }).join('');
 
-      if (tbody.innerHTML !== newHtml) {
-        tbody.innerHTML = newHtml;
+      if (tbody && tbody.innerHTML !== tableHtml) {
+        tbody.innerHTML = tableHtml;
+      }
+
+      // --- Mobile Card Rows ---
+      if (mobileContainer) {
+        const mobileHtml = result.queue.map(h => {
+          const wait = parseInt(h.wait_time_minutes, 10);
+          let waitClass = 'bg-success text-white';
+          if (wait >= 30) waitClass = 'bg-danger text-white';
+          else if (wait >= 15) waitClass = 'bg-warning text-dark';
+
+          const patientStr = `${h.patient_gender}, ${h.patient_age}`;
+          const etaStr = h.status === 'En route' ? `${h.eta_minutes} min` : 'Arrived';
+          const complaintStr = h.chief_complaint || 'Walk-in / Direct';
+
+          const actionBtn = h.status === 'En route' ?
+            `<button class="btn btn-sm btn-success mark-arrived-btn flex-fill" style="min-height: 48px;" data-id="${h.id}">Mark Arrived</button>` :
+            `<button class="btn btn-sm btn-primary clear-bay-btn flex-fill" style="min-height: 48px;" data-id="${h.id}" data-unit="${h.unit_id}" data-details="${patientStr} (${complaintStr})" data-bs-toggle="modal" data-bs-target="#handoverModal">Clear Bay</button>`;
+
+          return `
+            <div class="list-card-item flex-column align-items-start gap-2 py-3">
+              <div class="d-flex justify-content-between align-items-center w-100">
+                <span class="td-name fw-bold">${h.unit_id}</span>
+                <span class="badge ${h.acuity === 'Critical' ? 'bg-danger' : (h.acuity === 'Serious' ? 'bg-warning text-dark' : 'bg-success')}">${h.acuity}</span>
+              </div>
+              <div class="d-flex justify-content-between w-100" style="font-size: 0.85rem; color: var(--color-text-muted);">
+                <span>${h.provider}</span>
+                <span>${patientStr}</span>
+              </div>
+              <div class="d-flex justify-content-between w-100" style="font-size: 0.85rem; color: var(--color-text-muted);">
+                <span>${complaintStr}</span>
+                <span class="fw-bold">${etaStr}</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center w-100" style="font-size: 0.85rem;">
+                <span class="badge ${waitClass}">${wait} min</span>
+                ${actionBtn}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        if (mobileContainer.innerHTML !== mobileHtml) {
+          mobileContainer.innerHTML = mobileHtml;
+        }
       }
     };
 
     fetchQueue();
     setInterval(fetchQueue, 10000);
 
-    document.getElementById('queueTableBody').addEventListener('click', async (e) => {
+    const handleQueueAction = async (e) => {
       const arrivedBtn = e.target.closest('.mark-arrived-btn');
       if (arrivedBtn) {
         const handoverId = arrivedBtn.dataset.id;
@@ -358,7 +404,10 @@
         document.getElementById('handoverUnitId').textContent = btn.dataset.unit;
         document.getElementById('handoverPatientDetails').textContent = btn.dataset.details;
       }
-    });
+    };
+
+    document.getElementById('queueTableBody').addEventListener('click', handleQueueAction);
+    document.getElementById('queueMobileContainer').addEventListener('click', handleQueueAction);
 
     // 3. Form Submissions (AJAX)
     const statusForm = document.getElementById('statusForm');
