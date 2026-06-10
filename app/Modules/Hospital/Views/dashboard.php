@@ -355,8 +355,8 @@
                 <span>${complaintStr}</span>
                 <span class="fw-bold">${etaStr}</span>
               </div>
-              <div class="d-flex justify-content-between align-items-center w-100" style="font-size: 0.85rem;">
-                <span class="badge ${waitClass}">${wait} min</span>
+              <div class="d-flex justify-content-between align-items-center w-100 gap-3" style="font-size: 0.85rem;">
+                <span class="badge ${waitClass} flex-shrink-0" style="padding: 10px 14px; font-size: 0.85rem;">${wait} min</span>
                 ${actionBtn}
               </div>
             </div>
