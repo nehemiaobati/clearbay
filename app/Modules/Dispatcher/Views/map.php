@@ -120,21 +120,21 @@
 
         const wait = telemetry.waits[a.id];
         const waitText = (wait && wait.wait_time_minutes >= 30) ?
-          `<span class="badge bg-danger d-block mt-1" style="font-size: 0.7rem;">${wait.wait_time_minutes}m — ${wait.hospital_name}</span>` :
+          `<span class="badge bg-danger d-block mt-1 text-wrap text-end" style="font-size: 0.7rem; white-space: normal; line-height: 1.3;">${wait.wait_time_minutes}m waiting at ${wait.hospital_name}</span>` :
           '';
 
         return `
           <button type="button"
-                  class="p-2 border border-secondary border-opacity-10 rounded d-flex justify-content-between align-items-start hover-glow text-start bg-transparent text-reset focus-ring"
+                  class="p-2 border border-secondary border-opacity-10 rounded d-flex justify-content-between align-items-start hover-glow text-start bg-transparent text-reset focus-ring w-100"
                   style="min-height: 48px;"
                   aria-label="Focus on ${a.unit_id} (${a.status})"
                   onclick="focusAmbulance(${a.current_lat}, ${a.current_lng}, '${a.unit_id}')">
-            <div class="d-flex align-items-center gap-2 flex-shrink-1" style="min-width: 0;">
+            <div class="d-flex align-items-center gap-2 flex-shrink-1" style="min-width: 0; margin-top: 2px;">
               <span class="badge ${statusDot} rounded-circle p-1" aria-hidden="true" style="width: 8px; height: 8px;"></span>
               <strong class="mono-label text-cream">${a.unit_id}</strong>
               <small class="text-muted text-truncate">(${a.provider})</small>
             </div>
-            <div class="text-end flex-shrink-0 ps-2" style="min-width: 80px;">
+            <div class="text-end flex-shrink-0 ps-2" style="max-width: 180px;">
               <span class="small text-muted">${a.status}</span>
               ${waitText}
             </div>
