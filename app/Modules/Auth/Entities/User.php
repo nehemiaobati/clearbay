@@ -18,6 +18,7 @@ use CodeIgniter\Entity\Entity;
  * @property string $role
  * @property int|null $hospital_id
  * @property int|null $ems_provider_id
+ * @property int|null $ambulance_id
  * @property int $active
  * @property \CodeIgniter\I18n\Time|null $created_at
  * @property \CodeIgniter\I18n\Time|null $updated_at
@@ -34,6 +35,7 @@ class User extends Entity
         'role'            => 'string',
         'hospital_id'     => 'integer',
         'ems_provider_id' => 'integer',
+        'ambulance_id'    => '?integer',
         'active'          => 'integer',
     ];
 

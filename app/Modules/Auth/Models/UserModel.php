@@ -27,6 +27,7 @@ class UserModel extends Model
         'role',
         'hospital_id',
         'ems_provider_id',
+        'ambulance_id',
         'active',
     ];
 

@@ -814,6 +814,7 @@ class AdminController extends BaseController
             'robotsTag'       => 'noindex, nofollow',
             'hospitals'        => $this->admin_service->getAllHospitals(),
             'ems_providers'    => $this->admin_service->getAllEmsProviders(),
+            'ambulances'       => $this->_getAmbulancesWithAssignments(),
         ];
 
         return view('App\Modules\Admin\Views\users\edit', $data);
@@ -832,6 +833,7 @@ class AdminController extends BaseController
             'role'            => 'required|in_list[nurse,hospital_admin,paramedic,dispatcher,admin]',
             'hospital_id'     => 'permit_empty|integer',
             'ems_provider_id' => 'permit_empty|integer',
+            'ambulance_id'    => 'permit_empty|integer',
             'active'          => 'required|in_list[0,1]',
         ];
 
@@ -846,7 +848,16 @@ class AdminController extends BaseController
         $user->role            = (string) $this->request->getPost('role');
         $user->hospital_id     = $this->request->getPost('hospital_id') ? (int) $this->request->getPost('hospital_id') : null;
         $user->ems_provider_id = $this->request->getPost('ems_provider_id') ? (int) $this->request->getPost('ems_provider_id') : null;
+        $user->ambulance_id    = $this->request->getPost('ambulance_id') ? (int) $this->request->getPost('ambulance_id') : null;
         $user->active          = (int) $this->request->getPost('active');
+
+        // Validate ambulance uniqueness: prevent double assignment
+        if ($user->ambulance_id !== null) {
+            $conflict = $this->_checkAmbulanceConflict($user->ambulance_id, null);
+            if ($conflict !== null) {
+                return redirect()->back()->withInput()->with('errors', ['ambulance_id' => 'This ambulance is already assigned to ' . $conflict . '.']);
+            }
+        }
 
         $success = $this->admin_service->saveUser($user);
 
@@ -880,6 +891,7 @@ class AdminController extends BaseController
             'user'             => $user,
             'hospitals'        => $this->admin_service->getAllHospitals(),
             'ems_providers'    => $this->admin_service->getAllEmsProviders(),
+            'ambulances'       => $this->_getAmbulancesWithAssignments((int) $user_id),
         ];
 
         return view('App\Modules\Admin\Views\users\edit', $data);
@@ -906,6 +918,7 @@ class AdminController extends BaseController
             'role'            => 'required|in_list[nurse,hospital_admin,paramedic,dispatcher,admin]',
             'hospital_id'     => 'permit_empty|integer',
             'ems_provider_id' => 'permit_empty|integer',
+            'ambulance_id'    => 'permit_empty|integer',
             'active'          => 'required|in_list[0,1]',
         ];
 
@@ -918,7 +931,16 @@ class AdminController extends BaseController
         $user->role            = (string) $this->request->getPost('role');
         $user->hospital_id     = $this->request->getPost('hospital_id') ? (int) $this->request->getPost('hospital_id') : null;
         $user->ems_provider_id = $this->request->getPost('ems_provider_id') ? (int) $this->request->getPost('ems_provider_id') : null;
+        $user->ambulance_id    = $this->request->getPost('ambulance_id') ? (int) $this->request->getPost('ambulance_id') : null;
         $user->active          = (int) $this->request->getPost('active');
+
+        // Validate ambulance uniqueness: prevent double assignment
+        if ($user->ambulance_id !== null) {
+            $conflict = $this->_checkAmbulanceConflict($user->ambulance_id, (int) $user_id);
+            if ($conflict !== null) {
+                return redirect()->back()->withInput()->with('errors', ['ambulance_id' => 'This ambulance is already assigned to ' . $conflict . '.']);
+            }
+        }
 
         // Optional set new password if field is not empty
         $new_password = $this->request->getPost('new_password');
@@ -956,5 +978,58 @@ class AdminController extends BaseController
         }
 
         return redirect()->to(url_to('admin.users.list'))->with('success', 'User account deleted successfully.');
+    }
+
+    // =========================================================================
+    // PRIVATE HELPERS
+    // =========================================================================
+
+    /**
+     * Retrieves all ambulances annotated with their current paramedic assignment.
+     * Each row includes 'assigned_to_name' and 'assigned_to_id' if an active
+     * paramedic user already holds this ambulance.
+     *
+     * @param int|null $exclude_user_id Exclude this user from the conflict check (for edit forms).
+     * @return array
+     */
+    private function _getAmbulancesWithAssignments(?int $exclude_user_id = null): array
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('ambulances')
+            ->select('ambulances.id, ambulances.unit_id, ambulances.provider, ambulances.ems_provider_id, ambulances.registration, ambulances.status, users.id as assigned_to_id, users.name as assigned_to_name')
+            ->join('users', 'users.ambulance_id = ambulances.id AND users.active = 1 AND users.role = "paramedic"', 'left')
+            ->orderBy('ambulances.unit_id', 'ASC');
+
+        // When editing a specific user, exclude them so their own assignment doesn't show as a conflict
+        if ($exclude_user_id !== null) {
+            $builder->where('(users.id IS NULL OR users.id = ' . (int) $exclude_user_id . ')');
+        }
+
+        return $builder->get()->getResultArray();
+    }
+
+    /**
+     * Checks if an ambulance is already assigned to another active paramedic.
+     * Returns the conflicting user's name, or null if no conflict.
+     *
+     * @param int      $ambulance_id
+     * @param int|null $current_user_id The user being edited (excluded from conflict).
+     * @return string|null
+     */
+    private function _checkAmbulanceConflict(int $ambulance_id, ?int $current_user_id): ?string
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('users')
+            ->select('name')
+            ->where('ambulance_id', $ambulance_id)
+            ->where('active', 1)
+            ->where('role', 'paramedic');
+
+        if ($current_user_id !== null) {
+            $builder->where('id !=', $current_user_id);
+        }
+
+        $row = $builder->get()->getRow();
+        return $row ? $row->name : null;
     }
 }

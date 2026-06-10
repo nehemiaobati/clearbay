@@ -193,6 +193,7 @@ class AmbulanceService
 
     /**
      * Resolves active ambulance entity based on paramedic user identification.
+     * Prefers direct ambulance_id assignment; falls back to ems_provider_id lookup.
      *
      * @param int $user_id
      * @return Ambulance|null
@@ -201,13 +202,25 @@ class AmbulanceService
     {
         /** @var User|null $user */
         $user = $this->user_model->find($user_id);
-        if ($user === null || $user->ems_provider_id === null) {
+        if ($user === null) {
             return null;
         }
 
-        /** @var Ambulance|null $ambulance */
-        $ambulance = $this->ambulance_model->where('ems_provider_id', $user->ems_provider_id)->first();
-        return $ambulance;
+        // Prefer direct ambulance assignment
+        if ($user->ambulance_id !== null) {
+            /** @var Ambulance|null $ambulance */
+            $ambulance = $this->ambulance_model->find($user->ambulance_id);
+            return $ambulance;
+        }
+
+        // Fall back to first ambulance matching EMS provider
+        if ($user->ems_provider_id !== null) {
+            /** @var Ambulance|null $ambulance */
+            $ambulance = $this->ambulance_model->where('ems_provider_id', $user->ems_provider_id)->first();
+            return $ambulance;
+        }
+
+        return null;
     }
 
     /**
@@ -420,13 +433,13 @@ class AmbulanceService
         // Fetch paramedic user
         /** @var User|null $user */
         $user = $this->user_model->find($paramedic_id);
-        if ($user === null || $user->ems_provider_id === null) {
+        if ($user === null) {
             return null;
         }
 
-        // Fetch corresponding ambulance
+        // Fetch corresponding ambulance (prefers direct ambulance_id, falls back to ems_provider_id)
         /** @var Ambulance|null $ambulance */
-        $ambulance = $this->ambulance_model->where('ems_provider_id', $user->ems_provider_id)->first();
+        $ambulance = $this->getActiveAmbulance($paramedic_id);
         if ($ambulance === null) {
             return null;
         }

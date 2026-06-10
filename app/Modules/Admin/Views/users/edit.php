@@ -116,6 +116,34 @@ $isEdit = isset($user);
             </div>
           </div>
 
+          <!-- Ambulance assignment (visible only for paramedic) -->
+          <div class="mb-3 d-none" id="ambulanceGroup">
+            <div class="form-floating">
+              <select name="ambulance_id" id="ambulanceSelect" class="form-select">
+                <option value="" selected>Unassigned / None</option>
+                <?php foreach ($ambulances as $amb) : ?>
+                  <?php
+                    $is_selected = $isEdit && $user->ambulance_id !== null && (int)$user->ambulance_id === (int)$amb['id'];
+                    $is_taken = !empty($amb['assigned_to_id']) && (!$isEdit || (int)$amb['assigned_to_id'] !== (int)$user->id);
+                    $label = esc($amb['unit_id']) . ' — ' . esc($amb['provider']);
+                    if (!empty($amb['registration'])) {
+                        $label .= ' (' . esc($amb['registration']) . ')';
+                    }
+                    if ($is_taken) {
+                        $label .= ' ⚠ Assigned to ' . esc($amb['assigned_to_name']);
+                    }
+                  ?>
+                  <option value="<?= $amb['id'] ?>" <?= $is_selected ? 'selected' : '' ?> <?= $is_taken ? 'disabled' : '' ?>><?= $label ?></option>
+                <?php endforeach; ?>
+              </select>
+              <label for="ambulanceSelect">Assign to Ambulance Unit</label>
+              <?php if (session('errors.ambulance_id')) : ?>
+                <div class="text-danger small mt-1"><?= (string) esc(session('errors.ambulance_id')) ?></div>
+              <?php endif; ?>
+            </div>
+            <div class="form-text text-muted">Each ambulance can only be assigned to one active paramedic at a time.</div>
+          </div>
+
           <!-- Active Status -->
           <div class="mb-3">
             <div class="form-floating">
@@ -190,18 +218,22 @@ $isEdit = isset($user);
     const roleSelect = document.getElementById('roleSelect');
     const hospitalGroup = document.getElementById('hospitalGroup');
     const emsGroup = document.getElementById('emsGroup');
+    const ambulanceGroup = document.getElementById('ambulanceGroup');
 
     const toggleOrgFields = () => {
       const val = roleSelect.value;
       if (val === 'nurse' || val === 'hospital_admin') {
         hospitalGroup.classList.remove('d-none');
         emsGroup.classList.add('d-none');
+        ambulanceGroup.classList.add('d-none');
       } else if (val === 'paramedic') {
         emsGroup.classList.remove('d-none');
+        ambulanceGroup.classList.remove('d-none');
         hospitalGroup.classList.add('d-none');
       } else {
         hospitalGroup.classList.add('d-none');
         emsGroup.classList.add('d-none');
+        ambulanceGroup.classList.add('d-none');
       }
     };
 
