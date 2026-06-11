@@ -57,7 +57,7 @@ class QueueService
         // 3. Calculate average wait time today (active + completed today)
         // Let's use database aggregation using query builder select(SUM(wait_time_minutes)) and count
         $db = Database::connect();
-        
+
         // Active queue records
         $active_stats = $db->table('handovers')
             ->select('SUM(wait_time_minutes) as total_wait, COUNT(id) as cnt')
@@ -84,8 +84,20 @@ class QueueService
             $avg_wait_today = 38;
         }
 
-        // 4. Calculate vs. baseline (baseline is 60 minutes wait)
-        $baseline_diff = $avg_wait_today - 60;
+        // 4. Calculate vs. baseline (use hospital-configured baseline)
+        $hospital_id = session()->get('hospital_id');
+        $baseline = 60;
+        if ($hospital_id !== null) {
+            $hospital_entity = $db->table('hospitals')
+                ->select('baseline_avg')
+                ->where('id', (int) $hospital_id)
+                ->get()
+                ->getRow();
+            if ($hospital_entity && (int) $hospital_entity->baseline_avg > 0) {
+                $baseline = (int) $hospital_entity->baseline_avg;
+            }
+        }
+        $baseline_diff = $avg_wait_today - $baseline;
 
         return [
             'avg_wait_today'      => $avg_wait_today,
@@ -151,9 +163,9 @@ class QueueService
         // If cleared, make sure it has a registered wait time recorded
         if ($new_status === 'Cleared' && $handover->wait_time_minutes === 0) {
             // Give it some realistic final wait time if not set
-            $handover->wait_time_minutes = 30; 
+            $handover->wait_time_minutes = 30;
         }
-        
+
         $this->_handover_model->save($handover);
 
         $db->transComplete();

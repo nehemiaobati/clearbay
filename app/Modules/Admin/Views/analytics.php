@@ -76,7 +76,7 @@
     <div class="col-lg-6">
       <div class="card blueprint-card p-4 h-100">
         <h3 class="admin-card-heading mb-4">Performance summary by Facility</h3>
-        
+
         <!-- Mobile Card List (<768px) -->
         <div class="d-md-none">
           <?php if (empty($analytics['facility_performance'])) : ?>
@@ -86,11 +86,14 @@
               <div class="list-card-item flex-column align-items-start gap-2 py-3 border-bottom border-secondary border-opacity-10">
                 <div class="d-flex justify-content-between align-items-center w-100">
                   <span class="fw-bold"><?= esc($row['hospital_name']) ?></span>
-                  <span class="badge <?= (int)$row['avg_wait'] >= 30 ? 'bg-danger' : ((int)$row['avg_wait'] >= 15 ? 'bg-warning text-dark' : 'bg-success') ?>">
+                  <span class="badge <?= esc($row['status_class']) ?>">
                     <?= esc($row['avg_wait']) ?> min
                   </span>
                 </div>
-                <span class="mono-label small text-muted"><?= esc($row['total_handovers']) ?> handovers completed</span>
+                <div class="d-flex justify-content-between w-100">
+                  <span class="mono-label small text-muted"><?= esc($row['total_handovers']) ?> handovers completed</span>
+                  <span class="mono-label small text-muted">Baseline: <?= esc($row['baseline_avg'] ?? 60) ?> min</span>
+                </div>
               </div>
             <?php endforeach; ?>
           <?php endif; ?>
@@ -104,21 +107,23 @@
                 <tr class="mono-label text-muted">
                   <th>Facility</th>
                   <th>Handovers</th>
+                  <th>Baseline</th>
                   <th>Avg Wait</th>
                 </tr>
               </thead>
               <tbody>
                 <?php if (empty($analytics['facility_performance'])) : ?>
                   <tr>
-                    <td colspan="3" class="text-center text-muted py-4">No completed handover logs found in selected range.</td>
+                    <td colspan="4" class="text-center text-muted py-4">No completed handover logs found in selected range.</td>
                   </tr>
                 <?php else : ?>
                   <?php foreach ($analytics['facility_performance'] as $row) : ?>
                     <tr>
                       <td class="fw-bold"><?= esc($row['hospital_name']) ?></td>
                       <td><?= esc($row['total_handovers']) ?></td>
+                      <td class="mono-label"><?= esc($row['baseline_avg'] ?? 60) ?> min</td>
                       <td>
-                        <span class="badge <?= (int)$row['avg_wait'] >= 30 ? 'bg-danger' : ((int)$row['avg_wait'] >= 15 ? 'bg-warning text-dark' : 'bg-success') ?>">
+                        <span class="badge <?= esc($row['status_class']) ?>">
                           <?= esc($row['avg_wait']) ?> min
                         </span>
                       </td>
@@ -146,9 +151,7 @@
               <div class="list-card-item flex-column align-items-start gap-2 py-3 border-bottom border-secondary border-opacity-10">
                 <div class="d-flex justify-content-between align-items-center w-100">
                   <span class="fw-bold"><?= esc($row['provider']) ?></span>
-                  <span class="badge <?= (int)$row['avg_wait'] >= 30 ? 'bg-danger' : ((int)$row['avg_wait'] >= 15 ? 'bg-warning text-dark' : 'bg-success') ?>">
-                    <?= esc($row['avg_wait']) ?> min
-                  </span>
+                  <span class="mono-label small text-muted"><?= esc($row['total_ambulances']) ?> ambulances</span>
                 </div>
                 <span class="mono-label small text-muted"><?= esc($row['total_handovers']) ?> handovers completed</span>
               </div>
@@ -164,7 +167,7 @@
                 <tr class="mono-label text-muted">
                   <th>EMS Provider</th>
                   <th>Handovers</th>
-                  <th>Avg Wait</th>
+                  <th>Ambulances</th>
                 </tr>
               </thead>
               <tbody>
@@ -177,11 +180,7 @@
                     <tr>
                       <td class="fw-bold"><?= esc($row['provider']) ?></td>
                       <td><?= esc($row['total_handovers']) ?></td>
-                      <td>
-                        <span class="badge <?= (int)$row['avg_wait'] >= 30 ? 'bg-danger' : ((int)$row['avg_wait'] >= 15 ? 'bg-warning text-dark' : 'bg-success') ?>">
-                          <?= esc($row['avg_wait']) ?> min
-                        </span>
-                      </td>
+                      <td><?= esc($row['total_ambulances']) ?></td>
                     </tr>
                   <?php endforeach; ?>
                 <?php endif; ?>
@@ -226,8 +225,8 @@
           fill: true,
           tension: 0.1
         }, {
-          label: 'Pre-ClearBay Baseline (60 min)',
-          data: Array(waitLabels.length).fill(60),
+          label: 'Pre-ClearBay Baseline (<?= esc($analytics['aggregate_baseline']) ?> min)',
+          data: Array(waitLabels.length).fill(<?= (int) $analytics['aggregate_baseline'] ?>),
           borderColor: colorRed,
           borderWidth: 1,
           borderDash: [5, 5],

@@ -87,7 +87,7 @@ class HospitalService
             if ($h->status !== 'En route' && $h->arrived_at !== null) {
                 $diff_seconds = time() - strtotime($h->arrived_at->toDateTimeString());
                 $h->wait_time_minutes = (int) max(0, round($diff_seconds / 60));
-                
+
                 // Keep the database synchronized for dispatcher alerts
                 $this->handover_model->update($h->id, ['wait_time_minutes' => $h->wait_time_minutes]);
             } else {
@@ -437,7 +437,7 @@ class HospitalService
 
         // C. Provider performance summary
         $provider_performance_builder = $db->table('handovers')
-            ->select("ambulances.provider, COUNT(handovers.id) as total_handovers, ROUND(AVG(handovers.wait_time_minutes)) as avg_wait")
+            ->select("ambulances.provider, COUNT(handovers.id) as total_handovers, COUNT(DISTINCT ambulances.id) as total_ambulances")
             ->join('ambulances', 'ambulances.id = handovers.ambulance_id')
             ->where('handovers.status', 'Cleared')
             ->where('handovers.handover_complete_at >=', $start_date);
@@ -455,14 +455,35 @@ class HospitalService
         $facility_performance = [];
         if ($hospital_id === null) {
             $facility_performance = $db->table('handovers')
-                ->select("hospitals.name as hospital_name, COUNT(handovers.id) as total_handovers, ROUND(AVG(handovers.wait_time_minutes)) as avg_wait")
+                ->select("hospitals.name as hospital_name, hospitals.baseline_avg, COUNT(handovers.id) as total_handovers, ROUND(AVG(handovers.wait_time_minutes)) as avg_wait")
                 ->join('hospitals', 'hospitals.id = handovers.hospital_id')
                 ->where('handovers.status', 'Cleared')
                 ->where('handovers.handover_complete_at >=', $start_date)
-                ->groupBy('hospitals.name')
+                ->groupBy('hospitals.name, hospitals.baseline_avg')
                 ->orderBy('total_handovers', 'DESC')
                 ->get()
                 ->getResultArray();
+
+            foreach ($facility_performance as &$row) {
+                $facility_baseline = (int) ($row['baseline_avg'] ?? 60);
+                $row['status_class'] = $this->getWaitStatusClass((int) $row['avg_wait'], $facility_baseline);
+            }
+            unset($row);
+        }
+
+        // E. Calculate aggregate baseline for chart reference line
+        if ($hospital_id !== null) {
+            /** @var Hospital|null $hospital_entity */
+            $hospital_entity = $this->hospital_model->select('baseline_avg')->find($hospital_id);
+            $aggregate_baseline = ($hospital_entity && $hospital_entity->baseline_avg > 0)
+                ? (int) $hospital_entity->baseline_avg
+                : 60;
+        } else {
+            $avg_row = $db->table('hospitals')
+                ->select('ROUND(AVG(baseline_avg)) as avg_baseline')
+                ->get()
+                ->getRow();
+            $aggregate_baseline = (int) ($avg_row->avg_baseline ?? 60);
         }
 
         return [
@@ -470,6 +491,28 @@ class HospitalService
             'daily_counts'         => $daily_counts,
             'provider_performance' => $provider_performance,
             'facility_performance' => $facility_performance,
+            'aggregate_baseline'   => $aggregate_baseline,
         ];
+    }
+
+    /**
+     * Resolves the CSS status class for a given wait time relative to a baseline/target.
+     *
+     * @param int $avg_wait
+     * @param int $baseline
+     * @return string
+     */
+    public function getWaitStatusClass(int $avg_wait, int $baseline): string
+    {
+        $baseline = $baseline > 0 ? $baseline : 60;
+        $pct = ($avg_wait / $baseline) * 100;
+
+        if ($pct >= 50) {
+            return 'bg-danger';
+        }
+        if ($pct >= 25) {
+            return 'bg-warning text-dark';
+        }
+        return 'bg-success';
     }
 }

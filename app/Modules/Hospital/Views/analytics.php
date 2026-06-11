@@ -84,9 +84,7 @@
           <div class="list-card-item flex-column align-items-start gap-2 py-3">
             <div class="d-flex justify-content-between align-items-center w-100">
               <span class="fw-bold"><?= esc($row['provider']) ?></span>
-              <span class="badge <?= (int)$row['avg_wait'] >= 30 ? 'bg-danger' : ((int)$row['avg_wait'] >= 15 ? 'bg-warning text-dark' : 'bg-success') ?>">
-                <?= esc($row['avg_wait']) ?> min
-              </span>
+              <span class="mono-label small"><?= esc($row['total_ambulances']) ?> ambulances</span>
             </div>
             <span class="mono-label small"><?= esc($row['total_handovers']) ?> handovers completed</span>
           </div>
@@ -102,7 +100,7 @@
             <tr class="mono-label text-muted">
               <th>EMS Provider</th>
               <th>Total Handovers Completed</th>
-              <th>Average Wait Time</th>
+              <th>Ambulances</th>
             </tr>
           </thead>
           <tbody>
@@ -115,11 +113,7 @@
                 <tr>
                   <td class="fw-bold"><?= esc($row['provider']) ?></td>
                   <td><?= esc($row['total_handovers']) ?></td>
-                  <td>
-                    <span class="badge <?= (int)$row['avg_wait'] >= 30 ? 'bg-danger' : ((int)$row['avg_wait'] >= 15 ? 'bg-warning text-dark' : 'bg-success') ?>">
-                      <?= esc($row['avg_wait']) ?> min
-                    </span>
-                  </td>
+                  <td><?= esc($row['total_ambulances']) ?></td>
                 </tr>
               <?php endforeach; ?>
             <?php endif; ?>
@@ -162,8 +156,8 @@
           fill: true,
           tension: 0.1
         }, {
-          label: 'Pre-ClearBay Baseline (60 min)',
-          data: Array(waitLabels.length).fill(60),
+          label: 'Pre-ClearBay Baseline (<?= esc($analytics['aggregate_baseline']) ?> min)',
+          data: Array(waitLabels.length).fill(<?= (int) $analytics['aggregate_baseline'] ?>),
           borderColor: colorRed,
           borderWidth: 1,
           borderDash: [5, 5],
