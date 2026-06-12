@@ -119,7 +119,7 @@
         else if (a.status === 'Off Duty') statusDot = 'bg-secondary';
 
         const wait = telemetry.waits[a.id];
-        const waitText = (wait && wait.wait_time_minutes >= 30) ?
+        const waitText = (wait && wait.wait_time_minutes > 0.1) ?
           `<div class="badge bg-danger bg-opacity-25 border border-danger border-opacity-25 w-100 text-wrap text-start mt-2" style="font-size: 0.75rem; white-space: normal; line-height: 1.4; display: block; padding: 6px 10px; color: var(--color-accent-red); font-weight: normal;">⚠ ${wait.wait_time_minutes}m waiting at ${wait.hospital_name}</div>` :
           '';
 
