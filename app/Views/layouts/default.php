@@ -80,12 +80,12 @@ $robotsTag       = $robotsTag       ?? 'noindex, nofollow';
   ?>
 
   <!-- ━━━━ BS5 NAVBAR + OFF-CANVAS ━━━━ -->
-  <nav class="navbar navbar-dark fixed-top" style="background: var(--color-bg-main); border-bottom: 1px solid var(--color-border); padding: 1rem 6%;">
-    <div class="container-fluid p-0">
+  <nav class="navbar navbar-dark fixed-top border-bottom border-secondary border-opacity-10 py-3" style="background: var(--color-bg-main);">
+    <div class="container-fluid p-0" style="width: 88%; margin: 0 auto;">
       <!-- Brand -->
       <a class="navbar-brand p-0" href="<?= $homeUrl ?>">
         <span class="logo-mark d-inline-block align-middle"></span>
-        <span class="logo-name d-inline-block align-middle ms-2" style="font-family: var(--font-mono); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-main);">ClearBay</span>
+        <span class="d-inline-block align-middle ms-2 font-monospace text-uppercase" style="font-weight: 500; letter-spacing: 0.1em; color: var(--color-text-main);">ClearBay</span>
       </a>
 
       <!-- Desktop nav (lg+) -->
@@ -106,8 +106,8 @@ $robotsTag       = $robotsTag       ?? 'noindex, nofollow';
         <a href="<?= $homeUrl ?>#signup" class="btn btn-primary btn-sm nav-btn">Join Pilot</a>
       </div>
 
-      <!-- Hamburger toggle (below lg) -->
-      <button class="navbar-toggler d-lg-none border-0 p-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#navOffcanvas" aria-controls="navOffcanvas" aria-label="Toggle navigation" style="min-width: 48px; min-height: 48px;">
+      <!-- Hamburger toggle (below lg) — touch-friendly -->
+      <button class="navbar-toggler d-lg-none border-0 p-2 touch-target" type="button" data-bs-toggle="offcanvas" data-bs-target="#navOffcanvas" aria-controls="navOffcanvas" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
     </div>
@@ -116,8 +116,8 @@ $robotsTag       = $robotsTag       ?? 'noindex, nofollow';
   <!-- Offcanvas mobile nav -->
   <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="navOffcanvas" aria-labelledby="navOffcanvasLabel" style="background: var(--color-bg-main); border-right: 1px solid var(--color-border);">
     <div class="offcanvas-header border-bottom border-secondary border-opacity-10">
-      <span class="offcanvas-title" id="navOffcanvasLabel" style="font-family: var(--font-mono); color: var(--color-text-main);">ClearBay</span>
-      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close" style="min-width: 44px; min-height: 44px;"></button>
+      <span class="offcanvas-title font-monospace" id="navOffcanvasLabel" style="color: var(--color-text-main);">ClearBay</span>
+      <button type="button" class="btn-close btn-close-white touch-target" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body d-flex flex-column">
       <ul class="navbar-nav flex-grow-1 gap-2">
@@ -149,20 +149,22 @@ $robotsTag       = $robotsTag       ?? 'noindex, nofollow';
   <?= $this->renderSection('content') ?>
 
   <!-- ━━━━ FOOTER ━━━━ -->
-  <footer style="background: var(--color-bg-main); border-top: 1px solid var(--color-border); padding: 3rem 6%; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 3rem; margin-top: auto;">
-    <a href="<?= $homeUrl ?>" class="text-decoration-none d-flex align-items-center gap-2">
-      <span class="logo-mark d-inline-block"></span>
-      <span class="logo-name" style="font-family: var(--font-mono); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-main);">ClearBay</span>
-    </a>
-    <span style="font-family: var(--font-serif); font-style: italic; color: var(--color-text-dim); font-size: 0.9rem;">Clear the Bay. Free the Crew. Save the Next Life.</span>
-    <ul style="display: flex; flex-wrap: wrap; list-style: none; gap: 1rem; margin: 0 0 0 auto; padding: 0;">
-      <li><a href="<?= $homeUrl ?>#problem" style="font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-dim); text-decoration: none; transition: color 0.2s;">Problem</a></li>
-      <li><a href="<?= $homeUrl ?>#how" style="font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-dim); text-decoration: none; transition: color 0.2s;">Solution</a></li>
-      <li><a href="<?= $homeUrl ?>#serve" style="font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-dim); text-decoration: none; transition: color 0.2s;">Who We Serve</a></li>
-      <li><a href="<?= $homeUrl ?>#evidence" style="font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-dim); text-decoration: none; transition: color 0.2s;">Research</a></li>
-      <li><a href="mailto:info@clearbayhealthke.com" style="font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-dim); text-decoration: none; transition: color 0.2s;">info@clearbayhealthke.com</a></li>
-      <li><a href="#" style="font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-dim); text-decoration: none; transition: color 0.2s;">© 2026 ClearBay Health Ltd</a></li>
-    </ul>
+  <footer class="border-top border-secondary border-opacity-10 py-5 mt-auto" style="background: var(--color-bg-main);">
+    <div class="d-flex flex-wrap align-items-center gap-3" style="width: 88%; margin: 0 auto;">
+      <a href="<?= $homeUrl ?>" class="text-decoration-none d-flex align-items-center gap-2">
+        <span class="logo-mark d-inline-block"></span>
+        <span class="font-monospace text-uppercase" style="font-weight: 500; letter-spacing: 0.1em; color: var(--color-text-main);">ClearBay</span>
+      </a>
+      <span class="font-monospace small text-secondary fst-italic" style="font-family: var(--font-serif);">Clear the Bay. Free the Crew. Save the Next Life.</span>
+      <ul class="d-flex flex-wrap list-unstyled gap-3 ms-auto mb-0">
+        <li><a href="<?= $homeUrl ?>#problem" class="font-monospace small text-uppercase text-decoration-none text-secondary" style="letter-spacing: 0.05em;">Problem</a></li>
+        <li><a href="<?= $homeUrl ?>#how" class="font-monospace small text-uppercase text-decoration-none text-secondary" style="letter-spacing: 0.05em;">Solution</a></li>
+        <li><a href="<?= $homeUrl ?>#serve" class="font-monospace small text-uppercase text-decoration-none text-secondary" style="letter-spacing: 0.05em;">Who We Serve</a></li>
+        <li><a href="<?= $homeUrl ?>#evidence" class="font-monospace small text-uppercase text-decoration-none text-secondary" style="letter-spacing: 0.05em;">Research</a></li>
+        <li><a href="mailto:info@clearbayhealthke.com" class="font-monospace small text-uppercase text-decoration-none text-secondary" style="letter-spacing: 0.05em;">info@clearbayhealthke.com</a></li>
+        <li><a href="#" class="font-monospace small text-uppercase text-decoration-none text-secondary" style="letter-spacing: 0.05em;">© 2026 ClearBay Health Ltd</a></li>
+      </ul>
+    </div>
   </footer>
 
   <!-- Bootstrap 5 JS Bundle (deferred) -->

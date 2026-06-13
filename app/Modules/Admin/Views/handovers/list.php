@@ -12,36 +12,36 @@
 <?= $this->extend('layouts/default') ?>
 <?= $this->section('content') ?>
 
-<div class="container admin-page">
+<div class="container py-5 mt-5">
   <!-- Breadcrumb / Back Link -->
   <div class="mb-4">
-    <a href="<?= url_to('admin.dashboard') ?>" class="mono-label text-decoration-none admin-back">
+    <a href="<?= url_to('admin.dashboard') ?>" class="mono-label text-decoration-none" style="color: var(--color-brand-primary);">
       ← Back to Dashboard
     </a>
   </div>
 
   <!-- Header -->
-  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center blueprint-header reveal mb-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 reveal">
     <div>
       <div class="s-label mb-1">
         <div class="s-label-line"></div>
         <span class="s-label-text">Handovers Queue Registry</span>
       </div>
-      <h1 class="s-title mb-2 admin-heading">
-        Manage <span class="ital dim">Handovers</span>
+      <h1 class="s-title mb-0">
+        Manage <span class="fst-italic text-secondary">Handovers</span>
       </h1>
     </div>
     <div class="mt-3 mt-md-0">
-      <a href="<?= url_to('admin.handovers.new') ?>" class="btn btn-primary admin-btn-submit" style="min-height: 48px;">
+      <a href="<?= url_to('admin.handovers.new') ?>" class="btn btn-primary touch-target">
         Dispatch Handover +
       </a>
     </div>
   </div>
 
   <!-- Responsive Table with Mobile Card Fallback -->
-  <div class="card blueprint-card p-4">
+  <div class="card border-secondary border-opacity-10 p-4" style="background: var(--color-bg-card);">
     <?php if (empty($handovers)) : ?>
-      <p class="text-center my-4 text-muted">No handover queue records registered in the system.</p>
+      <p class="text-center my-4 text-secondary">No handover queue records registered in the system.</p>
     <?php else : ?>
 
       <!-- Mobile Card List (<768px) -->
@@ -60,12 +60,12 @@
           ?>
           <div class="list-card-item flex-column align-items-start gap-2 py-3">
             <div class="d-flex justify-content-between align-items-center w-100">
-              <span class="td-name fw-bold"><?= esc($handover->ambulance_unit ?? '—') ?></span>
-              <span class="<?= $statusClass ?> admin-status-pill"><?= esc($handover->status) ?></span>
+              <span class="fw-semibold" style="color: var(--color-text-main);"><?= esc($handover->ambulance_unit ?? '—') ?></span>
+              <span class="<?= $statusClass ?> font-monospace text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.05em;"><?= esc($handover->status) ?></span>
             </div>
             <div class="w-100">
               <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="text-muted small"><?= esc($handover->hospital_name ?? '—') ?></span>
+                <span class="text-secondary small"><?= esc($handover->hospital_name ?? '—') ?></span>
                 <span class="wait-pill <?= $acuityClass ?>"><?= esc($handover->acuity) ?></span>
               </div>
               <div class="d-flex justify-content-between align-items-center mb-1">
@@ -78,8 +78,8 @@
               </div>
             </div>
             <div class="d-flex gap-2 w-100">
-              <a href="<?= url_to('admin.handovers.edit', $handover->id) ?>" class="btn btn-outline-secondary btn-sm flex-fill" style="min-height: 48px;">Edit</a>
-              <a href="<?= url_to('admin.handovers.delete', $handover->id) ?>" class="btn btn-danger btn-sm flex-fill" style="min-height: 48px;" onclick="return confirm('Are you sure you want to delete this handover record?');">Delete</a>
+              <a href="<?= url_to('admin.handovers.edit', $handover->id) ?>" class="btn btn-outline-secondary btn-sm flex-fill touch-target">Edit</a>
+              <a href="<?= url_to('admin.handovers.delete', $handover->id) ?>" class="btn btn-danger btn-sm flex-fill touch-target" onclick="return confirm('Are you sure you want to delete this handover record?');">Delete</a>
             </div>
           </div>
         <?php endforeach; ?>
@@ -88,9 +88,9 @@
       <!-- Desktop Table (≥768px) -->
       <div class="d-none d-md-block">
         <div class="table-responsive">
-          <table class="table queue-table align-middle">
+          <table class="table align-middle" style="color: var(--color-text-main);">
             <thead>
-              <tr>
+              <tr class="mono-label text-secondary">
                 <th>ID</th>
                 <th>Ambulance</th>
                 <th>Hospital</th>
@@ -117,19 +117,19 @@
                 elseif ($handover->status === 'Preparing') $statusClass = 'badge bg-primary text-dark';
                 ?>
                 <tr>
-                  <td class="td-id"><?= esc($handover->id) ?></td>
-                  <td class="td-code"><?= esc($handover->ambulance_unit ?? '—') ?></td>
-                  <td class="td-name"><?= esc($handover->hospital_name ?? '—') ?></td>
+                  <td class="font-monospace small text-secondary"><?= esc($handover->id) ?></td>
+                  <td class="font-monospace"><?= esc($handover->ambulance_unit ?? '—') ?></td>
+                  <td class="fw-semibold"><?= esc($handover->hospital_name ?? '—') ?></td>
                   <td><?= esc($handover->patient_age) ?> y/o (<?= esc($handover->patient_gender) ?>)</td>
                   <td><span class="wait-pill <?= $acuityClass ?>"><?= esc($handover->acuity) ?></span></td>
-                  <td class="td-mono"><?= esc($handover->eta_minutes) ?> min</td>
-                  <td class="td-mono"><?= esc($handover->wait_time_minutes) ?> min</td>
-                  <td><span class="<?= $statusClass ?> admin-status-pill"><?= esc($handover->status) ?></span></td>
-                  <td class="td-mono-sm"><?= esc($handover->created_at ? $handover->created_at->format('Y-m-d H:i') : '—') ?></td>
+                  <td class="font-monospace small"><?= esc($handover->eta_minutes) ?> min</td>
+                  <td class="font-monospace small"><?= esc($handover->wait_time_minutes) ?> min</td>
+                  <td><span class="<?= $statusClass ?> font-monospace text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.05em;"><?= esc($handover->status) ?></span></td>
+                  <td class="small font-monospace text-secondary"><?= esc($handover->created_at ? $handover->created_at->format('Y-m-d H:i') : '—') ?></td>
                   <td class="text-end">
                     <div class="d-inline-flex gap-2">
-                      <a href="<?= url_to('admin.handovers.edit', $handover->id) ?>" class="btn btn-outline-secondary btn-sm px-3 py-2 d-inline-block admin-btn-edit" style="min-height: 48px; min-width: 48px;">Edit</a>
-                      <a href="<?= url_to('admin.handovers.delete', $handover->id) ?>" class="btn btn-danger btn-sm px-3 py-2 d-inline-block admin-btn-delete" style="min-height: 48px; min-width: 48px;" onclick="return confirm('Are you sure you want to delete this handover record?');">Delete</a>
+                      <a href="<?= url_to('admin.handovers.edit', $handover->id) ?>" class="btn btn-outline-secondary btn-sm px-3 touch-target">Edit</a>
+                      <a href="<?= url_to('admin.handovers.delete', $handover->id) ?>" class="btn btn-danger btn-sm px-3 touch-target" onclick="return confirm('Are you sure you want to delete this handover record?');">Delete</a>
                     </div>
                   </td>
                 </tr>
@@ -141,7 +141,7 @@
 
       <!-- Pagination -->
       <?php if ($pager) : ?>
-        <div class="mt-4 d-flex justify-content-center admin-pager">
+        <div class="mt-4 d-flex justify-content-center">
           <?= $pager->links('handovers', 'default_full') ?>
         </div>
       <?php endif; ?>
