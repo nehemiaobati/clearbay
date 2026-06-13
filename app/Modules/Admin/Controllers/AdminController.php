@@ -1105,7 +1105,7 @@ class AdminController extends BaseController
         $lines[] = "Date Range,Past 30 Days";
         $lines[] = "Report Date," . date('Y-m-d H:i:s') . " EAT";
         $lines[] = "";
-        
+
         // Hospital Breakdown
         $lines[] = "Facility Summary";
         $lines[] = "Hospital Name,Handovers Completed,Average Wait Time (Minutes)";
@@ -1121,13 +1121,13 @@ class AdminController extends BaseController
 
         // Provider Breakdown
         $lines[] = "EMS Provider Summary";
-        $lines[] = "Provider,Handovers Completed,Average Wait Time (Minutes)";
+        $lines[] = "Provider,Handovers Completed,Ambulances";
         foreach ($analytics['provider_performance'] as $row) {
             $lines[] = sprintf(
-                "%s,%d,%s",
+                "%s,%d,%d",
                 $this->_csvEscape((string) $row['provider']),
-                (int) $row['total_handovers'],
-                (string) $row['avg_wait']
+                (int) ($row['total_handovers'] ?? 0),
+                (int) ($row['total_ambulances'] ?? 0)
             );
         }
 
@@ -1138,6 +1138,4 @@ class AdminController extends BaseController
             ->setHeader('Content-Disposition', 'attachment; filename="clearbay_global_report.csv"')
             ->setBody($content);
     }
-
-
 }
