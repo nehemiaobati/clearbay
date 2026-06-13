@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Admin\Libraries;
 
+use App\Libraries\DatabaseTransactionTrait;
 use App\Modules\Pilot\Models\PilotSignupModel;
 use App\Modules\Pilot\Entities\PilotSignup;
 use Config\Database;
@@ -20,6 +21,8 @@ use Throwable;
  */
 class PilotAdminService
 {
+    use DatabaseTransactionTrait;
+
     private PilotSignupModel $pilot_model;
 
     public function __construct()
@@ -63,25 +66,10 @@ class PilotAdminService
      */
     public function savePilot(PilotSignup $pilot): array
     {
-        $db = Database::connect();
-        $db->transStart();
-
-        try {
-            $this->pilot_model->save($pilot);
-            $db->transComplete();
-            
-            if ($db->transStatus() === false) {
-                return ['status' => 'error', 'message' => 'Transaction failed while saving pilot signup.'];
-            }
-            return ['status' => 'success', 'message' => 'Pilot signup saved successfully.'];
-        } catch (Throwable $e) {
-            $db->transRollback();
-            log_message('error', 'Failed to save pilot signup', [
-                'exception' => $e->getMessage(),
-                'trace'     => $e->getTraceAsString(),
-            ]);
-            return ['status' => 'error', 'message' => $e->getMessage()];
-        }
+        return $this->wrapInTransaction(
+            fn() => $this->pilot_model->save($pilot),
+            'saving pilot signup'
+        );
     }
 
     /**
@@ -93,25 +81,10 @@ class PilotAdminService
      */
     public function deletePilot(int $id): array
     {
-        $db = Database::connect();
-        $db->transStart();
-
-        try {
-            $this->pilot_model->delete($id);
-            $db->transComplete();
-
-            if ($db->transStatus() === false) {
-                return ['status' => 'error', 'message' => 'Transaction failed while deleting pilot signup.'];
-            }
-            return ['status' => 'success', 'message' => 'Pilot signup deleted successfully.'];
-        } catch (Throwable $e) {
-            $db->transRollback();
-            log_message('error', 'Failed to delete pilot signup', [
-                'id'        => $id,
-                'exception' => $e->getMessage(),
-            ]);
-            return ['status' => 'error', 'message' => $e->getMessage()];
-        }
+        return $this->wrapInTransaction(
+            fn() => $this->pilot_model->delete($id),
+            'deleting pilot signup'
+        );
     }
 
     /**

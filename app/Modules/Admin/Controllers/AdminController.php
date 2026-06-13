@@ -23,14 +23,17 @@ use App\Modules\Admin\Libraries\AdminService;
  */
 class AdminController extends BaseController
 {
-    /**
-     * @var AdminService
-     */
     private AdminService $admin_service;
 
-    /**
-     * Declared helpers.
-     */
+    /** @var array<string, string> Role options for dashboard navigation */
+    private const ROLE_OPTIONS = [
+        'nurse'          => 'Nurse',
+        'hospital_admin' => 'Hospital Administrator',
+        'paramedic'      => 'Paramedic',
+        'dispatcher'     => 'Dispatcher',
+        'admin'          => 'Admin',
+    ];
+
     protected $helpers = ['form', 'url'];
 
     /**
@@ -46,68 +49,99 @@ class AdminController extends BaseController
     // --- Helper Methods ---
 
     /**
-     * Retrieves all ambulances annotated with their current paramedic assignment.
-     * Each row includes 'assigned_to_name' and 'assigned_to_id' if an active
-     * paramedic user already holds this ambulance.
-     *
-     * @param int|null $exclude_user_id Exclude this user from the conflict check (for edit forms).
-     * @return array
+     * Hydrates a PilotSignup entity from POST data.
      */
-    private function _getAmbulancesWithAssignments(?int $exclude_user_id = null): array
+    private function _hydratePilot(PilotSignup $pilot): PilotSignup
     {
-        $db = \Config\Database::connect();
-        $builder = $db->table('ambulances')
-            ->select('ambulances.id, ambulances.unit_id, ambulances.provider, ambulances.ems_provider_id, ambulances.registration, ambulances.status, users.id as assigned_to_id, users.name as assigned_to_name')
-            ->join('users', 'users.ambulance_id = ambulances.id AND users.active = 1 AND users.role = "paramedic"', 'left')
-            ->orderBy('ambulances.unit_id', 'ASC');
-
-        // When editing a specific user, exclude them so their own assignment doesn't show as a conflict
-        if ($exclude_user_id !== null) {
-            $builder->where('(users.id IS NULL OR users.id = ' . (int) $exclude_user_id . ')');
-        }
-
-        return $builder->get()->getResultArray();
+        $pilot->full_name     = (string) $this->request->getPost('fullName');
+        $pilot->email_address = (string) $this->request->getPost('emailAddress');
+        $pilot->organisation  = (string) $this->request->getPost('organisation');
+        $pilot->user_role     = (string) $this->request->getPost('userRole');
+        $pilot->phone_number  = $this->request->getPost('phoneNumber') ? (string) $this->request->getPost('phoneNumber') : null;
+        $pilot->message       = $this->request->getPost('message') ? (string) $this->request->getPost('message') : null;
+        return $pilot;
     }
 
     /**
-     * Checks if an ambulance is already assigned to another active paramedic.
-     * Returns the conflicting user's name, or null if no conflict.
-     *
-     * @param int      $ambulance_id
-     * @param int|null $current_user_id The user being edited (excluded from conflict).
-     * @return string|null
+     * Hydrates a Handover entity from POST data.
      */
-    private function _checkAmbulanceConflict(int $ambulance_id, ?int $current_user_id): ?string
+    private function _hydrateHandover(Handover $handover, bool $is_update = false): Handover
     {
-        $db = \Config\Database::connect();
-        $builder = $db->table('users')
-            ->select('name')
-            ->where('ambulance_id', $ambulance_id)
-            ->where('active', 1)
-            ->where('role', 'paramedic');
+        $handover->ambulance_id      = (int) $this->request->getPost('ambulanceId');
+        $handover->hospital_id       = (int) $this->request->getPost('hospitalId');
+        $handover->patient_age       = (int) $this->request->getPost('patientAge');
+        $handover->patient_gender    = (string) $this->request->getPost('patientGender');
+        $handover->acuity            = (string) $this->request->getPost('acuity');
+        $handover->eta_minutes       = (int) $this->request->getPost('etaMinutes');
+        $handover->wait_time_minutes = (int) $this->request->getPost('waitTimeMinutes');
+        $handover->status            = (string) $this->request->getPost('status');
+        $handover->bay_number        = $this->request->getPost('bayNumber') ? (string) $this->request->getPost('bayNumber') : null;
+        $handover->notes             = $this->request->getPost('notes') ? (string) $this->request->getPost('notes') : null;
 
-        if ($current_user_id !== null) {
-            $builder->where('id !=', $current_user_id);
+        if ($is_update) {
+            $old_status = $handover->status;
+            $new_status = (string) $this->request->getPost('status');
+            $handover->status = $new_status;
+
+            // Admin-only arrival declaration: record timestamp on transition to 'Arrived'
+            if ($old_status === 'En route' && $new_status === 'Arrived') {
+                $handover->arrived_at = date('Y-m-d H:i:s');
+            }
         }
 
-        $row = $builder->get()->getRow();
-        return $row ? $row->name : null;
+        return $handover;
     }
 
     /**
-     * CSV cell escaping utility.
-     *
-     * @param string $val
-     * @return string
+     * Hydrates a Hospital entity from POST data.
      */
-    private function _csvEscape(string $val): string
+    private function _hydrateHospital(Hospital $hospital): Hospital
     {
-        $val = str_replace('"', '""', $val);
-        if (str_contains($val, ',') || str_contains($val, '"') || str_contains($val, "\n") || str_contains($val, "\r")) {
-            return '"' . $val . '"';
-        }
-        return $val;
+        $hospital->code           = strtoupper((string) $this->request->getPost('code'));
+        $hospital->name           = (string) $this->request->getPost('name');
+        $hospital->category       = (string) $this->request->getPost('category');
+        $hospital->status         = (string) $this->request->getPost('status');
+        $hospital->bays_available = (int) ($this->request->getPost('bays_available') ?? 0);
+        $hospital->baseline_avg   = (int) ($this->request->getPost('baseline_avg') ?? 60);
+        $hospital->lat            = $this->request->getPost('lat') !== null ? (float) $this->request->getPost('lat') : null;
+        $hospital->lng            = $this->request->getPost('lng') !== null ? (float) $this->request->getPost('lng') : null;
+        $hospital->address        = $this->request->getPost('address') ? (string) $this->request->getPost('address') : null;
+        $hospital->contact_phone  = $this->request->getPost('contact_phone') ? (string) $this->request->getPost('contact_phone') : null;
+        $hospital->active         = $this->request->getPost('active') !== null ? (int) $this->request->getPost('active') : 1;
+        return $hospital;
     }
+
+    /**
+     * Hydrates an Ambulance entity from POST data.
+     */
+    private function _hydrateAmbulance(Ambulance $ambulance): Ambulance
+    {
+        $ambulance->unit_id        = strtoupper((string) $this->request->getPost('unitId'));
+        $ambulance->provider       = (string) $this->request->getPost('provider');
+        $ambulance->ems_provider_id = $this->request->getPost('ems_provider_id') ? (int) $this->request->getPost('ems_provider_id') : null;
+        $ambulance->registration   = $this->request->getPost('registration') ? (string) $this->request->getPost('registration') : null;
+        $ambulance->status         = (string) ($this->request->getPost('status') ?? 'Available');
+        $ambulance->current_lat    = $this->request->getPost('current_lat') !== null ? (float) $this->request->getPost('current_lat') : null;
+        $ambulance->current_lng    = $this->request->getPost('current_lng') !== null ? (float) $this->request->getPost('current_lng') : null;
+        return $ambulance;
+    }
+
+    /**
+     * Hydrates a User entity from POST data.
+     */
+    private function _hydrateUser(User $user): User
+    {
+        $user->name            = (string) $this->request->getPost('name');
+        $user->email           = (string) $this->request->getPost('email');
+        $user->role            = (string) $this->request->getPost('role');
+        $user->hospital_id     = $this->request->getPost('hospital_id') ? (int) $this->request->getPost('hospital_id') : null;
+        $user->ems_provider_id = $this->request->getPost('ems_provider_id') ? (int) $this->request->getPost('ems_provider_id') : null;
+        $user->ambulance_id    = $this->request->getPost('ambulance_id') ? (int) $this->request->getPost('ambulance_id') : null;
+        $user->active          = (int) $this->request->getPost('active');
+        return $user;
+    }
+
+    // --- Dashboard ---
 
     /**
      * Renders the administrative dashboard.
@@ -180,27 +214,11 @@ class AdminController extends BaseController
      */
     public function pilotCreate(): RedirectResponse
     {
-        $rules = [
-            'fullName'     => 'required|min_length[3]|max_length[255]',
-            'emailAddress' => 'required|valid_email|max_length[255]',
-            'organisation' => 'required|min_length[3]|max_length[255]',
-            'userRole'     => 'required|in_list[Hospital Administrator,ED Manager / Charge Nurse,Emergency Physician,Paramedic / EMT,EMS Dispatcher / Operations Manager,Investor / Funder,Researcher / Academic,Other]',
-            'phoneNumber'  => 'permit_empty|min_length[7]|max_length[50]',
-            'message'      => 'permit_empty|max_length[2000]',
-        ];
-
-        if (!$this->validate($rules)) {
+        if (!$this->validate(PilotSignup::VALIDATION_RULES)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $pilot = new PilotSignup();
-        $pilot->full_name     = (string) $this->request->getPost('fullName');
-        $pilot->email_address = (string) $this->request->getPost('emailAddress');
-        $pilot->organisation  = (string) $this->request->getPost('organisation');
-        $pilot->user_role     = (string) $this->request->getPost('userRole');
-        $pilot->phone_number  = $this->request->getPost('phoneNumber') ? (string) $this->request->getPost('phoneNumber') : null;
-        $pilot->message       = $this->request->getPost('message') ? (string) $this->request->getPost('message') : null;
-
+        $pilot = $this->_hydratePilot(new PilotSignup());
         $success = $this->admin_service->savePilot($pilot);
 
         if (!$success) {
@@ -251,26 +269,11 @@ class AdminController extends BaseController
             return redirect()->to(url_to('admin.pilots.list'))->with('error', 'Pilot signup record not found.');
         }
 
-        $rules = [
-            'fullName'     => 'required|min_length[3]|max_length[255]',
-            'emailAddress' => 'required|valid_email|max_length[255]',
-            'organisation' => 'required|min_length[3]|max_length[255]',
-            'userRole'     => 'required|in_list[Hospital Administrator,ED Manager / Charge Nurse,Emergency Physician,Paramedic / EMT,EMS Dispatcher / Operations Manager,Investor / Funder,Researcher / Academic,Other]',
-            'phoneNumber'  => 'permit_empty|min_length[7]|max_length[50]',
-            'message'      => 'permit_empty|max_length[2000]',
-        ];
-
-        if (!$this->validate($rules)) {
+        if (!$this->validate(PilotSignup::VALIDATION_RULES)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $pilot->full_name     = (string) $this->request->getPost('fullName');
-        $pilot->email_address = (string) $this->request->getPost('emailAddress');
-        $pilot->organisation  = (string) $this->request->getPost('organisation');
-        $pilot->user_role     = (string) $this->request->getPost('userRole');
-        $pilot->phone_number  = $this->request->getPost('phoneNumber') ? (string) $this->request->getPost('phoneNumber') : null;
-        $pilot->message       = $this->request->getPost('message') ? (string) $this->request->getPost('message') : null;
-
+        $pilot = $this->_hydratePilot($pilot);
         $success = $this->admin_service->savePilot($pilot);
 
         if (!$success) {
@@ -347,35 +350,11 @@ class AdminController extends BaseController
      */
     public function handoverCreate(): RedirectResponse
     {
-        $rules = [
-            'ambulanceId'     => 'required|integer',
-            'hospitalId'      => 'required|integer',
-            'patientAge'      => 'required|integer|greater_than_equal_to[0]',
-            'patientGender'   => 'required|in_list[M,F]',
-            'acuity'          => 'required|in_list[Critical,Serious,Stable]',
-            'etaMinutes'      => 'required|integer|greater_than_equal_to[0]',
-            'waitTimeMinutes' => 'required|integer|greater_than_equal_to[0]',
-            'status'          => 'required|in_list[En route,Arrived,Acknowledged,Preparing,Cleared]',
-            'bayNumber'       => 'permit_empty|alpha_numeric_space|max_length[50]',
-            'notes'           => 'permit_empty|max_length[200]',
-        ];
-
-        if (!$this->validate($rules)) {
+        if (!$this->validate(Handover::VALIDATION_RULES)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $handover = new Handover();
-        $handover->ambulance_id       = (int) $this->request->getPost('ambulanceId');
-        $handover->hospital_id        = (int) $this->request->getPost('hospitalId');
-        $handover->patient_age        = (int) $this->request->getPost('patientAge');
-        $handover->patient_gender     = (string) $this->request->getPost('patientGender');
-        $handover->acuity             = (string) $this->request->getPost('acuity');
-        $handover->eta_minutes        = (int) $this->request->getPost('etaMinutes');
-        $handover->wait_time_minutes  = (int) $this->request->getPost('waitTimeMinutes');
-        $handover->status             = (string) $this->request->getPost('status');
-        $handover->bay_number         = $this->request->getPost('bayNumber') ? (string) $this->request->getPost('bayNumber') : null;
-        $handover->notes              = $this->request->getPost('notes') ? (string) $this->request->getPost('notes') : null;
-
+        $handover = $this->_hydrateHandover(new Handover());
         $success = $this->admin_service->saveHandover($handover);
 
         if (!$success) {
@@ -428,42 +407,11 @@ class AdminController extends BaseController
             return redirect()->to(url_to('admin.handovers.list'))->with('error', 'Handover record not found.');
         }
 
-        $rules = [
-            'ambulanceId'     => 'required|integer',
-            'hospitalId'      => 'required|integer',
-            'patientAge'      => 'required|integer|greater_than_equal_to[0]',
-            'patientGender'   => 'required|in_list[M,F]',
-            'acuity'          => 'required|in_list[Critical,Serious,Stable]',
-            'etaMinutes'      => 'required|integer|greater_than_equal_to[0]',
-            'waitTimeMinutes' => 'required|integer|greater_than_equal_to[0]',
-            'status'          => 'required|in_list[En route,Arrived,Acknowledged,Preparing,Cleared]',
-            'bayNumber'       => 'permit_empty|alpha_numeric_space|max_length[50]',
-            'notes'           => 'permit_empty|max_length[200]',
-        ];
-
-        if (!$this->validate($rules)) {
+        if (!$this->validate(Handover::VALIDATION_RULES)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $old_status = $handover->status;
-        $new_status = (string) $this->request->getPost('status');
-
-        $handover->ambulance_id       = (int) $this->request->getPost('ambulanceId');
-        $handover->hospital_id        = (int) $this->request->getPost('hospitalId');
-        $handover->patient_age        = (int) $this->request->getPost('patientAge');
-        $handover->patient_gender     = (string) $this->request->getPost('patientGender');
-        $handover->acuity             = (string) $this->request->getPost('acuity');
-        $handover->eta_minutes        = (int) $this->request->getPost('etaMinutes');
-        $handover->wait_time_minutes  = (int) $this->request->getPost('waitTimeMinutes');
-        $handover->status             = $new_status;
-        $handover->bay_number         = $this->request->getPost('bayNumber') ? (string) $this->request->getPost('bayNumber') : null;
-        $handover->notes              = $this->request->getPost('notes') ? (string) $this->request->getPost('notes') : null;
-
-        // Admin-only arrival declaration: record timestamp on transition to 'Arrived'
-        if ($old_status === 'En route' && $new_status === 'Arrived') {
-            $handover->arrived_at = date('Y-m-d H:i:s');
-        }
-
+        $handover = $this->_hydrateHandover($handover, true);
         $success = $this->admin_service->saveHandover($handover);
 
         if (!$success) {
@@ -538,37 +486,11 @@ class AdminController extends BaseController
      */
     public function hospitalCreate(): RedirectResponse
     {
-        $rules = [
-            'code'          => 'required|min_length[2]|max_length[10]|is_unique[hospitals.code]',
-            'name'          => 'required|min_length[3]|max_length[255]',
-            'category'      => 'required|min_length[3]|max_length[255]',
-            'status'        => 'required|in_list[Green,Amber,Red,Recruiting]',
-            'bays_available' => 'permit_empty|integer|greater_than_equal_to[0]',
-            'baseline_avg'  => 'permit_empty|integer|greater_than_equal_to[0]',
-            'lat'           => 'permit_empty|decimal',
-            'lng'           => 'permit_empty|decimal',
-            'address'       => 'permit_empty|max_length[500]',
-            'contact_phone' => 'permit_empty|max_length[50]',
-            'active'        => 'permit_empty|in_list[0,1]',
-        ];
-
-        if (!$this->validate($rules)) {
+        if (!$this->validate(Hospital::VALIDATION_RULES)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $hospital = new Hospital();
-        $hospital->code          = strtoupper((string) $this->request->getPost('code'));
-        $hospital->name          = (string) $this->request->getPost('name');
-        $hospital->category      = (string) $this->request->getPost('category');
-        $hospital->status        = (string) $this->request->getPost('status');
-        $hospital->bays_available = (int) ($this->request->getPost('bays_available') ?? 0);
-        $hospital->baseline_avg  = (int) ($this->request->getPost('baseline_avg') ?? 60);
-        $hospital->lat           = $this->request->getPost('lat') !== null ? (float) $this->request->getPost('lat') : null;
-        $hospital->lng           = $this->request->getPost('lng') !== null ? (float) $this->request->getPost('lng') : null;
-        $hospital->address       = $this->request->getPost('address') ? (string) $this->request->getPost('address') : null;
-        $hospital->contact_phone = $this->request->getPost('contact_phone') ? (string) $this->request->getPost('contact_phone') : null;
-        $hospital->active        = $this->request->getPost('active') !== null ? (int) $this->request->getPost('active') : 1;
-
+        $hospital = $this->_hydrateHospital(new Hospital());
         $success = $this->admin_service->saveHospital($hospital);
 
         if (!$success) {
@@ -619,36 +541,15 @@ class AdminController extends BaseController
             return redirect()->to(url_to('admin.hospitals.list'))->with('error', 'Hospital record not found.');
         }
 
-        $rules = [
-            'code'          => 'required|min_length[2]|max_length[10]|is_unique[hospitals.code,id,' . $hospital_id . ']',
-            'name'          => 'required|min_length[3]|max_length[255]',
-            'category'      => 'required|min_length[3]|max_length[255]',
-            'status'        => 'required|in_list[Green,Amber,Red,Recruiting]',
-            'bays_available' => 'permit_empty|integer|greater_than_equal_to[0]',
-            'baseline_avg'  => 'permit_empty|integer|greater_than_equal_to[0]',
-            'lat'           => 'permit_empty|decimal',
-            'lng'           => 'permit_empty|decimal',
-            'address'       => 'permit_empty|max_length[500]',
-            'contact_phone' => 'permit_empty|max_length[50]',
-            'active'        => 'permit_empty|in_list[0,1]',
-        ];
+        // Build rules with ID exclusion for unique code check
+        $rules = Hospital::UPDATE_RULES;
+        $rules['code'] = 'required|min_length[2]|max_length[10]|is_unique[hospitals.code,id,' . $hospital_id . ']';
 
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $hospital->code          = strtoupper((string) $this->request->getPost('code'));
-        $hospital->name          = (string) $this->request->getPost('name');
-        $hospital->category      = (string) $this->request->getPost('category');
-        $hospital->status        = (string) $this->request->getPost('status');
-        $hospital->bays_available = (int) ($this->request->getPost('bays_available') ?? 0);
-        $hospital->baseline_avg  = (int) ($this->request->getPost('baseline_avg') ?? 60);
-        $hospital->lat           = $this->request->getPost('lat') !== null ? (float) $this->request->getPost('lat') : null;
-        $hospital->lng           = $this->request->getPost('lng') !== null ? (float) $this->request->getPost('lng') : null;
-        $hospital->address       = $this->request->getPost('address') ? (string) $this->request->getPost('address') : null;
-        $hospital->contact_phone = $this->request->getPost('contact_phone') ? (string) $this->request->getPost('contact_phone') : null;
-        $hospital->active        = $this->request->getPost('active') !== null ? (int) $this->request->getPost('active') : 1;
-
+        $hospital = $this->_hydrateHospital($hospital);
         $success = $this->admin_service->saveHospital($hospital);
 
         if (!$success) {
@@ -724,29 +625,11 @@ class AdminController extends BaseController
      */
     public function ambulanceCreate(): RedirectResponse
     {
-        $rules = [
-            'unitId'        => 'required|min_length[3]|max_length[50]|is_unique[ambulances.unit_id]',
-            'provider'      => 'required|min_length[2]|max_length[255]',
-            'ems_provider_id' => 'permit_empty|integer',
-            'registration'  => 'permit_empty|max_length[50]',
-            'status'        => 'permit_empty|in_list[Available,Transporting,On Scene,Queued,Off Duty]',
-            'current_lat'   => 'permit_empty|decimal',
-            'current_lng'   => 'permit_empty|decimal',
-        ];
-
-        if (!$this->validate($rules)) {
+        if (!$this->validate(Ambulance::VALIDATION_RULES)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $ambulance = new Ambulance();
-        $ambulance->unit_id        = strtoupper((string) $this->request->getPost('unitId'));
-        $ambulance->provider       = (string) $this->request->getPost('provider');
-        $ambulance->ems_provider_id = $this->request->getPost('ems_provider_id') ? (int) $this->request->getPost('ems_provider_id') : null;
-        $ambulance->registration   = $this->request->getPost('registration') ? (string) $this->request->getPost('registration') : null;
-        $ambulance->status         = (string) ($this->request->getPost('status') ?? 'Available');
-        $ambulance->current_lat    = $this->request->getPost('current_lat') !== null ? (float) $this->request->getPost('current_lat') : null;
-        $ambulance->current_lng    = $this->request->getPost('current_lng') !== null ? (float) $this->request->getPost('current_lng') : null;
-
+        $ambulance = $this->_hydrateAmbulance(new Ambulance());
         $success = $this->admin_service->saveAmbulance($ambulance);
 
         if (!$success) {
@@ -798,28 +681,15 @@ class AdminController extends BaseController
             return redirect()->to(url_to('admin.ambulances.list'))->with('error', 'Ambulance record not found.');
         }
 
-        $rules = [
-            'unitId'        => 'required|min_length[3]|max_length[50]|is_unique[ambulances.unit_id,id,' . $ambulance_id . ']',
-            'provider'      => 'required|min_length[2]|max_length[255]',
-            'ems_provider_id' => 'permit_empty|integer',
-            'registration'  => 'permit_empty|max_length[50]',
-            'status'        => 'permit_empty|in_list[Available,Transporting,On Scene,Queued,Off Duty]',
-            'current_lat'   => 'permit_empty|decimal',
-            'current_lng'   => 'permit_empty|decimal',
-        ];
+        // Build rules with ID exclusion for unique unit_id check
+        $rules = Ambulance::UPDATE_RULES;
+        $rules['unitId'] = 'required|min_length[3]|max_length[50]|is_unique[ambulances.unit_id,id,' . $ambulance_id . ']';
 
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $ambulance->unit_id        = strtoupper((string) $this->request->getPost('unitId'));
-        $ambulance->provider       = (string) $this->request->getPost('provider');
-        $ambulance->ems_provider_id = $this->request->getPost('ems_provider_id') ? (int) $this->request->getPost('ems_provider_id') : null;
-        $ambulance->registration   = $this->request->getPost('registration') ? (string) $this->request->getPost('registration') : null;
-        $ambulance->status         = (string) ($this->request->getPost('status') ?? 'Available');
-        $ambulance->current_lat    = $this->request->getPost('current_lat') !== null ? (float) $this->request->getPost('current_lat') : null;
-        $ambulance->current_lng    = $this->request->getPost('current_lng') !== null ? (float) $this->request->getPost('current_lng') : null;
-
+        $ambulance = $this->_hydrateAmbulance($ambulance);
         $success = $this->admin_service->saveAmbulance($ambulance);
 
         if (!$success) {
@@ -847,7 +717,7 @@ class AdminController extends BaseController
     }
 
     // =========================================================================
-    // USERS CRUD ACTIONS (SC-16)
+    // USERS CRUD ACTIONS
     // =========================================================================
 
     /**
@@ -884,7 +754,7 @@ class AdminController extends BaseController
             'robotsTag'       => 'noindex, nofollow',
             'hospitals'        => $this->admin_service->getAllHospitals(),
             'ems_providers'    => $this->admin_service->getAllEmsProviders(),
-            'ambulances'       => $this->_getAmbulancesWithAssignments(),
+            'ambulances'       => $this->admin_service->getAmbulancesWithAssignments(),
         ];
 
         return view('App\Modules\Admin\Views\users\edit', $data);
@@ -897,33 +767,16 @@ class AdminController extends BaseController
      */
     public function userCreate(): RedirectResponse
     {
-        $rules = [
-            'name'            => 'required|min_length[3]|max_length[255]',
-            'email'           => 'required|valid_email|max_length[255]|is_unique[users.email]',
-            'role'            => 'required|in_list[nurse,hospital_admin,paramedic,dispatcher,admin]',
-            'hospital_id'     => 'permit_empty|integer',
-            'ems_provider_id' => 'permit_empty|integer',
-            'ambulance_id'    => 'permit_empty|integer',
-            'active'          => 'required|in_list[0,1]',
-        ];
-
-        if (!$this->validate($rules)) {
+        if (!$this->validate(User::VALIDATION_RULES)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $user = new User();
-        $user->name            = (string) $this->request->getPost('name');
-        $user->email           = (string) $this->request->getPost('email');
-        $user->password_hash   = password_hash('12345678', PASSWORD_BCRYPT);
-        $user->role            = (string) $this->request->getPost('role');
-        $user->hospital_id     = $this->request->getPost('hospital_id') ? (int) $this->request->getPost('hospital_id') : null;
-        $user->ems_provider_id = $this->request->getPost('ems_provider_id') ? (int) $this->request->getPost('ems_provider_id') : null;
-        $user->ambulance_id    = $this->request->getPost('ambulance_id') ? (int) $this->request->getPost('ambulance_id') : null;
-        $user->active          = (int) $this->request->getPost('active');
+        $user = $this->_hydrateUser(new User());
+        $user->password_hash = password_hash('12345678', PASSWORD_BCRYPT);
 
         // Validate ambulance uniqueness: prevent double assignment
         if ($user->ambulance_id !== null) {
-            $conflict = $this->_checkAmbulanceConflict($user->ambulance_id, null);
+            $conflict = $this->admin_service->checkAmbulanceConflict($user->ambulance_id, null);
             if ($conflict !== null) {
                 return redirect()->back()->withInput()->with('errors', ['ambulance_id' => 'This ambulance is already assigned to ' . $conflict . '.']);
             }
@@ -961,7 +814,7 @@ class AdminController extends BaseController
             'user'             => $user,
             'hospitals'        => $this->admin_service->getAllHospitals(),
             'ems_providers'    => $this->admin_service->getAllEmsProviders(),
-            'ambulances'       => $this->_getAmbulancesWithAssignments((int) $user_id),
+            'ambulances'       => $this->admin_service->getAmbulancesWithAssignments((int) $user_id),
         ];
 
         return view('App\Modules\Admin\Views\users\edit', $data);
@@ -982,31 +835,15 @@ class AdminController extends BaseController
             return redirect()->to(url_to('admin.users.list'))->with('error', 'User account not found.');
         }
 
-        $rules = [
-            'name'            => 'required|min_length[3]|max_length[255]',
-            'email'           => 'required|valid_email|max_length[255]|is_unique[users.email,id,' . $user_id . ']',
-            'role'            => 'required|in_list[nurse,hospital_admin,paramedic,dispatcher,admin]',
-            'hospital_id'     => 'permit_empty|integer',
-            'ems_provider_id' => 'permit_empty|integer',
-            'ambulance_id'    => 'permit_empty|integer',
-            'active'          => 'required|in_list[0,1]',
-        ];
-
-        if (!$this->validate($rules)) {
+        if (!$this->validate(User::UPDATE_RULES)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $user->name            = (string) $this->request->getPost('name');
-        $user->email           = (string) $this->request->getPost('email');
-        $user->role            = (string) $this->request->getPost('role');
-        $user->hospital_id     = $this->request->getPost('hospital_id') ? (int) $this->request->getPost('hospital_id') : null;
-        $user->ems_provider_id = $this->request->getPost('ems_provider_id') ? (int) $this->request->getPost('ems_provider_id') : null;
-        $user->ambulance_id    = $this->request->getPost('ambulance_id') ? (int) $this->request->getPost('ambulance_id') : null;
-        $user->active          = (int) $this->request->getPost('active');
+        $user = $this->_hydrateUser($user);
 
         // Validate ambulance uniqueness: prevent double assignment
         if ($user->ambulance_id !== null) {
-            $conflict = $this->_checkAmbulanceConflict($user->ambulance_id, (int) $user_id);
+            $conflict = $this->admin_service->checkAmbulanceConflict($user->ambulance_id, (int) $user_id);
             if ($conflict !== null) {
                 return redirect()->back()->withInput()->with('errors', ['ambulance_id' => 'This ambulance is already assigned to ' . $conflict . '.']);
             }
@@ -1015,10 +852,7 @@ class AdminController extends BaseController
         // Optional set new password if field is not empty
         $new_password = $this->request->getPost('new_password');
         if (!empty($new_password)) {
-            $password_rules = [
-                'new_password' => 'required|min_length[6]',
-            ];
-            if (!$this->validate($password_rules)) {
+            if (!$this->validate(User::PASSWORD_RULES)) {
                 return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
             }
             $user->password_hash = password_hash((string) $new_password, PASSWORD_BCRYPT);
@@ -1050,7 +884,9 @@ class AdminController extends BaseController
         return redirect()->to(url_to('admin.users.list'))->with('success', 'User account deleted successfully.');
     }
 
-
+    // =========================================================================
+    // ANALYTICS
+    // =========================================================================
 
     /**
      * Renders the Global Analytics Dashboard (SC-06) for Sysadmin.
@@ -1089,53 +925,19 @@ class AdminController extends BaseController
     }
 
     /**
-     * Generates a plain-text downloadable CSV report matching global metrics.
+     * Generates a downloadable CSV report matching global metrics.
      *
      * @return \CodeIgniter\HTTP\ResponseInterface
      */
-    public function exportPdf(): \CodeIgniter\HTTP\ResponseInterface
+    public function exportCsv(): \CodeIgniter\HTTP\ResponseInterface
     {
         $hospital_service = service('hospitalService');
         $analytics = $hospital_service->getAnalytics(null, 30);
-
-        // Build CSV with proper escaping for spreadsheet compatibility
-        $lines   = [];
-        $lines[] = "ClearBay Global Off-Load Performance Report";
-        $lines[] = "Facility,All Facilities";
-        $lines[] = "Date Range,Past 30 Days";
-        $lines[] = "Report Date," . date('Y-m-d H:i:s') . " EAT";
-        $lines[] = "";
-
-        // Hospital Breakdown
-        $lines[] = "Facility Summary";
-        $lines[] = "Hospital Name,Handovers Completed,Average Wait Time (Minutes)";
-        foreach ($analytics['facility_performance'] as $row) {
-            $lines[] = sprintf(
-                "%s,%d,%s",
-                $this->_csvEscape((string) $row['hospital_name']),
-                (int) $row['total_handovers'],
-                (string) $row['avg_wait']
-            );
-        }
-        $lines[] = "";
-
-        // Provider Breakdown
-        $lines[] = "EMS Provider Summary";
-        $lines[] = "Provider,Handovers Completed,Ambulances";
-        foreach ($analytics['provider_performance'] as $row) {
-            $lines[] = sprintf(
-                "%s,%d,%d",
-                $this->_csvEscape((string) $row['provider']),
-                (int) ($row['total_handovers'] ?? 0),
-                (int) ($row['total_ambulances'] ?? 0)
-            );
-        }
-
-        $content = implode("\n", $lines) . "\n";
+        $csv_content = $this->admin_service->generateCsvReport($analytics);
 
         return $this->response
             ->setHeader('Content-Type', 'text/csv')
             ->setHeader('Content-Disposition', 'attachment; filename="clearbay_global_report.csv"')
-            ->setBody($content);
+            ->setBody($csv_content);
     }
 }

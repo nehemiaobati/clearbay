@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Admin\Libraries;
 
+use App\Libraries\DatabaseTransactionTrait;
 use App\Modules\Auth\Models\UserModel;
 use App\Modules\Auth\Entities\User;
 use Config\Database;
@@ -20,6 +21,8 @@ use Throwable;
  */
 class UserAdminService
 {
+    use DatabaseTransactionTrait;
+
     private UserModel $user_model;
 
     public function __construct()
@@ -68,25 +71,10 @@ class UserAdminService
      */
     public function saveUser(User $user): array
     {
-        $db = Database::connect();
-        $db->transStart();
-
-        try {
-            $this->user_model->save($user);
-            $db->transComplete();
-
-            if ($db->transStatus() === false) {
-                return ['status' => 'error', 'message' => 'Transaction failed while saving user.'];
-            }
-            return ['status' => 'success', 'message' => 'User saved successfully.'];
-        } catch (Throwable $e) {
-            $db->transRollback();
-            log_message('error', 'Failed to save user', [
-                'exception' => $e->getMessage(),
-                'trace'     => $e->getTraceAsString(),
-            ]);
-            return ['status' => 'error', 'message' => $e->getMessage()];
-        }
+        return $this->wrapInTransaction(
+            fn() => $this->user_model->save($user),
+            'saving user'
+        );
     }
 
     /**
@@ -98,25 +86,10 @@ class UserAdminService
      */
     public function deleteUser(int $id): array
     {
-        $db = Database::connect();
-        $db->transStart();
-
-        try {
-            $this->user_model->update($id, ['active' => 0]);
-            $db->transComplete();
-
-            if ($db->transStatus() === false) {
-                return ['status' => 'error', 'message' => 'Transaction failed while deactivating user.'];
-            }
-            return ['status' => 'success', 'message' => 'User deactivated successfully.'];
-        } catch (Throwable $e) {
-            $db->transRollback();
-            log_message('error', 'Failed to deactivate user', [
-                'id'        => $id,
-                'exception' => $e->getMessage(),
-            ]);
-            return ['status' => 'error', 'message' => $e->getMessage()];
-        }
+        return $this->wrapInTransaction(
+            fn() => $this->user_model->update($id, ['active' => 0]),
+            'deactivating user'
+        );
     }
 
     /**

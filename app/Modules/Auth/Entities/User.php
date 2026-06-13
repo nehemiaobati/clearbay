@@ -39,6 +39,33 @@ class User extends Entity
         'active'          => 'integer',
     ];
 
+    /** Validation rules for create operations. */
+    public const VALIDATION_RULES = [
+        'name'            => 'required|min_length[3]|max_length[255]',
+        'email'           => 'required|valid_email|max_length[255]|is_unique[users.email]',
+        'role'            => 'required|in_list[nurse,hospital_admin,paramedic,dispatcher,admin]',
+        'hospital_id'     => 'permit_empty|integer',
+        'ems_provider_id' => 'permit_empty|integer',
+        'ambulance_id'    => 'permit_empty|integer',
+        'active'          => 'required|in_list[0,1]',
+    ];
+
+    /** Validation rules for update operations (without unique email check). */
+    public const UPDATE_RULES = [
+        'name'            => 'required|min_length[3]|max_length[255]',
+        'email'           => 'required|valid_email|max_length[255]',
+        'role'            => 'required|in_list[nurse,hospital_admin,paramedic,dispatcher,admin]',
+        'hospital_id'     => 'permit_empty|integer',
+        'ems_provider_id' => 'permit_empty|integer',
+        'ambulance_id'    => 'permit_empty|integer',
+        'active'          => 'required|in_list[0,1]',
+    ];
+
+    /** Password validation rules (update context). */
+    public const PASSWORD_RULES = [
+        'new_password' => 'required|min_length[6]',
+    ];
+
     /**
      * Hashes the password automatically when set.
      *

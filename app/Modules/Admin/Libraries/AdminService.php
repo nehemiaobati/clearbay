@@ -27,82 +27,84 @@ class AdminService
     private AmbulanceAdminService $ambulance_service;
     private UserAdminService $user_service;
 
-    public function __construct()
-    {
-        $this->pilot_service     = service('pilotAdminService');
-        $this->handover_service  = service('handoverAdminService');
-        $this->hospital_service  = service('hospitalAdminService');
-        $this->ambulance_service = service('ambulanceAdminService');
-        $this->user_service      = service('userAdminService');
+    public function __construct(
+        ?PilotAdminService $pilot_service = null,
+        ?HandoverAdminService $handover_service = null,
+        ?HospitalAdminService $hospital_service = null,
+        ?AmbulanceAdminService $ambulance_service = null,
+        ?UserAdminService $user_service = null
+    ) {
+        $this->pilot_service     = $pilot_service ?? service('pilotAdminService');
+        $this->handover_service  = $handover_service ?? service('handoverAdminService');
+        $this->hospital_service  = $hospital_service ?? service('hospitalAdminService');
+        $this->ambulance_service = $ambulance_service ?? service('ambulanceAdminService');
+        $this->user_service      = $user_service ?? service('userAdminService');
     }
 
-    /**
-     * Resolves a single pilot signup record by primary key.
-     */
+    // --- Single Record Resolvers ---
+
     public function getPilot(int $pilot_id): ?PilotSignup
     {
         return $this->pilot_service->getPilot($pilot_id);
     }
 
-    /**
-     * Resolves a single handover record by primary key.
-     */
     public function getHandover(int $handover_id): ?Handover
     {
         return $this->handover_service->getHandover($handover_id);
     }
 
-    /**
-     * Resolves a single hospital record by primary key.
-     */
     public function getHospital(int $hospital_id): ?Hospital
     {
         return $this->hospital_service->getHospital($hospital_id);
     }
 
-    /**
-     * Resolves a single ambulance record by primary key.
-     */
     public function getAmbulance(int $ambulance_id): ?Ambulance
     {
         return $this->ambulance_service->getAmbulance($ambulance_id);
     }
 
-    /**
-     * Resolves a single user record by primary key.
-     */
     public function getUser(int $user_id): ?User
     {
         return $this->user_service->getUser($user_id);
     }
 
-    /**
-     * Retrieves all hospitals ordered by name.
-     */
+    // --- Collection Retrieval ---
+
     public function getAllHospitals(): array
     {
         return $this->hospital_service->getAllHospitals();
     }
 
-    /**
-     * Retrieves all ambulances ordered by unit_id.
-     */
     public function getAllAmbulances(): array
     {
         return $this->ambulance_service->getAllAmbulances();
     }
 
-    /**
-     * Retrieves all EMS providers.
-     */
     public function getAllEmsProviders(): array
     {
         return $this->ambulance_service->getAllEmsProviders();
     }
 
     /**
-     * Returns count results for pilots, handovers, hospitals, ambulances, and users.
+     * Retrieves all ambulances annotated with their current paramedic
+     * assignment (assigned_to_name and assigned_to_id).
      */
+    public function getAmbulancesWithAssignments(?int $exclude_user_id = null): array
+    {
+        return $this->ambulance_service->getAmbulancesWithAssignments($exclude_user_id);
+    }
+
+    /**
+     * Checks if an ambulance is assigned to another active paramedic.
+     * Returns the conflicting user's name, or null if no conflict.
+     */
+    public function checkAmbulanceConflict(int $ambulance_id, ?int $current_user_id): ?string
+    {
+        return $this->ambulance_service->checkAmbulanceConflict($ambulance_id, $current_user_id);
+    }
+
+    // --- Dashboard ---
+
     public function getDashboardMetrics(): array
     {
         return [
@@ -114,133 +116,152 @@ class AdminService
         ];
     }
 
-    /**
-     * Returns paginated pilots list and the pager instance.
-     */
+    // --- Paginated Lists ---
+
     public function getPilotsList(int $perPage): array
     {
         return $this->pilot_service->getPilotsList($perPage);
     }
 
-    /**
-     * Returns paginated handovers list and the pager instance.
-     */
     public function getHandoversList(int $perPage): array
     {
         return $this->handover_service->getHandoversList($perPage);
     }
 
-    /**
-     * Returns paginated hospitals list and the pager instance.
-     */
     public function getHospitalsList(int $perPage): array
     {
         return $this->hospital_service->getHospitalsList($perPage);
     }
 
-    /**
-     * Returns paginated ambulances list and the pager instance.
-     */
     public function getAmbulancesList(int $perPage): array
     {
         return $this->ambulance_service->getAmbulancesList($perPage);
     }
 
-    /**
-     * Returns paginated users list and the pager instance.
-     */
     public function getUsersList(int $perPage): array
     {
         return $this->user_service->getUsersList($perPage);
     }
 
-    /**
-     * Saves a pilot record.
-     */
+    // --- Save / Delete Passthroughs ---
+
     public function savePilot(PilotSignup $pilot): bool
     {
         $result = $this->pilot_service->savePilot($pilot);
         return $result['status'] === 'success';
     }
 
-    /**
-     * Deletes a pilot record.
-     */
     public function deletePilot(int $id): bool
     {
         $result = $this->pilot_service->deletePilot($id);
         return $result['status'] === 'success';
     }
 
-    /**
-     * Saves a handover record.
-     */
     public function saveHandover(Handover $handover): bool
     {
         $result = $this->handover_service->saveHandover($handover);
         return $result['status'] === 'success';
     }
 
-    /**
-     * Deletes a handover record.
-     */
     public function deleteHandover(int $id): bool
     {
         $result = $this->handover_service->deleteHandover($id);
         return $result['status'] === 'success';
     }
 
-    /**
-     * Saves a hospital record.
-     */
     public function saveHospital(Hospital $hospital): bool
     {
         $result = $this->hospital_service->saveHospital($hospital);
         return $result['status'] === 'success';
     }
 
-    /**
-     * Deletes a hospital record.
-     */
     public function deleteHospital(int $id): bool
     {
         $result = $this->hospital_service->deleteHospital($id);
         return $result['status'] === 'success';
     }
 
-    /**
-     * Saves an ambulance record.
-     */
     public function saveAmbulance(Ambulance $ambulance): bool
     {
         $result = $this->ambulance_service->saveAmbulance($ambulance);
         return $result['status'] === 'success';
     }
 
-    /**
-     * Deletes an ambulance record.
-     */
     public function deleteAmbulance(int $id): bool
     {
         $result = $this->ambulance_service->deleteAmbulance($id);
         return $result['status'] === 'success';
     }
 
-    /**
-     * Saves a user record.
-     */
     public function saveUser(User $user): bool
     {
         $result = $this->user_service->saveUser($user);
         return $result['status'] === 'success';
     }
 
-    /**
-     * Deactivates a user account.
-     */
     public function deleteUser(int $id): bool
     {
         $result = $this->user_service->deleteUser($id);
         return $result['status'] === 'success';
+    }
+
+    // --- CSV Report Generation ---
+
+    /**
+     * Generates a plain-text CSV string from analytics data.
+     *
+     * @param array $analytics The analytics dataset from HospitalService::getAnalytics()
+     * @return string
+     */
+    public function generateCsvReport(array $analytics): string
+    {
+        $lines = [];
+        $lines[] = "ClearBay Global Off-Load Performance Report";
+        $lines[] = "Facility,All Facilities";
+        $lines[] = "Date Range,Past 30 Days";
+        $lines[] = "Report Date," . date('Y-m-d H:i:s') . " EAT";
+        $lines[] = "";
+
+        // Hospital Breakdown
+        $lines[] = "Facility Summary";
+        $lines[] = "Hospital Name,Handovers Completed,Average Wait Time (Minutes)";
+        foreach ($analytics['facility_performance'] as $row) {
+            $lines[] = sprintf(
+                "%s,%d,%s",
+                $this->_csvEscape((string) $row['hospital_name']),
+                (int) $row['total_handovers'],
+                (string) $row['avg_wait']
+            );
+        }
+        $lines[] = "";
+
+        // Provider Breakdown
+        $lines[] = "EMS Provider Summary";
+        $lines[] = "Provider,Handovers Completed,Ambulances";
+        foreach ($analytics['provider_performance'] as $row) {
+            $lines[] = sprintf(
+                "%s,%d,%d",
+                $this->_csvEscape((string) $row['provider']),
+                (int) ($row['total_handovers'] ?? 0),
+                (int) ($row['total_ambulances'] ?? 0)
+            );
+        }
+
+        return implode("\n", $lines) . "\n";
+    }
+
+    /**
+     * CSV cell escaping utility.
+     *
+     * @param string $val
+     * @return string
+     */
+    private function _csvEscape(string $val): string
+    {
+        $val = str_replace('"', '""', $val);
+        if (str_contains($val, ',') || str_contains($val, '"') || str_contains($val, "\n") || str_contains($val, "\r")) {
+            return '"' . $val . '"';
+        }
+        return $val;
     }
 }

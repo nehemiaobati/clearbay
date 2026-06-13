@@ -42,4 +42,34 @@ class Hospital extends Entity
         'contact_phone'  => 'string',
         'active'         => 'integer',
     ];
+
+    /** Validation rules for create and update operations. */
+    public const VALIDATION_RULES = [
+        'code'           => 'required|min_length[2]|max_length[10]|is_unique[hospitals.code]',
+        'name'           => 'required|min_length[3]|max_length[255]',
+        'category'       => 'required|min_length[3]|max_length[255]',
+        'status'         => 'required|in_list[Green,Amber,Red,Recruiting]',
+        'bays_available' => 'permit_empty|integer|greater_than_equal_to[0]',
+        'baseline_avg'   => 'permit_empty|integer|greater_than_equal_to[0]',
+        'lat'            => 'permit_empty|decimal',
+        'lng'            => 'permit_empty|decimal',
+        'address'        => 'permit_empty|max_length[500]',
+        'contact_phone'  => 'permit_empty|max_length[50]',
+        'active'         => 'permit_empty|in_list[0,1]',
+    ];
+
+    /** Validation rules for update (with ID exclusion for unique checks). */
+    public const UPDATE_RULES = [
+        'code'           => 'required|min_length[2]|max_length[10]',
+        'name'           => 'required|min_length[3]|max_length[255]',
+        'category'       => 'required|min_length[3]|max_length[255]',
+        'status'         => 'required|in_list[Green,Amber,Red,Recruiting]',
+        'bays_available' => 'permit_empty|integer|greater_than_equal_to[0]',
+        'baseline_avg'   => 'permit_empty|integer|greater_than_equal_to[0]',
+        'lat'            => 'permit_empty|decimal',
+        'lng'            => 'permit_empty|decimal',
+        'address'        => 'permit_empty|max_length[500]',
+        'contact_phone'  => 'permit_empty|max_length[50]',
+        'active'         => 'permit_empty|in_list[0,1]',
+    ];
 }

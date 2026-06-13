@@ -46,4 +46,18 @@ class Handover extends Entity
         'notes'               => 'string',
         'completed_by'        => 'integer',
     ];
+
+    /** Validation rules for create and update operations. */
+    public const VALIDATION_RULES = [
+        'ambulanceId'     => 'required|integer',
+        'hospitalId'      => 'required|integer',
+        'patientAge'      => 'required|integer|greater_than_equal_to[0]',
+        'patientGender'   => 'required|in_list[M,F]',
+        'acuity'          => 'required|in_list[Critical,Serious,Stable]',
+        'etaMinutes'      => 'required|integer|greater_than_equal_to[0]',
+        'waitTimeMinutes' => 'required|integer|greater_than_equal_to[0]',
+        'status'          => 'required|in_list[En route,Arrived,Acknowledged,Preparing,Cleared]',
+        'bayNumber'       => 'permit_empty|alpha_numeric_space|max_length[50]',
+        'notes'           => 'permit_empty|max_length[200]',
+    ];
 }

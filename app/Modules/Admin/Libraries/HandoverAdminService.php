@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Admin\Libraries;
 
+use App\Libraries\DatabaseTransactionTrait;
 use App\Modules\Hospital\Models\HandoverModel;
 use App\Modules\Hospital\Entities\Handover;
 use Config\Database;
@@ -20,6 +21,8 @@ use Throwable;
  */
 class HandoverAdminService
 {
+    use DatabaseTransactionTrait;
+
     private HandoverModel $handover_model;
 
     public function __construct()
@@ -68,25 +71,10 @@ class HandoverAdminService
      */
     public function saveHandover(Handover $handover): array
     {
-        $db = Database::connect();
-        $db->transStart();
-
-        try {
-            $this->handover_model->save($handover);
-            $db->transComplete();
-
-            if ($db->transStatus() === false) {
-                return ['status' => 'error', 'message' => 'Transaction failed while saving handover.'];
-            }
-            return ['status' => 'success', 'message' => 'Handover saved successfully.'];
-        } catch (Throwable $e) {
-            $db->transRollback();
-            log_message('error', 'Failed to save handover', [
-                'exception' => $e->getMessage(),
-                'trace'     => $e->getTraceAsString(),
-            ]);
-            return ['status' => 'error', 'message' => $e->getMessage()];
-        }
+        return $this->wrapInTransaction(
+            fn() => $this->handover_model->save($handover),
+            'saving handover'
+        );
     }
 
     /**
@@ -98,25 +86,10 @@ class HandoverAdminService
      */
     public function deleteHandover(int $id): array
     {
-        $db = Database::connect();
-        $db->transStart();
-
-        try {
-            $this->handover_model->delete($id);
-            $db->transComplete();
-
-            if ($db->transStatus() === false) {
-                return ['status' => 'error', 'message' => 'Transaction failed while deleting handover.'];
-            }
-            return ['status' => 'success', 'message' => 'Handover deleted successfully.'];
-        } catch (Throwable $e) {
-            $db->transRollback();
-            log_message('error', 'Failed to delete handover', [
-                'id'        => $id,
-                'exception' => $e->getMessage(),
-            ]);
-            return ['status' => 'error', 'message' => $e->getMessage()];
-        }
+        return $this->wrapInTransaction(
+            fn() => $this->handover_model->delete($id),
+            'deleting handover'
+        );
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Admin\Libraries;
 
+use App\Libraries\DatabaseTransactionTrait;
 use App\Modules\Hospital\Models\HospitalModel;
 use App\Modules\Hospital\Entities\Hospital;
 use Config\Database;
@@ -20,6 +21,8 @@ use Throwable;
  */
 class HospitalAdminService
 {
+    use DatabaseTransactionTrait;
+
     private HospitalModel $hospital_model;
 
     public function __construct()
@@ -73,25 +76,10 @@ class HospitalAdminService
      */
     public function saveHospital(Hospital $hospital): array
     {
-        $db = Database::connect();
-        $db->transStart();
-
-        try {
-            $this->hospital_model->save($hospital);
-            $db->transComplete();
-
-            if ($db->transStatus() === false) {
-                return ['status' => 'error', 'message' => 'Transaction failed while saving hospital.'];
-            }
-            return ['status' => 'success', 'message' => 'Hospital saved successfully.'];
-        } catch (Throwable $e) {
-            $db->transRollback();
-            log_message('error', 'Failed to save hospital', [
-                'exception' => $e->getMessage(),
-                'trace'     => $e->getTraceAsString(),
-            ]);
-            return ['status' => 'error', 'message' => $e->getMessage()];
-        }
+        return $this->wrapInTransaction(
+            fn() => $this->hospital_model->save($hospital),
+            'saving hospital'
+        );
     }
 
     /**
@@ -103,25 +91,10 @@ class HospitalAdminService
      */
     public function deleteHospital(int $id): array
     {
-        $db = Database::connect();
-        $db->transStart();
-
-        try {
-            $this->hospital_model->delete($id);
-            $db->transComplete();
-
-            if ($db->transStatus() === false) {
-                return ['status' => 'error', 'message' => 'Transaction failed while deleting hospital.'];
-            }
-            return ['status' => 'success', 'message' => 'Hospital deleted successfully.'];
-        } catch (Throwable $e) {
-            $db->transRollback();
-            log_message('error', 'Failed to delete hospital', [
-                'id'        => $id,
-                'exception' => $e->getMessage(),
-            ]);
-            return ['status' => 'error', 'message' => $e->getMessage()];
-        }
+        return $this->wrapInTransaction(
+            fn() => $this->hospital_model->delete($id),
+            'deleting hospital'
+        );
     }
 
     /**
